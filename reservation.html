@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezerwacja Obszaru - BeeConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles/styles.css">
+    <style>
+        /* Dodatkowe style specyficzne dla strony rezerwacji */
+        body {
+            overflow-y: auto;
+        }
+        
+        .reservation-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .area-details {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .area-header {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--primary-light);
+            color: var(--secondary);
+        }
+
+        .area-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+
+        .area-status {
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background-color: rgba(143, 195, 31, 0.2);
+            color: var(--accent-dark);
+        }
+
+        .area-image {
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .area-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .area-info {
+            display: flex;
+            padding: 20px;
+        }
+
+        .area-info-section {
+            flex: 1;
+            padding: 0 15px;
+        }
+
+        .area-info-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .area-property {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .area-property-label {
+            flex: 0 0 40%;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .area-property-value {
+            flex: 1;
+            color: var(--dark);
+        }
+
+        .reservation-form {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 25px;
+        }
+
+        .reservation-form-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .reservation-form-description {
+            margin-bottom: 25px;
+            color: var(--medium);
+            line-height: 1.5;
+        }
+
+        .form-row {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--secondary);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.2);
+            outline: none;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--medium);
+        }
+
+        .reservation-summary {
+            background-color: #f9f9f9;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .summary-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .summary-item-label {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .summary-item-value {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .summary-total-label {
+            color: var(--dark);
+        }
+
+        .summary-total-value {
+            color: var(--primary-dark);
+        }
+
+        .reservation-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn i {
+            margin-right: 8px;
+        }
+
+        .submit-reservation-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .area-info {
+                flex-direction: column;
+            }
+            
+            .area-info-section {
+                padding: 15px 0;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .reservation-actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .submit-reservation-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
+            </div>
+            <div class="welcome-message">Witaj, Dawid Pasieka!</div>
+        </div>
+        <div class="header-controls">
+            <!-- Przycisk ustawień -->
+            <div class="settings-dropdown">
+                <button class="settings-btn" onclick="toggleDropdown()">
+                    <i class="fas fa-cog"></i> Ustawienia
+                </button>
+                <div id="settingsDropdown" class="dropdown-content">
+                    <a href="#"><i class="fas fa-user-edit"></i> Edytuj profil</a>
+                    <a href="#"><i class="fas fa-wallet"></i> Doładuj konto</a>
+                    <a href="#"><i class="fas fa-bell"></i> Powiadomienia</a>
+                    <a href="#"><i class="fas fa-question-circle"></i> Pomoc</a>
+                </div>
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Zaloguj się
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="reservation-container">
+        <!-- Breadcrumbs -->
+        <div style="margin-bottom: 20px; font-size: 14px; color: var(--medium);">
+            <a href="index.html" style="color: var(--medium); text-decoration: none;">Strona główna</a> 
+            <i class="fas fa-angle-right" style="margin: 0 8px;"></i> 
+            <a href="#" style="color: var(--medium); text-decoration: none;">Mapa obszarów</a> 
+            <i class="fas fa-angle-right" style="margin: 0 8px;"></i> 
+            <span style="color: var(--dark);">Rezerwacja obszaru</span>
+        </div>
+
+        <!-- Szczegóły obszaru -->
+        <div class="area-details">
+            <div class="area-header">
+                <h1 class="area-title">Obszar lipy - Dolina Warty</h1>
+                <span class="area-status">Dostępny</span>
+            </div>
+            
+            <div class="area-image">
+                <img src="assets/area1.jpg" alt="Obszar lipy - Dolina Warty">
+            </div>
+            
+            <div class="area-info">
+                <div class="area-info-section">
+                    <h2 class="area-info-title">Informacje o obszarze</h2>
+                    <div class="area-property">
+                        <div class="area-property-label">Typ:</div>
+                        <div class="area-property-value">Lipa</div>
+                    </div>
+                    <div class="area-property">
+                        <div class="area-property-label">Powierzchnia:</div>
+                        <div class="area-property-value">12 ha</div>
+                    </div>
+                    <div class="area-property">
+                        <div class="area-property-label">Lokalizacja:</div>
+                        <div class="area-property-value">Dolina Warty, woj. wielkopolskie</div>
+                    </div>
+                    <div class="area-property">
+                        <div class="area-property-label">Ocena:</div>
+                        <div class="area-property-value">
+                            <i class="fas fa-star" style="color: #FFD700;"></i>
+                            <i class="fas fa-star" style="color: #FFD700;"></i>
+                            <i class="fas fa-star" style="color: #FFD700;"></i>
+                            <i class="fas fa-star" style="color: #FFD700;"></i>
+                            <i class="fas fa-star-half-alt" style="color: #FFD700;"></i>
+                            (4.5/5)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="area-info-section">
+                    <h2 class="area-info-title">Informacje o właścicielu</h2>
+                    <div class="area-property">
+                        <div class="area-property-label">Właściciel:</div>
+                        <div class="area-property-value">Jan Kowalski</div>
+                    </div>
+                    <div class="area-property">
+                        <div class="area-property-label">Cena:</div>
+                        <div class="area-property-value">5 PLN / ul / dzień</div>
+                    </div>
+                    <div class="area-property">
+                        <div class="area-property-label">Maks. liczba uli:</div>
+                        <div class="area-property-value">30</div>
+                    </div>
+                    <div class="area-property">
+                        <div class="area-property-label">Dostępność:</div>
+                        <div class="area-property-value">01.05.2025 - 30.09.2025</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formularz rezerwacji -->
+        <div class="reservation-form">
+            <h2 class="reservation-form-title">Rezerwacja obszaru</h2>
+            <p class="reservation-form-description">
+                Uzupełnij poniższe informacje, aby zarezerwować obszar. Określ okres rezerwacji oraz liczbę uli, które chcesz umieścić na wybranym terenie.
+            </p>
+            
+            <form id="reservation-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start-date">Data od:</label>
+                        <input type="date" id="start-date" name="start-date" required min="2025-04-27">
+                        <small>Wybierz datę rozpoczęcia wynajmu</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end-date">Data do:</label>
+                        <input type="date" id="end-date" name="end-date" required min="2025-04-28">
+                        <small>Wybierz datę zakończenia wynajmu</small>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="hives-count">Liczba uli:</label>
+                        <input type="number" id="hives-count" name="hives-count" min="1" max="30" value="10" required>
+                        <small>Podaj liczbę uli, które planujesz umieścić (maksymalnie 30)</small>
+                    </div>
+                    
+      
+                </div>
+                
+
+                
+                <div class="reservation-summary">
+                    <h3 class="summary-title">Podsumowanie rezerwacji</h3>
+                    
+                    <div class="summary-item">
+                        <div class="summary-item-label">Wybrany okres:</div>
+                        <div class="summary-item-value"><span id="summary-date-range">01.05.2025 - 30.05.2025</span> (<span id="summary-days">30</span> dni)</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-item-label">Liczba uli:</div>
+                        <div class="summary-item-value"><span id="summary-hives">10</span> uli</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-item-label">Cena dzienna:</div>
+                        <div class="summary-item-value"><span id="summary-daily">50</span> PLN (<span id="summary-hive-price">5</span> PLN × <span id="summary-hives-count">10</span> uli)</div>
+                    </div>
+                    
+                    <div class="summary-total">
+                        <div class="summary-total-label">Szacowany koszt:</div>
+                        <div class="summary-total-value"><span id="summary-total">1500</span> PLN</div>
+                    </div>
+                </div>
+                
+                <div class="reservation-actions">
+                    <a href="#" class="btn btn-outline back-btn" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> Anuluj
+                    </a>
+                    
+                    <button type="submit" class="btn btn-primary submit-reservation-btn">
+                        <i class="fas fa-calendar-check"></i> Zarezerwuj obszar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Funkcja do przełączania dropdown menu
+        function toggleDropdown() {
+            document.getElementById("settingsDropdown").classList.toggle("show");
+        }
+
+        // Zamknij dropdown gdy kliknięto poza nim
+        window.onclick = function(event) {
+            if (!event.target.matches('.settings-btn') && !event.target.matches('.fa-cog')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+        
+        // Funkcja powrotu do poprzedniej strony
+        function goBack() {
+            window.history.back();
+        }
+        
+        // Ustaw domyślne daty (dzisiaj i za 30 dni)
+        window.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const thirtyDaysLater = new Date();
+            thirtyDaysLater.setDate(today.getDate() + 30);
+            
+            // Formatowanie dat do formatu YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            document.getElementById('start-date').value = formatDate(today);
+            document.getElementById('end-date').value = formatDate(thirtyDaysLater);
+            
+            // Ustaw minimalne daty
+            document.getElementById('start-date').min = formatDate(today);
+            document.getElementById('end-date').min = formatDate(new Date(today.setDate(today.getDate() + 1)));
+            
+            // Pierwszy raz zaktualizuj podsumowanie
+            updateSummary();
+        });
+        
+        // Aktualizuj podsumowanie przy zmianie wartości
+        document.getElementById('start-date').addEventListener('change', updateSummary);
+        document.getElementById('end-date').addEventListener('change', updateSummary);
+        document.getElementById('hives-count').addEventListener('change', updateSummary);
+        
+        // Funkcja aktualizująca podsumowanie
+        function updateSummary() {
+            const startDate = new Date(document.getElementById('start-date').value);
+            const endDate = new Date(document.getElementById('end-date').value);
+            const hivesCount = parseInt(document.getElementById('hives-count').value) || 0;
+            const pricePerHive = 5; // PLN per hive per day
+            
+            // Sprawdź czy daty są poprawne
+            if (startDate && endDate && startDate < endDate) {
+                // Oblicz liczbę dni
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                // Oblicz koszt dzienny i całkowity
+                const dailyCost = hivesCount * pricePerHive;
+                const totalCost = dailyCost * diffDays;
+                
+                // Formatowanie dat do wyświetlenia
+                const formatDisplayDate = (date) => {
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}.${month}.${year}`;
+                };
+                
+                const dateRange = `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
+                
+                // Zaktualizuj wartości w podsumowaniu
+                document.getElementById('summary-date-range').textContent = dateRange;
+                document.getElementById('summary-days').textContent = diffDays;
+                document.getElementById('summary-hives').textContent = hivesCount;
+                document.getElementById('summary-daily').textContent = dailyCost;
+                document.getElementById('summary-hive-price').textContent = pricePerHive;
+                document.getElementById('summary-hives-count').textContent = hivesCount;
+                document.getElementById('summary-total').textContent = totalCost;
+            } else if (startDate >= endDate) {
+                // Jeśli data końcowa jest wcześniejsza lub równa dacie początkowej
+                alert('Data końcowa musi być późniejsza niż data początkowa.');
+                
+                // Ustaw datę końcową na 1 dzień po początkowej
+                const newEndDate = new Date(startDate);
+                newEndDate.setDate(startDate.getDate() + 1);
+                
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+                
+                document.getElementById('end-date').value = formatDate(newEndDate);
+                
+                // Ponownie zaktualizuj podsumowanie
+                updateSummary();
+            }
+        }
+        
+        // Obsługa formularza
+        document.getElementById('reservation-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Pobierz dane z formularza
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const hivesCount = document.getElementById('hives-count').value;
+            const hiveType = document.getElementById('hive-type').value;
+            const notes = document.getElementById('reservation-notes').value;
+            
+            // Podstawowa walidacja
+            if (!startDate || !endDate || !hivesCount) {
+                alert('Proszę wypełnić wszystkie wymagane pola.');
+                return;
+            }
+            
+            // W rzeczywistej aplikacji tutaj byłoby wysyłanie danych do serwera
+            console.log("Dane rezerwacji:", {
+                startDate,
+                endDate,
+                hivesCount,
+                hiveType,
+                notes
+            });
+            
+            // Pokaż komunikat potwierdzający
+            alert('Rezerwacja została złożona! Oczekuj na potwierdzenie od właściciela obszaru.');
+            
+            // Przekierowanie z powrotem do mapy
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szczegóły Produktu - BeeConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #F2A900;         /* Miodowy żółty */
+            --primary-light: #FFD875;   /* Jasny miód */
+            --primary-dark: #D89000;    /* Ciemny miód */
+            --secondary: #5A3921;       /* Brązowy */
+            --accent: #8FC31F;          /* Zielony - pszczoły, natura */
+            --accent-dark: #6A9118;     /* Ciemny zielony */
+            --dark: #333333;            /* Prawie czarny */
+            --medium: #777777;          /* Średni szary */
+            --light: #EEEEEE;           /* Jasny szary */
+            --white: #FFFFFF;           /* Biały */
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --radius: 8px;              /* Zaokrąglenie rogów */
+            --radius-lg: 12px;          /* Większe zaokrąglenie */
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: var(--dark);
+            background-color: #f9f9f9;
+        }
+
+        h1, h2, h3, h4, .welcome-message, .btn {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--white);
+            padding: 12px 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            height: 70px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-light);
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo img {
+            max-width: 80%;
+            max-height: 80%;
+        }
+
+        .welcome-message, .page-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        /* Breadcrumbs */
+        .breadcrumbs {
+            display: flex;
+            padding: 12px 0;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--medium);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumbs a:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumbs .separator {
+            margin: 0 10px;
+            color: var(--medium);
+        }
+
+        .breadcrumbs .current {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        /* Main container */
+        .product-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Product Detail Layout */
+        .product-detail {
+            display: flex;
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .product-gallery {
+            flex: 0 0 45%;
+            position: relative;
+        }
+
+        .product-main-image {
+            width: 100%;
+            height: 400px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .product-main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-thumbnails {
+            display: flex;
+            padding: 15px;
+            gap: 10px;
+            background-color: rgba(0,0,0,0.03);
+        }
+
+        .product-thumbnail {
+            width: 70px;
+            height: 70px;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .product-thumbnail.active {
+            border-color: var(--primary);
+        }
+
+        .product-thumbnail:hover {
+            opacity: 0.8;
+        }
+
+        .product-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--accent);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        .product-info-container {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .product-category {
+            color: var(--medium);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .product-rating-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .product-stars {
+            color: #FFD700;
+            margin-right: 10px;
+        }
+
+        .rating-count {
+            color: var(--medium);
+            font-size: 14px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .rating-count:hover {
+            text-decoration: underline;
+            color: var(--primary);
+        }
+
+        .product-price {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+        }
+
+        .product-quantity {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .quantity-label {
+            font-weight: 600;
+            margin-right: 15px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .quantity-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quantity-btn:hover {
+            background-color: var(--light);
+        }
+
+        .quantity-input {
+            width: 50px;
+            height: 36px;
+            border: none;
+            text-align: center;
+            font-size: 16px;
+            -moz-appearance: textfield;
+        }
+
+        .quantity-input::-webkit-outer-spin-button,
+        .quantity-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .buy-now-btn, .contact-seller-btn {
+            flex: 1;
+            padding: 14px;
+            font-size: 16px;
+        }
+
+        .add-to-wishlist-btn {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            color: var(--medium);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .add-to-wishlist-btn:hover {
+            background-color: #fff0f0;
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        .add-to-wishlist-btn.active {
+            background-color: #fff0f0;
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        .seller-info {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: var(--radius);
+            margin-top: auto;
+        }
+
+        .seller-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .seller-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .seller-details {
+            flex: 1;
+        }
+
+        .seller-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .seller-rating {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: var(--medium);
+        }
+
+        .seller-rating i {
+            color: #FFD700;
+            margin-right: 4px;
+        }
+
+        .view-profile-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        /* Product Details Tabs */
+        .product-details-tabs {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .tabs-header {
+            display: flex;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-button {
+            padding: 16px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            color: var(--medium);
+            transition: var(--transition);
+            font-family: 'Montserrat', sans-serif;
+            background: none;
+            border: none;
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+        }
+
+        .tab-button.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+        }
+
+        .tab-button:hover:not(.active) {
+            background-color: rgba(0,0,0,0.03);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content h3 {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .product-description {
+            line-height: 1.7;
+            color: var(--dark);
+        }
+
+        .product-description p {
+            margin-bottom: 15px;
+        }
+
+        .specifications-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .specifications-table tr:nth-child(even) {
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        .specifications-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .specifications-table td:first-child {
+            font-weight: 600;
+            width: 30%;
+        }
+
+        /* Similar Products */
+        .similar-products {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .products-slider {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .product-image {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--accent);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .card-info {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .card-category {
+            color: var(--medium);
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .card-price {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary-dark);
+        }
+
+        .card-rating {
+            display: flex;
+            align-items: center;
+            color: var(--medium);
+            font-size: 12px;
+        }
+
+        .card-rating i {
+            color: #FFD700;
+            margin-right: 4px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            background-color: var(--primary-light);
+            color: var(--secondary);
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--medium);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--secondary);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Buy modal specific */
+        .order-summary {
+            margin-bottom: 20px;
+        }
+
+        .summary-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .summary-item.total {
+            font-weight: 600;
+            padding-top: 10px;
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 17px;
+        }
+
+        .shipping-address {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            font-size: 15px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.2);
+        }
+
+        .payment-methods {
+            margin-bottom: 20px;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .payment-option:hover {
+            background-color: #f9f9f9;
+        }
+
+        .payment-option.selected {
+            border-color: var(--primary);
+            background-color: rgba(242, 169, 0, 0.05);
+        }
+
+        .payment-option input {
+            margin-right: 10px;
+        }
+
+        /* Chat modal specific */
+        .chat-container {
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            border-radius: var(--radius);
+            margin-bottom: 15px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+
+        .message-received {
+            margin-right: auto;
+        }
+
+        .message-sent {
+            margin-left: auto;
+        }
+
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message-received .message-content {
+            background-color: #e0e0e0;
+            color: var(--dark);
+        }
+
+        .message-sent .message-content {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--medium);
+            margin-top: 4px;
+            display: block;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .send-message-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .send-message-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            outline: none;
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: #4a2e1a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: var(--white);
+        }
+
+        .btn-accent:hover {
+            background-color: var(--accent-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--dark);
+            border: 1px solid #ddd;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--light);
+            transform: translateY(-1px);
+        }
+
+        .btn i {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .product-detail {
+                flex-direction: column;
+            }
+
+            .product-gallery {
+                flex: 0 0 auto;
+            }
+
+            .product-main-image {
+                height: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .product-detail-container {
+                padding: 20px;
+            }
+
+            .product-title {
+                font-size: 24px;
+            }
+
+            .product-price {
+                font-size: 26px;
+            }
+
+            .tab-button {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            .products-slider {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .product-detail-container {
+                padding: 15px;
+            }
+
+            .product-main-image {
+                height: 300px;
+            }
+
+            .product-thumbnails {
+                justify-content: center;
+            }
+
+            .product-info-container {
+                padding: 20px;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+
+            .products-slider {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs-header {
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
+            </div>
+            <div class="page-title">BeeConnect</div>
+        </div>
+        <div class="header-controls">
+            <div class="welcome-message">Witaj, Dawid!</div>
+            <a href="dashboard.html" class="btn btn-outline">
+                <i class="fas fa-user"></i>
+                Mój Profil
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="product-detail-container">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+            <a href="index.html">Strona Główna</a>
+            <span class="separator">/</span>
+            <a href="marketplace.html">Marketplace</a>
+            <span class="separator">/</span>
+            <span class="current">Miód lipowy premium</span>
+        </div>
+
+        <!-- Product Detail -->
+        <div class="product-detail">
+            <div class="product-gallery">
+                <div class="product-badge">Nowość</div>
+                <div class="product-main-image">
+                    <img src="assets/product1.jpg" alt="Miód lipowy premium" id="main-product-image">
+                </div>
+                <div class="product-thumbnails">
+                    <div class="product-thumbnail active" data-src="assets/product1.jpg">
+                        <img src="assets/product1.jpg" alt="Miód lipowy - thumbnail 1">
+                    </div>
+                    <div class="product-thumbnail" data-src="assets/product2.jpg">
+                        <img src="assets/product2.jpg" alt="Miód lipowy - thumbnail 2">
+                    </div>
+                    <div class="product-thumbnail" data-src="assets/bought-product1.jpg">
+                        <img src="assets/bought-product1.jpg" alt="Miód lipowy - thumbnail 3">
+                    </div>
+                    <div class="product-thumbnail" data-src="assets/area1.jpg">
+                        <img src="assets/area1.jpg" alt="Miód lipowy - thumbnail 4">
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-info-container">
+                <h1 class="product-title">Miód lipowy premium</h1>
+                <div class="product-category">Kategoria: Miód</div>
+                
+                <div class="product-rating-container">
+                    <div class="product-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <a href="#reviews" class="rating-count">4.9 (28 opinii)</a>
+                </div>
+
+                <div class="product-price">35 PLN</div>
+
+                <div class="product-quantity">
+                    <span class="quantity-label">Ilość:</span>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn decrease-btn" id="decrease-quantity">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" class="quantity-input" id="product-quantity" value="1" min="1">
+                        <button class="quantity-btn increase-btn" id="increase-quantity">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="product-actions">
+                    <button class="btn btn-primary buy-now-btn" id="buy-now-btn">
+                        <i class="fas fa-shopping-cart"></i>
+                        Kup teraz
+                    </button>
+                    <button class="btn btn-outline contact-seller-btn" id="contact-seller-btn">
+                        <i class="fas fa-comment"></i>
+                        Napisz do sprzedawcy
+                    </button>
+                    <button class="add-to-wishlist-btn" id="add-to-wishlist-btn">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+
+                <div class="seller-info">
+                    <div class="seller-avatar">
+                        <img src="assets/default-avatar.png" alt="Avatar sprzedawcy">
+                    </div>
+                    <div class="seller-details">
+                        <div class="seller-name">Jan Kowalski</div>
+                        <div class="seller-rating">
+                            <i class="fas fa-star"></i>
+                            4.8 (56 opinii)
+                        </div>
+                    </div>
+                    <a href="seller-profile.html?id=1" class="btn btn-outline view-profile-btn">
+                        Zobacz profil
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details Tabs -->
+        <div class="product-details-tabs">
+            <div class="tabs-header">
+                <button class="tab-button active" data-tab="description">Opis</button>
+                <button class="tab-button" data-tab="reviews">Opinie (28)</button>
+                <button class="tab-button" data-tab="shipping">Dostawa i płatność</button>
+            </div>
+
+            <div class="tab-content active" id="description">
+                <div class="product-description">
+                    <h3>O produkcie</h3>
+                    <p>Miód lipowy premium to wyjątkowy produkt pochodzący z ekologicznych pasiek położonych w czystych rejonach Podlasia. Miód zebrany został w okresie intensywnego kwitnienia lip, co nadaje mu charakterystyczny jasny kolor i intensywny aromat kwiatów lipy.</p>
+                    
+                    <p>Nasz miód lipowy charakteryzuje się delikatnym, słodkim smakiem z lekko miętową nutą, która jest typowa dla najwyższej jakości miodów lipowych. W smaku można wyczuć subtelne nuty drzewne oraz kwiatowe, które sprawiają, że jest to jeden z najbardziej cenionych rodzajów miodu.</p>
+                    
+                    <p>Jest naturalnie bogaty w związki flawonoidowe, olejki eteryczne oraz witaminy z grupy B. Miód lipowy tradycyjnie stosowany jest jako naturalny środek wspomagający w przeziębieniach, stanach zapalnych górnych dróg oddechowych oraz problemach z gardłem.</p>
+                    
+                    <p>Miód nie był poddawany nadmiernemu ogrzewaniu ani filtrowaniu, dzięki czemu zachowuje wszystkie cenne właściwości. Może się krystalizować, co jest naturalnym procesem świadczącym o jego wysokiej jakości.</p>
+                </div>
+            </div>
+
+
+            <div class="tab-content" id="reviews">
+                <h3>Opinie klientów (28)</h3>
+                <!-- Reviews would go here -->
+                <p>Sekcja z opiniami klientów zostanie dodana wkrótce.</p>
+            </div>
+
+            <div class="tab-content" id="shipping">
+                <h3>Dostawa i płatność</h3>
+                <div class="product-description">
+                    <p><strong>Opcje dostawy:</strong></p>
+                    <ul>
+                        <li>Kurier - 15 PLN (czas dostawy: 1-2 dni robocze)</li>
+                        <li>Paczkomaty InPost - 12 PLN (czas dostawy: 1-2 dni robocze)</li>
+                        <li>Odbiór osobisty - 0 PLN (po wcześniejszym umówieniu)</li>
+                    </ul>
+
+                    <p><strong>Metody płatności:</strong></p>
+                    <ul>
+                        <li>Przelew bankowy</li>
+                        <li>BLIK</li>
+                        <li>Płatność kartą</li>
+                        <li>Płatność za pobraniem (+5 PLN)</li>
+                    </ul>
+
+                    <p><strong>Polityka zwrotów:</strong></p>
+                    <p>Możesz zwrócić produkt w ciągu 14 dni od otrzymania zamówienia. Prosimy o kontakt przed dokonaniem zwrotu w celu uzgodnienia szczegółów.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Similar Products -->
+        <div class="similar-products">
+            <h2 class="section-title">Podobne produkty</h2>
+            <div class="products-slider">
+                <!-- Product 1 -->
+                <div class="product-card" onclick="window.location.href='product-details.html?id=2'">
+                    <div class="product-image">
+                        <img src="assets/product2.jpg" alt="Miód gryczany">
+                    </div>
+                    <div class="card-info">
+                        <h3 class="card-title">Miód gryczany</h3>
+                        <div class="card-category">Miód</div>
+                        <div class="card-footer">
+                            <div class="card-price">40 PLN</div>
+                            <div class="card-rating">
+                                <i class="fas fa-star"></i>
+                                4.7
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="product-card" onclick="window.location.href='product-details.html?id=5'">
+                    <div class="product-image">
+                        <img src="assets/bought-product1.jpg" alt="Miód akacjowy">
+                        <div class="card-badge">Bestseller</div>
+                    </div>
+                    <div class="card-info">
+                        <h3 class="card-title">Miód akacjowy premium</h3>
+                        <div class="card-category">Miód</div>
+                        <div class="card-footer">
+                            <div class="card-price">45 PLN</div>
+                            <div class="card-rating">
+                                <i class="fas fa-star"></i>
+                                5.0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="product-card" onclick="window.location.href='product-details.html?id=7'">
+                    <div class="product-image">
+                        <img src="assets/area1.jpg" alt="Miód wielokwiatowy">
+                    </div>
+                    <div class="card-info">
+                        <h3 class="card-title">Miód wielokwiatowy górski</h3>
+                        <div class="card-category">Miód</div>
+                        <div class="card-footer">
+                            <div class="card-price">38 PLN</div>
+                            <div class="card-rating">
+                                <i class="fas fa-star"></i>
+                                4.6
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 4 -->
+                <div class="product-card" onclick="window.location.href='product-details.html?id=8'">
+                    <div class="product-image">
+                        <img src="assets/area2.jpg" alt="Miód rzepakowy">
+                    </div>
+                    <div class="card-info">
+                        <h3 class="card-title">Miód rzepakowy naturalny</h3>
+                        <div class="card-category">Miód</div>
+                        <div class="card-footer">
+                            <div class="card-price">32 PLN</div>
+                            <div class="card-rating">
+                                <i class="fas fa-star"></i>
+                                4.4
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buy Now Modal -->
+    <div class="modal-overlay" id="buy-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Finalizacja zakupu</div>
+                <button class="modal-close" id="close-buy-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="order-summary">
+                    <h3 class="summary-title">Podsumowanie zamówienia</h3>
+                    <div class="summary-item">
+                        <span>Miód lipowy premium</span>
+                        <span id="modal-quantity">1 x 35 PLN</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Dostawa (Kurier)</span>
+                        <span>15 PLN</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>Suma</span>
+                        <span id="modal-total">50 PLN</span>
+                    </div>
+                </div>
+
+                <div class="shipping-address">
+                    <h3 class="summary-title">Adres dostawy</h3>
+                    <div class="form-group">
+                        <label for="full-name">Imię i nazwisko</label>
+                        <input type="text" id="full-name" class="form-control" value="Dawid Pasieka">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Adres</label>
+                        <input type="text" id="address" class="form-control" value="ul. Miodowa 123">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">Miasto</label>
+                        <input type="text" id="city" class="form-control" value="Pszczelowo">
+                    </div>
+                    <div class="form-group">
+                        <label for="zip-code">Kod pocztowy</label>
+                        <input type="text" id="zip-code" class="form-control" value="15-123">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Telefon</label>
+                        <input type="tel" id="phone" class="form-control" value="+48 123 456 789">
+                    </div>
+                </div>
+
+                <div class="payment-methods">
+                    <h3 class="summary-title">Metoda płatności</h3>
+                    <div class="payment-option selected">
+                        <input type="radio" id="payment-bank" name="payment-method" checked>
+                        <label for="payment-bank">Przelew bankowy</label>
+                    </div>
+                    <div class="payment-option">
+                        <input type="radio" id="payment-blik" name="payment-method">
+                        <label for="payment-blik">BLIK</label>
+                    </div>
+                    <div class="payment-option">
+                        <input type="radio" id="payment-card" name="payment-method">
+                        <label for="payment-card">Karta płatnicza</label>
+                    </div>
+                    <div class="payment-option">
+                        <input type="radio" id="payment-cod" name="payment-method">
+                        <label for="payment-cod">Płatność za pobraniem (+5 PLN)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="back-to-product-btn">Wróć</button>
+                <button class="btn btn-primary" id="complete-purchase-btn">Zamawiam i płacę</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="modal-overlay" id="chat-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Czat z Jan Kowalski</div>
+                <button class="modal-close" id="close-chat-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message message-received">
+                            <div class="message-content">
+                                Witaj! W czym mogę pomóc odnośnie miodu lipowego?
+                            </div>
+                            <span class="message-time">Dzisiaj, 12:30</span>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" class="message-input" id="message-input" placeholder="Napisz wiadomość...">
+                        <button class="send-message-btn" id="send-message-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quantity controls
+        const quantityInput = document.getElementById('product-quantity');
+        
+        document.getElementById('decrease-quantity').addEventListener('click', function() {
+            const currentValue = parseInt(quantityInput.value);
+            if (currentValue > 1) {
+                quantityInput.value = currentValue - 1;
+                updateModalPrice();
+            }
+        });
+        
+        document.getElementById('increase-quantity').addEventListener('click', function() {
+            const currentValue = parseInt(quantityInput.value);
+            quantityInput.value = currentValue + 1;
+            updateModalPrice();
+        });
+        
+        quantityInput.addEventListener('change', function() {
+            if (this.value < 1) {
+                this.value = 1;
+            }
+            updateModalPrice();
+        });
+        
+        // Product thumbnails
+        document.querySelectorAll('.product-thumbnail').forEach(thumbnail => {
+            thumbnail.addEventListener('click', function() {
+                const imgSrc = this.getAttribute('data-src');
+                document.getElementById('main-product-image').src = imgSrc;
+                
+                // Update active class
+                document.querySelectorAll('.product-thumbnail').forEach(thumb => {
+                    thumb.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+        
+        // Tabs functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // Update active button
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Update active content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Wishlist button toggle
+        document.getElementById('add-to-wishlist-btn').addEventListener('click', function() {
+            this.classList.toggle('active');
+            const icon = this.querySelector('i');
+            if (this.classList.contains('active')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+            }
+        });
+        
+        // Buy Now button
+        document.getElementById('buy-now-btn').addEventListener('click', function() {
+            openModal('buy-modal');
+            updateModalPrice();
+        });
+        
+        // Contact seller button
+        document.getElementById('contact-seller-btn').addEventListener('click', function() {
+            openModal('chat-modal');
+            // Focus on the message input
+            setTimeout(() => {
+                document.getElementById('message-input').focus();
+            }, 300);
+        });
+        
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto'; // Allow scrolling
+        }
+        
+        // Close modal buttons
+        document.getElementById('close-buy-modal').addEventListener('click', function() {
+            closeModal('buy-modal');
+        });
+        
+        document.getElementById('close-chat-modal').addEventListener('click', function() {
+            closeModal('chat-modal');
+        });
+        
+        document.getElementById('back-to-product-btn').addEventListener('click', function() {
+            closeModal('buy-modal');
+        });
+        
+        // Complete purchase
+        document.getElementById('complete-purchase-btn').addEventListener('click', function() {
+            alert('Dziękujemy za zakup! Wkrótce otrzymasz szczegóły zamówienia na e-mail.');
+            closeModal('buy-modal');
+        });
+        
+        // Payment method selection
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Select the radio button
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+                
+                // Update selected state
+                document.querySelectorAll('.payment-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                // Update total if COD selected
+                updateModalPrice();
+            });
+        });
+        
+        // Send message functionality
+        document.getElementById('send-message-btn').addEventListener('click', sendMessage);
+        document.getElementById('message-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                const chatMessages = document.getElementById('chat-messages');
+                const now = new Date();
+                const timeString = `Dzisiaj, ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+                
+                const messageHTML = `
+                    <div class="message message-sent">
+                        <div class="message-content">
+                            ${message}
+                        </div>
+                        <span class="message-time">${timeString}</span>
+                    </div>
+                `;
+                
+                chatMessages.innerHTML += messageHTML;
+                messageInput.value = '';
+                
+                // Scroll to the bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Simulate a response after a short delay
+                setTimeout(() => {
+                    const responseHTML = `
+                        <div class="message message-received">
+                            <div class="message-content">
+                                Dziękuję za wiadomość. Odpowiem najszybciej jak to możliwe!
+                            </div>
+                            <span class="message-time">${timeString}</span>
+                        </div>
+                    `;
+                    
+                    chatMessages.innerHTML += responseHTML;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+        }
+        
+        // Update modal price based on quantity and payment method
+        function updateModalPrice() {
+            const quantity = parseInt(document.getElementById('product-quantity').value);
+            const basePrice = 35; // PLN
+            const shippingCost = 15; // PLN
+            
+            let total = (quantity * basePrice) + shippingCost;
+            
+            // Add COD fee if selected
+            if (document.getElementById('payment-cod').checked) {
+                total += 5;
+            }
+            
+            document.getElementById('modal-quantity').textContent = `${quantity} x ${basePrice} PLN`;
+            document.getElementById('modal-total').textContent = `${total} PLN`;
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeModal(event.target.id);
+            }
+        });
+    </script>
+</body>
+</html>

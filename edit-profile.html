@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edycja Profilu - Pszczeli Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/styles.css">
+    <style>
+        /* Temporary inline styles for demonstration - add these to your CSS file */
+        
+        /* Proper body and container setup */
+        body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        /* Main content area proper scrolling */
+        .profile-container {
+            height: calc(100vh - 60px);
+            padding: 1rem;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+        }
+        
+        /* Fix profile card layout */
+        .profile-card {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            min-height: 600px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            height: auto;
+        }
+        
+        /* Fix sidebar to extend full height */
+        .profile-sidebar {
+            flex-direction: column;
+            width: 280px;
+            background-color: #ffd875;
+            color: var(--secondary);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            min-height:900px;
+        }
+        
+        /* Make the sidebar menu grow to fill available space */
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            margin-bottom: 2rem;
+        }
+        
+        /* Content area scrolling */
+        .profile-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            max-height: 600px; /* Set a reasonable max-height */
+        }
+        
+        /* Fix tab content scrolling */
+        .tab-content {
+            height: auto;
+            padding-bottom: 2rem;
+        }
+        
+        /* Prevent scroll jumping on file selection */
+        .file-upload-input {
+            position: fixed;
+            top: -1000px;
+        }
+        
+        /* Mobile responsive fixes */
+        @media (max-width: 768px) {
+            .profile-card {
+                flex-direction: column;
+            }
+            
+            .profile-sidebar {
+                width: 100%;
+                min-height: auto;
+            }
+            
+            .profile-content {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+   <!-- Header -->
+   <div class="header">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="assets/BeeConnect.png" alt="BeeConnect Logo" style="max-height: 24px;">
+            </div>
+            <div class="page-title">BeeConnect</div>
+        </div>
+        <div class="user-menu">
+            <a href="home.html" class="user-menu-item"><i class="fas fa-home"></i> Strona główna</a>
+            <a href="profile.html" class="user-menu-item active"><i class="fas fa-user-edit"></i> Mój profil</a>
+            <a href="login.html" class="user-menu-item"><i class="fas fa-sign-out-alt"></i> Wyloguj</a>
+        </div>
+   </div>
+
+    <!-- Main Content -->
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-sidebar">
+                <div class="user-profile">
+                    <div class="profile-image">
+                        <img src="assets/default-avatar.png" >
+                    </div>
+                    <h3 class="user-name">Dawid Pasieka</h3>
+                    <p class="user-role">Pszczelarz</p>
+                </div>
+                <div class="sidebar-menu">
+                    <a href="#" class="sidebar-item active">
+                        <i class="fas fa-user-edit"></i>
+                        <span>Dane osobowe</span>
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="fas fa-lock"></i>
+                        <span>Bezpieczeństwo</span>
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Zweryfikuj</span>
+                    </a>
+                </div>
+            </div>
+            <div class="profile-content">
+                <h2 class="section-title">Edycja profilu</h2>
+                <div class="tab-content active" id="personal-data">
+                    <div class="profile-form-container">
+                        <form id="profile-form">
+                            <div class="form-section">
+                                <h3 class="form-section-title">Dane osobowe</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="firstname">Imię</label>
+                                        <input type="text" id="firstname" name="firstname" value="Dawid" readonly>
+                                        <small class="field-info">Pole tylko do odczytu</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lastname">Nazwisko</label>
+                                        <input type="text" id="lastname" name="lastname" value="Pasieka" readonly>
+                                        <small class="field-info">Pole tylko do odczytu</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3 class="form-section-title">Dane kontaktowe</h3>
+                                <div class="form-group">
+                                    <label for="phone">Numer telefonu</label>
+                                    <input type="tel" id="phone" name="phone" value="+48 123 456 789">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Adres e-mail</label>
+                                    <input type="email" id="email" name="email" value="dawid.pasieka@fizyka.com">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary save-btn">
+                                    <i class="fas fa-save"></i>
+                                    Zapisz zmiany
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="password-change">
+                    <div class="profile-form-container">
+                        <form id="password-form">
+                            <div class="form-section">
+                                <h3 class="form-section-title">Zmiana hasła</h3>
+                                <div class="form-group">
+                                    <label for="current-password">Aktualne hasło</label>
+                                    <input type="password" id="current-password" name="current-password" placeholder="Wprowadź aktualne hasło" required>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="new-password">Nowe hasło</label>
+                                        <input type="password" id="new-password" name="new-password" placeholder="Wprowadź nowe hasło" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirm-new-password">Potwierdź nowe hasło</label>
+                                        <input type="password" id="confirm-new-password" name="confirm-new-password" placeholder="Potwierdź nowe hasło" required>
+                                    </div>
+                                </div>
+
+                                <div class="password-requirements">
+                                    <h4>Wymagania hasła:</h4>
+                                    <ul>
+                                        <li>Minimum 8 znaków</li>
+                                        <li>Przynajmniej jedna wielka litera</li>
+                                        <li>Przynajmniej jedna mała litera</li>
+                                        <li>Przynajmniej jedna cyfra</li>
+                                        <li>Przynajmniej jeden znak specjalny</li>
+                                    </ul>
+                                </div>
+
+                                <button type="submit" class="btn btn-accent save-btn">
+                                    <i class="fas fa-lock"></i>
+                                    Zmień hasło
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="verification">
+                    <div class="profile-form-container">
+                        <form id="verification-form">
+                            <div class="form-section">
+                                <h3 class="form-section-title">Weryfikacja pszczelarza</h3>
+                                <div class="verification-info">
+                                    <p>Aby zweryfikować swoje konto jako pszczelarz, prosimy o wypełnienie poniższego formularza oraz dołączenie skanu lub zdjęcia jednego z dokumentów potwierdzających:</p>
+                                    <ul>
+                                        <li>Zaświadczenia o ukończeniu kursu pszczelarskiego</li>
+                                        <li>Legitymacji związku pszczelarzy</li>
+                                        <li>Dokumentu potwierdzającego rejestrację pasieki</li>
+                                        <li>Innego dokumentu potwierdzającego działalność pszczelarską</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3 class="form-section-title">Informacje o pasiece</h3>
+                                
+                                <div class="form-group">
+                                    <label for="apiary-name">Nazwa pasieki</label>
+                                    <input type="text" id="apiary-name" name="apiary-name" placeholder="Wprowadź nazwę pasieki">
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="apiary-size">Liczba uli</label>
+                                        <input type="number" id="apiary-size" name="apiary-size" placeholder="Podaj liczbę uli" min="1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="experience">Doświadczenie (w latach)</label>
+                                        <input type="number" id="experience" name="experience" placeholder="Lata doświadczenia" min="0">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="apiary-address">Adres pasieki</label>
+                                    <input type="text" id="apiary-address" name="apiary-address" placeholder="Podaj adres pasieki">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="honey-types">Rodzaje produkowanego miodu</label>
+                                    <input type="text" id="honey-types" name="honey-types" placeholder="np. wielokwiatowy, lipowy, akacjowy">
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3 class="form-section-title">Dokument potwierdzający</h3>
+                                
+                                <div class="form-group">
+                                    <label for="document-type">Rodzaj dokumentu</label>
+                                    <select id="document-type" name="document-type" required>
+                                        <option value="">Wybierz rodzaj dokumentu</option>
+                                        <option value="certificate">Zaświadczenie o ukończeniu kursu</option>
+                                        <option value="id-card">Legitymacja związku pszczelarzy</option>
+                                        <option value="registration">Rejestracja pasieki</option>
+                                        <option value="other">Inny dokument</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group" id="other-document-container" style="display: none;">
+                                    <label for="other-document">Określ rodzaj dokumentu</label>
+                                    <input type="text" id="other-document" name="other-document" placeholder="Rodzaj dokumentu">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="document-upload">Załącz dokument</label>
+                                    <div class="file-upload-container">
+                                        <input type="file" id="document-upload" name="document-upload" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png" required>
+                                        <label for="document-upload" class="file-upload-label">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span class="file-upload-text">Wybierz plik</span>
+                                        </label>
+                                        <div class="file-upload-info">Dozwolone formaty: PDF, JPG, PNG</div>
+                                    </div>
+                                    <div class="selected-file" id="selected-file-info"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="terms" required>
+                                    <span class="checkmark"></span>
+                                    Potwierdzam, że podane informacje są prawdziwe oraz wyrażam zgodę na weryfikację danych przez administrację portalu.
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary save-btn">
+                                <i class="fas fa-check-circle"></i>
+                                Wyślij wniosek o weryfikację
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle between profile tabs
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all sidebar items
+                document.querySelectorAll('.sidebar-item').forEach(i => {
+                    i.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Show appropriate tab content
+                const tabContents = document.querySelectorAll('.tab-content');
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                if (this.querySelector('span').textContent === 'Dane osobowe') {
+                    document.getElementById('personal-data').classList.add('active');
+                } else if (this.querySelector('span').textContent === 'Bezpieczeństwo') {
+                    document.getElementById('password-change').classList.add('active');
+                } else if (this.querySelector('span').textContent === 'Zweryfikuj') {
+                    document.getElementById('verification').classList.add('active');
+                }
+            });
+        });
+        
+        // Form submission handlers
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Here you would add code to handle the profile update
+            alert('Dane zostały zaktualizowane!');
+        });
+        
+        document.getElementById('password-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-new-password').value;
+            
+            if (newPassword !== confirmPassword) {
+                alert('Hasła nie są identyczne!');
+                return;
+            }
+            
+            // Here you would add code to verify current password and update to new password
+            alert('Hasło zostało zmienione!');
+            this.reset();
+        });
+
+        // Show/hide other document input field based on selection
+        document.getElementById('document-type').addEventListener('change', function() {
+            const otherDocumentContainer = document.getElementById('other-document-container');
+            if (this.value === 'other') {
+                otherDocumentContainer.style.display = 'block';
+                document.getElementById('other-document').setAttribute('required', '');
+            } else {
+                otherDocumentContainer.style.display = 'none';
+                document.getElementById('other-document').removeAttribute('required');
+            }
+        });
+
+        // Display selected filename without scrolling
+        document.getElementById('document-upload').addEventListener('change', function(e) {
+            // Prevent scroll jumps
+            e.preventDefault();
+            
+            const fileInfo = document.getElementById('selected-file-info');
+            if (this.files.length > 0) {
+                const fileName = this.files[0].name;
+                const fileSize = (this.files[0].size / 1024).toFixed(2);
+                fileInfo.innerHTML = `<i class="fas fa-file"></i> ${fileName} (${fileSize} KB)`;
+                fileInfo.style.display = 'block';
+                document.querySelector('.file-upload-text').textContent = 'Zmień plik';
+            } else {
+                fileInfo.style.display = 'none';
+                document.querySelector('.file-upload-text').textContent = 'Wybierz plik';
+            }
+        });
+
+        // Verification form submission
+        document.getElementById('verification-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!document.querySelector('input[name="terms"]').checked) {
+                alert('Proszę zaakceptować warunki weryfikacji.');
+                return;
+            }
+            
+            // Here you would add code to submit the verification request
+            alert('Wniosek o weryfikację został wysłany! Poinformujemy Cię o wyniku weryfikacji.');
+            // this.reset();
+        });
+    </script>
+</body>
+</html>

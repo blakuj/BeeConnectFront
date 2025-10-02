@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logowanie i Rejestracja - BeeConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/styles.css">
+  
+</head>
+<body>
+   <!-- Header -->
+   <div class="header">
+    <div class="logo-container">
+        <div class="logo">
+            <img src="assets/BeeConnect.png" alt="BeeConnect Logo" style="max-height: 24px;">
+        </div>
+        <div class="page-title">BeeConnect</div>
+    </div>
+</div>
+
+    <!-- Main Content -->
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-image">
+                <div class="brand-content">
+                    <div class="brand-logo">
+                        <img src="assets/BeeConnect.png" alt="BeeConnect Logo" style="max-height: 80px;">
+                    </div>
+                    <h1 class="brand-title">BeeConnect</h1>
+                    <p class="brand-tagline">Twoje miejsce w pszczelarskim świecie</p>
+                </div>
+            </div>
+            <div class="forms-container">
+                <div class="tabs">
+                    <div class="tab active" id="login-tab">Logowanie</div>
+                    <div class="tab" id="register-tab">Rejestracja</div>
+                </div>
+                
+                <!-- Login Form -->
+                <div class="form-container active" id="login-form">
+                    <h2 class="form-title">Zaloguj się do konta</h2>
+                    <form>
+                        <div class="form-group">
+                            <label for="login">Login</label>
+                            <input type="text" id="login" name="login" placeholder="Wprowadź swój login" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Hasło</label>
+                            <input type="password" id="password" name="password" placeholder="Wprowadź hasło" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary submit-btn">
+    						<i class="fas fa-sign-in-alt"></i>
+    						Zaloguj się
+						</button>
+                    </form>
+                    <div class="form-footer">
+                        Nie masz jeszcze konta? <a href="#" id="show-register">Zarejestruj się</a>
+                    </div>
+                </div>
+                
+                <!-- Registration Form -->
+                <div class="form-container" id="register-form">
+                    <h2 class="form-title">Utwórz nowe konto</h2>
+                    <form>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstname">Imię</label>
+                                <input type="text" id="firstname" name="firstname" placeholder="Wprowadź imię" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname">Nazwisko</label>
+                                <input type="text" id="lastname" name="lastname" placeholder="Wprowadź nazwisko" required>
+                            </div>
+                        </div>
+            
+                        
+                        <div class="form-group">
+                            <label for="phone">Numer telefonu</label>
+                            <input type="tel" id="phone" name="phone" placeholder="Wprowadź numer telefonu" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Adres e-mail</label>
+                            <input type="email" id="email" name="email" placeholder="Wprowadź adres e-mail" required>
+                        </div>
+                        
+            
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reg-password">Hasło</label>
+                                <input type="password" id="reg-password" name="reg-password" placeholder="Utwórz hasło" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-password">Potwierdź hasło</label>
+                                <input type="password" id="confirm-password" name="confirm-password" placeholder="Potwierdź hasło" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-accent submit-btn">
+    						<i class="fas fa-user-plus"></i>
+    						Zarejestruj się
+						</button>
+                    </form>
+                    <div class="form-footer">
+                        Masz już konto? <a href="#" id="show-login">Zaloguj się</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const apiUrl = '/api/auth';
+
+	// Przełączanie zakładek
+	document.getElementById('login-tab').addEventListener('click', function () {
+	    document.getElementById('login-tab').classList.add('active');
+	    document.getElementById('register-tab').classList.remove('active');
+	    document.getElementById('login-form').classList.add('active');
+	    document.getElementById('register-form').classList.remove('active');
+	});
+	
+	document.getElementById('register-tab').addEventListener('click', function () {
+	    document.getElementById('register-tab').classList.add('active');
+	    document.getElementById('login-tab').classList.remove('active');
+	    document.getElementById('register-form').classList.add('active');
+	    document.getElementById('login-form').classList.remove('active');
+	});
+	
+	document.getElementById('show-register').addEventListener('click', function (e) {
+	    e.preventDefault();
+	    document.getElementById('register-tab').click();
+	});
+	
+	document.getElementById('show-login').addEventListener('click', function (e) {
+	    e.preventDefault();
+	    document.getElementById('login-tab').click();
+	});
+	
+	// Obsługa logowania
+	document.querySelector('#login-form form').addEventListener('submit', async (e) => {
+	    e.preventDefault();
+	
+	    const login = document.getElementById('login').value;
+	    const password = document.getElementById('password').value;
+	
+	    const body = { login, password };
+	
+	    try {
+	        const response = await fetch(`${apiUrl}/login`, {
+	            method: 'POST',
+	            headers: { 'Content-Type': 'application/json' },
+	            credentials: 'include', // ważne: uwzględnia ciasteczko
+	            body: JSON.stringify(body)
+	        });
+	
+	        const result = await response.text(); // oczekujemy "true" lub "false" jako tekst
+	
+	        if (result === "true") {
+	            // po zalogowaniu pobierz użytkownika i przekieruj
+	            const meRes = await fetch(`${apiUrl}/me`, {
+	                method: 'GET',
+	                credentials: 'include'
+	            });
+	
+	            if (meRes.ok) {
+	                const user = await meRes.json();
+	                localStorage.setItem('currentUser', JSON.stringify(user));
+	                window.location.href = 'home.html';
+	            } else {
+	                alert("Nie udało się pobrać danych użytkownika");
+	            }
+	        } else {
+	            alert('Niepoprawne dane logowania');
+	        }
+	    } catch (err) {
+	        console.error(err);
+	        alert('Błąd połączenia z serwerem podczas logowania');
+	    }
+	});
+	
+	// Obsługa rejestracji
+	document.querySelector('#register-form form').addEventListener('submit', async (e) => {
+	    e.preventDefault();
+	
+	    const firstname = document.getElementById('firstname').value;
+	    const lastname = document.getElementById('lastname').value;
+	    const phone = document.getElementById('phone').value;
+	    const email = document.getElementById('email').value;
+	    const password = document.getElementById('reg-password').value;
+	    const confirmPassword = document.getElementById('confirm-password').value;
+	
+	    if (password !== confirmPassword) {
+	        alert("Hasła nie są takie same");
+	        return;
+	    }
+	
+	    const body = { firstname, lastname, phone, email, password };
+	
+	    try {
+	        const response = await fetch(`${apiUrl}/register`, {
+	            method: 'POST',
+	            headers: { 'Content-Type': 'application/json' },
+	            body: JSON.stringify(body)
+	        });
+	
+	        const text = await response.text();
+	        alert(text);
+	
+	        if (text === "User registered successfully") {
+			    alert("Rejestracja zakończona sukcesem! Teraz możesz się zalogować.");
+			    document.getElementById('login-tab').click(); 
+			}
+
+	    } catch (err) {
+	        console.error(err);
+	        alert("Błąd połączenia z serwerem podczas rejestracji");
+	    }
+});
+
+</script>
+
+</body>
+</html>

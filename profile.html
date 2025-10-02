@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Użytkownika - BeeConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/styles.css">
+
+</head>
+<body>
+   <!-- Header -->
+   <div class="header">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
+            </div>
+            <div class="page-title">BeeConnect</div> 
+        </div>
+        <div class="header-controls">
+            <div class="welcome-message">Witaj, Dawid!</div>
+        </div>
+   </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <div class="dashboard-sidebar">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="assets/default-avatar.png" alt="Avatar użytkownika">
+                </div>
+                <div class="user-name">Dawid Pasieka</div>
+                <div class="user-email">dawid.pasieka@fizyka.com</div>
+                <div class="user-status">Zweryfikowany Pszczelarz</div>
+            </div>
+            <div class="sidebar-nav">
+                <a href="#" class="sidebar-nav-item active" data-tab="areas">
+                    <i class="fas fa-map-marked-alt"></i>
+                    Twoje Obszary
+                </a>
+                <a href="#" class="sidebar-nav-item" data-tab="rented-areas">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    Wynajęte Obszary
+                </a>
+                <a href="#" class="sidebar-nav-item" data-tab="products">
+                    <i class="fas fa-box"></i>
+                    Twoje Produkty
+                </a>
+                <a href="#" class="sidebar-nav-item" data-tab="bought-products">
+                    <i class="fas fa-shopping-basket"></i>
+                    Kupione Produkty
+                </a>
+                <a href="edit-profile.html" class="sidebar-nav-item">
+                    <i class="fas fa-user-edit"></i>
+                    Edytuj Profil
+                </a>
+            </div>
+            <a href="login.html" class="btn btn-outline logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Wyloguj się
+            </a>
+        </div>
+        
+        <div class="dashboard-content">
+            <!-- Twoje Obszary -->
+            <div class="tab-content active" id="areas">
+                <div class="dashboard-heading">
+                    <h1 class="dashboard-title">Twoje Obszary</h1>
+                    <a href="add-field.html" class="btn btn-accent">
+                        <i class="fas fa-plus"></i>
+                        Dodaj Nowy Obszar
+                    </a>
+                </div>
+                
+                <div class="card-container">
+                    <!-- Obszar 1 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Łąka przy lesie</div>
+                            <div class="card-header-status card-status-active">Aktywne</div>
+                        </div>
+                        <div class="area-preview">
+                            <img src="assets/area1.jpg" alt="Podgląd obszaru">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Powierzchnia:</div>
+                                <div class="card-property-value">2.5 ha</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Lokalizacja:</div>
+                                <div class="card-property-value">Brzozówka, woj. podlaskie</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Kwiaty:</div>
+                                <div class="card-property-value">Lipa, Wielokwiat</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Status:</div>
+                                <div class="card-property-value">Dostępny od 01.05.2025</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-outline card-btn edit-area-btn" data-id="1">
+                                <i class="fas fa-edit"></i>
+                                Edytuj
+                            </button>
+                            <button class="btn btn-danger card-btn delete-area-btn" data-id="1">
+                                <i class="fas fa-trash-alt"></i>
+                                Usuń
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Obszar 2 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Polana kwiatowa</div>
+                            <div class="card-header-status card-status-active">Aktywne</div>
+                        </div>
+                        <div class="area-preview">
+                            <img src="assets/area2.jpg" alt="Podgląd obszaru">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Powierzchnia:</div>
+                                <div class="card-property-value">1.8 ha</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Lokalizacja:</div>
+                                <div class="card-property-value">Lipowo, woj. warmińsko-mazurskie</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Kwiaty:</div>
+                                <div class="card-property-value">Rzepak, Akacja</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Status:</div>
+                                <div class="card-property-value">Wynajęty do 15.09.2025</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-outline card-btn edit-area-btn" data-id="2">
+                                <i class="fas fa-edit"></i>
+                                Edytuj
+                            </button>
+                            <button class="btn btn-danger card-btn delete-area-btn" data-id="2">
+                                <i class="fas fa-trash-alt"></i>
+                                Usuń
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Obszar 3 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Teren przy sadzie</div>
+                            <div class="card-header-status card-status-inactive">Nieaktywne</div>
+                        </div>
+                        <div class="area-preview">
+                            <img src="assets/area3.jpg" alt="Podgląd obszaru">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Powierzchnia:</div>
+                                <div class="card-property-value">3.2 ha</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Lokalizacja:</div>
+                                <div class="card-property-value">Miodówka, woj. lubelskie</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Kwiaty:</div>
+                                <div class="card-property-value">Jabłoń, Grusza, Malina</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Status:</div>
+                                <div class="card-property-value">Wygasło 30.10.2024</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary card-btn activate-area-btn" data-id="3">
+                                <i class="fas fa-check"></i>
+                                Aktywuj ponownie
+                            </button>
+                            <button class="btn btn-danger card-btn delete-area-btn" data-id="3">
+                                <i class="fas fa-trash-alt"></i>
+                                Usuń
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wynajęte Obszary -->
+            <div class="tab-content" id="rented-areas">
+                <div class="dashboard-heading">
+                    <h1 class="dashboard-title">Wynajęte przez Ciebie Obszary</h1>
+                </div>
+                
+                <div class="card-container">
+                    <!-- Wynajęty obszar 1 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Łąka wrzosowa</div>
+                            <div class="card-header-status card-status-active">Aktywny</div>
+                        </div>
+                        <div class="area-preview">
+                            <img src="assets/rented-area1.jpg" alt="Podgląd obszaru">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Powierzchnia:</div>
+                                <div class="card-property-value">4.2 ha</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Lokalizacja:</div>
+                                <div class="card-property-value">Wrzosowo, woj. zachodniopomorskie</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Kwiaty:</div>
+                                <div class="card-property-value">Wrzos</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Wynajęty od:</div>
+                                <div class="card-property-value">01.03.2025 do 31.10.2025</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Właściciel:</div>
+                                <div class="card-property-value">Jan Kowalski</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-accent card-btn review-area-btn" data-id="101">
+                                <i class="fas fa-star"></i>
+                                Wystaw opinię
+                            </button>
+                            <button class="btn btn-primary card-btn view-area-btn" data-id="101">
+                                <i class="fas fa-eye"></i>
+                                Szczegóły
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Wynajęty obszar 2 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Zagajnik leśny</div>
+                            <div class="card-header-status card-status-inactive">Zakończony</div>
+                        </div>
+                        <div class="area-preview">
+                            <img src="assets/rented-area2.jpg" alt="Podgląd obszaru">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Powierzchnia:</div>
+                                <div class="card-property-value">1.5 ha</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Lokalizacja:</div>
+                                <div class="card-property-value">Borkowo, woj. pomorskie</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Kwiaty:</div>
+                                <div class="card-property-value">Wielokwiat, Malina leśna</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Wynajęty od:</div>
+                                <div class="card-property-value">15.04.2024 do 30.09.2024</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Właściciel:</div>
+                                <div class="card-property-value">Anna Nowak</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-accent card-btn review-area-btn" data-id="102">
+                                <i class="fas fa-star"></i>
+                                Wystaw opinię
+                            </button>
+                            <button class="btn btn-primary card-btn view-area-btn" data-id="102">
+                                <i class="fas fa-eye"></i>
+                                Szczegóły
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Twoje Produkty -->
+            <div class="tab-content" id="products">
+                <div class="dashboard-heading">
+                    <h1 class="dashboard-title">Twoje Produkty</h1>
+                    <a href="add-product.html" class="btn btn-accent">
+                        <i class="fas fa-plus"></i>
+                        Dodaj Nowy Produkt
+                    </a>
+                </div>
+                
+                <div class="card-container">
+                    <!-- Produkt 1 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Miód lipowy</div>
+                            <div class="card-header-status card-status-active">Dostępny</div>
+                        </div>
+                        <div class="product-image">
+                            <img src="assets/product1.jpg" alt="Miód lipowy">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Typ:</div>
+                                <div class="card-property-value">Miód</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Ilość:</div>
+                                <div class="card-property-value">15 słoików (30 kg)</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Cena:</div>
+                                <div class="card-property-value">35 PLN / słoik (0,9l)</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Data produkcji:</div>
+                                <div class="card-property-value">Lipiec 2024</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-outline card-btn edit-product-btn" data-id="201">
+                                <i class="fas fa-edit"></i>
+                                Edytuj
+                            </button>
+                            <button class="btn btn-danger card-btn delete-product-btn" data-id="201">
+                                <i class="fas fa-trash-alt"></i>
+                                Usuń
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Produkt 2 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Miód gryczany</div>
+                            <div class="card-header-status card-status-active">Dostępny</div>
+                        </div>
+                        <div class="product-image">
+                            <img src="assets/product2.jpg" alt="Miód gryczany">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Typ:</div>
+                                <div class="card-property-value">Miód</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Ilość:</div>
+                                <div class="card-property-value">8 słoików (12 kg)</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Cena:</div>
+                                <div class="card-property-value">40 PLN / słoik (0,7l)</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Data produkcji:</div>
+                                <div class="card-property-value">Sierpień 2024</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-outline card-btn edit-product-btn" data-id="202">
+                                <i class="fas fa-edit"></i>
+                                Edytuj
+                            </button>
+                            <button class="btn btn-danger card-btn delete-product-btn" data-id="202">
+                                <i class="fas fa-trash-alt"></i>
+                                Usuń
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Produkt 3 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Pyłek pszczeli</div>
+                            <div class="card-header-status card-status-inactive">Wyprzedany</div>
+                        </div>
+                        <div class="product-image">
+                            <img src="assets/product3.jpg" alt="Pyłek pszczeli">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Typ:</div>
+                                <div class="card-property-value">Pyłek</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Ilość:</div>
+                                <div class="card-property-value">0 opakowań (wyprzedany)</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Cena:</div>
+                                <div class="card-property-value">25 PLN / 100g</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Data produkcji:</div>
+                                <div class="card-property-value">Czerwiec 2024</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary card-btn restock-product-btn" data-id="203">
+                                <i class="fas fa-plus-circle"></i>
+                                Uzupełnij
+                            </button>
+                            <button class="btn btn-danger card-btn delete-product-btn" data-id="203">
+                                <i class="fas fa-trash-alt"></i>
+                                Usuń
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Kupione Produkty -->
+            <div class="tab-content" id="bought-products">
+                <div class="dashboard-heading">
+                    <h1 class="dashboard-title">Kupione Produkty</h1>
+                </div>
+                
+                <div class="card-container">
+                    <!-- Kupiony produkt 1 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Miód akacjowy</div>
+                            <div class="card-header-status card-status-active">Dostarczony</div>
+                        </div>
+                        <div class="product-image">
+                            <img src="assets/bought-product1.jpg" alt="Miód akacjowy">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Typ:</div>
+                                <div class="card-property-value">Miód</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Ilość:</div>
+                                <div class="card-property-value">3 słoiki (3 kg)</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Cena:</div>
+                                <div class="card-property-value">45 PLN / słoik</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Data zakupu:</div>
+                                <div class="card-property-value">15.03.2025</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Sprzedawca:</div>
+                                <div class="card-property-value">Anna Nowak</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-accent card-btn review-product-btn" data-id="301">
+                                <i class="fas fa-star"></i>
+                                Wystaw opinię
+                            </button>
+                            <button class="btn btn-primary card-btn view-product-btn" data-id="301">
+                                <i class="fas fa-eye"></i>
+                                Szczegóły
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Kupiony produkt 2 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-title">Wosk pszczeli</div>
+                            <div class="card-header-status card-status-active">Dostarczony</div>
+                        </div>
+                        <div class="product-image">
+                            <img src="assets/bought-product2.jpg" alt="Wosk pszczeli">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-property">
+                                <div class="card-property-label">Typ:</div>
+                                <div class="card-property-value">Wosk</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Ilość:</div>
+                                <div class="card-property-value">2 bloki (1 kg)</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Cena:</div>
+                                <div class="card-property-value">60 PLN / kg</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Data zakupu:</div>
+                                <div class="card-property-value">02.02.2025</div>
+                            </div>
+                            <div class="card-property">
+                                <div class="card-property-label">Sprzedawca:</div>
+                                <div class="card-property-value">Marek Pszczelarski</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-accent card-btn review-product-btn" data-id="302">
+                                <i class="fas fa-star"></i>
+                                Wystaw opinię
+                            </button>
+                            <button class="btn btn-primary card-btn view-product-btn" data-id="302">
+                                <i class="fas fa-eye"></i>
+                                Szczegóły
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Edytuj Profil -->
+            <div class="tab-content" id="profile">
+                <div class="dashboard-heading">
+                    <h1 class="dashboard-title">Edytuj Profil</h1>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <form id="profile-form">
+                            <div class="form-section">
+                                <h3 class="form-section-title">Dane osobowe</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="firstname">Imię</label>
+                                        <input type="text" id="firstname" name="firstname" value="Dawid" readonly>
+                                        <small class="field-info">Pole tylko do odczytu</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lastname">Nazwisko</label>
+                                        <input type="text" id="lastname" name="lastname" value="Pasieka" readonly>
+                                        <small class="field-info">Pole tylko do odczytu</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3 class="form-section-title">Dane kontaktowe</h3>
+                                <div class="form-group">
+                                    <label for="phone">Numer telefonu</label>
+                                    <input type="tel" id="phone" name="phone" value="+48 123 456 789">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Adres e-mail</label>
+                                    <input type="email" id="email" name="email" value="dawid.pasieka@fizyka.com">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="address">Adres</label>
+                                    <input type="text" id="address" name="address" value="ul. Miodowa, 15-123 Pszczelowo">
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3 class="form-section-title">Zmiana hasła</h3>
+                                <div class="form-group">
+                                    <label for="current-password">Aktualne hasło</label>
+                                    <input type="password" id="current-password" name="current-password" placeholder="Wprowadź aktualne hasło">
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="new-password">Nowe hasło</label>
+                                        <input type="password" id="new-password" name="new-password" placeholder="Wprowadź nowe hasło">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirm-new-password">Potwierdź nowe hasło</label>
+                                        <input type="password" id="confirm-new-password" name="confirm-new-password" placeholder="Potwierdź nowe hasło">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary save-btn">
+                                <i class="fas fa-save"></i>
+                                Zapisz zmiany
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Modal opinii dla obszaru -->
+    <div class="modal-overlay" id="area-review-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Wystaw opinię o obszarze</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="area-review-form">
+                    <div class="form-group">
+                        <label>Ocena:</label>
+                        <div class="stars-container">
+                            <div class="star active" data-value="1"><i class="fas fa-star"></i></div>
+                            <div class="star active" data-value="2"><i class="fas fa-star"></i></div>
+                            <div class="star active" data-value="3"><i class="fas fa-star"></i></div>
+                            <div class="star" data-value="4"><i class="fas fa-star"></i></div>
+                            <div class="star" data-value="5"><i class="fas fa-star"></i></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="area-review-title">Tytuł opinii:</label>
+                        <input type="text" id="area-review-title" name="title" placeholder="Np. Doskonała lokalizacja dla pszczół">
+                    </div>
+                    <div class="form-group">
+                        <label for="area-review-content">Twoja opinia:</label>
+                        <textarea id="area-review-content" name="content" rows="5" placeholder="Opisz swoje doświadczenia z tym obszarem..."></textarea>
+                    </div>
+                    <input type="hidden" id="area-review-id" name="areaId" value="">
+                    <input type="hidden" id="area-review-rating" name="rating" value="3">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal-btn">Anuluj</button>
+                <button class="btn btn-accent submit-area-review-btn">Wyślij opinię</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal opinii dla produktu -->
+    <div class="modal-overlay" id="product-review-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Wystaw opinię o produkcie</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="product-review-form">
+                    <div class="form-group">
+                        <label>Ocena:</label>
+                        <div class="stars-container">
+                            <div class="star active" data-value="1"><i class="fas fa-star"></i></div>
+                            <div class="star active" data-value="2"><i class="fas fa-star"></i></div>
+                            <div class="star active" data-value="3"><i class="fas fa-star"></i></div>
+                            <div class="star active" data-value="4"><i class="fas fa-star"></i></div>
+                            <div class="star" data-value="5"><i class="fas fa-star"></i></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-review-title">Tytuł opinii:</label>
+                        <input type="text" id="product-review-title" name="title" placeholder="Np. Najlepszy miód jaki jadłem">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-review-content">Twoja opinia:</label>
+                        <textarea id="product-review-content" name="content" rows="5" placeholder="Opisz swoje wrażenia z tego produktu..."></textarea>
+                    </div>
+                    <input type="hidden" id="product-review-id" name="productId" value="">
+                    <input type="hidden" id="product-review-rating" name="rating" value="4">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal-btn">Anuluj</button>
+                <button class="btn btn-accent submit-product-review-btn">Wyślij opinię</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal potwierdzenia usunięcia -->
+    <div class="modal-overlay" id="delete-confirm-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Potwierdź usunięcie</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Czy na pewno chcesz usunąć ten element? Tej operacji nie można cofnąć.</p>
+                <input type="hidden" id="delete-item-id" value="">
+                <input type="hidden" id="delete-item-type" value="">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal-btn">Anuluj</button>
+                <button class="btn btn-danger confirm-delete-btn">Usuń</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOWY MODAL: Edycja obszaru -->
+    <div class="modal-overlay" id="edit-area-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Edytuj obszar</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-area-form">
+                    <!-- Zdjęcie obszaru na górze -->
+                    <div class="form-group image-upload-top">
+                        <label>Zdjęcie obszaru:</label>
+                        <div class="image-preview-container">
+                            <div class="image-preview">
+                                <img id="edit-area-current-image" src="/api/placeholder/800/500" alt="Zdjęcie obszaru">
+                            </div>
+                            <div class="image-upload-controls">
+                                <label for="edit-area-image" class="btn btn-outline image-upload-btn">
+                                    <i class="fas fa-upload"></i> Wybierz zdjęcie
+                                </label>
+                                <input type="file" id="edit-area-image" name="image" accept="image/*" style="display: none;">
+                                <span class="selected-file-name">Nie wybrano pliku</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-area-title">Nazwa obszaru:</label>
+                        <input type="text" id="edit-area-title" name="title" placeholder="Np. Łąka przy lesie">
+                    </div>
+                    
+                    <div class="form-group switch-container">
+                        <label for="edit-area-status-switch">Status:</label>
+                        <div class="switch-control">
+                            <span class="switch-label">Nieaktywny</span>
+                            <label class="switch">
+                                <input type="checkbox" id="edit-area-status-switch" name="status">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="switch-label">Aktywny</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group read-only">
+                            <label>Powierzchnia:</label>
+                            <div class="read-only-value" id="edit-area-size-display">2.5 ha</div>
+                        </div>
+                        <div class="form-group read-only">
+                            <label>Lokalizacja:</label>
+                            <div class="read-only-value" id="edit-area-location-display">Brzozówka, woj. podlaskie</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-area-flowers">Kwiaty (oddzielone przecinkami):</label>
+                        <input type="text" id="edit-area-flowers" name="flowers" placeholder="Np. Lipa, Wielokwiat">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-area-max-hives">Maksymalna liczba uli:</label>
+                            <input type="number" id="edit-area-max-hives" name="maxHives" min="1" placeholder="Np. 20">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-area-price">Cena za ul/dzień (PLN):</label>
+                            <input type="number" id="edit-area-price" name="price" step="0.01" min="0" placeholder="Np. 5.50">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-area-date-to">Data zakończenia dostępności:</label>
+                        <input type="date" id="edit-area-date-to" name="dateTo" class="full-width-date">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-area-description">Opis obszaru:</label>
+                        <textarea id="edit-area-description" name="description" rows="4" placeholder="Opisz swoją pasiękę i warunki dla pszczół..."></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="edit-area-id" name="areaId" value="">
+                    <input type="hidden" id="edit-area-size" name="size" value="">
+                    <input type="hidden" id="edit-area-location" name="location" value="">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal-btn">Anuluj</button>
+                <button class="btn btn-primary submit-edit-area-btn">Zapisz zmiany</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOWY MODAL: Edycja produktu -->
+    <div class="modal-overlay" id="edit-product-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Edytuj produkt</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-product-form">
+                    <!-- Zdjęcie produktu na górze -->
+                    <div class="form-group image-upload-top">
+                        <label>Zdjęcie produktu:</label>
+                        <div class="image-preview-container">
+                            <div class="image-preview">
+                                <img id="edit-product-current-image" src="/api/placeholder/600/400" alt="Zdjęcie produktu">
+                            </div>
+                            <div class="image-upload-controls">
+                                <label for="edit-product-image" class="btn btn-outline image-upload-btn">
+                                    <i class="fas fa-upload"></i> Wybierz zdjęcie
+                                </label>
+                                <input type="file" id="edit-product-image" name="image" accept="image/*" style="display: none;">
+                                <span class="selected-file-name">Nie wybrano pliku</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-product-title">Nazwa produktu:</label>
+                        <input type="text" id="edit-product-title" name="title" placeholder="Np. Miód lipowy">
+                    </div>
+                    
+                    <div class="form-group switch-container">
+                        <label for="edit-product-status-switch">Status:</label>
+                        <div class="switch-control">
+                            <span class="switch-label">Wyprzedany</span>
+                            <label class="switch">
+                                <input type="checkbox" id="edit-product-status-switch" name="status">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="switch-label">Dostępny</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-product-type">Typ produktu:</label>
+                        <select id="edit-product-type" name="type">
+                            <option value="miód">Miód</option>
+                            <option value="pyłek">Pyłek pszczeli</option>
+                            <option value="wosk">Wosk</option>
+                            <option value="propolis">Propolis</option>
+                            <option value="inny">Inny</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-product-quantity">Ilość:</label>
+                        <input type="number" id="edit-product-quantity" name="quantity" min="0" placeholder="Np. 15">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-product-price">Cena (PLN):</label>
+                        <input type="number" id="edit-product-price" name="price" step="0.01" min="0" placeholder="Np. 35">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-product-description">Opis produktu:</label>
+                        <textarea id="edit-product-description" name="description" rows="4" placeholder="Opisz szczegółowo swój produkt, jego właściwości i zalety..."></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="edit-product-id" name="productId" value="">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal-btn">Anuluj</button>
+                <button class="btn btn-primary submit-edit-product-btn">Zapisz zmiany</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                
+                
+                // Remove active class from all items
+                document.querySelectorAll('.sidebar-nav-item').forEach(i => {
+                    i.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Show the corresponding tab content
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Star rating functionality
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const stars = this.parentElement.querySelectorAll('.star');
+                const ratingInput = this.closest('form').querySelector('input[name="rating"]');
+                
+                // Update hidden input with selected rating
+                ratingInput.value = value;
+                
+                // Update stars display
+                stars.forEach(s => {
+                    if (s.getAttribute('data-value') <= value) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        // Modal functionality
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto'; // Allow scrolling
+        }
+        
+        function closeAllModals() {
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.style.display = 'none';
+            });
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal buttons
+        document.querySelectorAll('.modal-close, .close-modal-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                closeAllModals();
+            });
+        });
+        
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAllModals();
+                }
+            });
+        });
+        
+        // Review area button
+        document.querySelectorAll('.review-area-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const areaId = this.getAttribute('data-id');
+                document.getElementById('area-review-id').value = areaId;
+                openModal('area-review-modal');
+            });
+        });
+        
+        // Review product button
+        document.querySelectorAll('.review-product-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                document.getElementById('product-review-id').value = productId;
+                openModal('product-review-modal');
+            });
+        });
+        
+        // Delete buttons
+        document.querySelectorAll('.delete-area-btn, .delete-product-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-id');
+                const itemType = this.classList.contains('delete-area-btn') ? 'area' : 'product';
+                
+                document.getElementById('delete-item-id').value = itemId;
+                document.getElementById('delete-item-type').value = itemType;
+                
+                openModal('delete-confirm-modal');
+            });
+        });
+        
+        // Submit forms
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Normally you would send data to server
+            alert('Profil został zaktualizowany!');
+        });
+        
+        document.querySelector('.submit-area-review-btn').addEventListener('click', function() {
+            // Normally you would send data to server
+            alert('Dziękujemy za opinię o obszarze!');
+            closeAllModals();
+        });
+        
+        document.querySelector('.submit-product-review-btn').addEventListener('click', function() {
+            // Normally you would send data to server
+            alert('Dziękujemy za opinię o produkcie!');
+            closeAllModals();
+        });
+        
+        document.querySelector('.confirm-delete-btn').addEventListener('click', function() {
+            const itemId = document.getElementById('delete-item-id').value;
+            const itemType = document.getElementById('delete-item-type').value;
+            
+            // Normally you would send delete request to server
+            alert(`Element (${itemType} #${itemId}) został usunięty!`);
+            closeAllModals();
+        });
+
+        // Obsługa wyświetlania nazwy pliku po wybraniu zdjęcia
+        document.getElementById('edit-area-image').addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : 'Nie wybrano pliku';
+            this.closest('.image-upload-controls').querySelector('.selected-file-name').textContent = fileName;
+            
+            // Podgląd wybranego zdjęcia
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('edit-area-current-image').src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        document.getElementById('edit-product-image').addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : 'Nie wybrano pliku';
+            this.closest('.image-upload-controls').querySelector('.selected-file-name').textContent = fileName;
+            
+            // Podgląd wybranego zdjęcia
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('edit-product-current-image').src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        // NOWA FUNKCJONALNOŚĆ: Obsługa przycisku edycji obszaru
+        document.querySelectorAll('.edit-area-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const areaId = this.getAttribute('data-id');
+                document.getElementById('edit-area-id').value = areaId;
+                
+                // Znajdź kartę z danym obszarem
+                const areaCard = this.closest('.card');
+                
+                // Pobierz dane z karty
+                const areaTitle = areaCard.querySelector('.card-header-title').textContent;
+                const areaStatus = areaCard.querySelector('.card-header-status').classList.contains('card-status-active');
+                const areaSize = areaCard.querySelector('.card-property-value').textContent.split(' ')[0];
+                const areaLocation = areaCard.querySelectorAll('.card-property-value')[1].textContent;
+                const areaFlowers = areaCard.querySelectorAll('.card-property-value')[2].textContent;
+                const areaAvailability = areaCard.querySelectorAll('.card-property-value')[3].textContent;
+                const areaImageSrc = areaCard.querySelector('.area-preview img').src;
+                
+                // Przygotuj datę zakończenia - przykładowe przetłumaczenie z tekstu na datę
+                let dateTo = '';
+                const availabilityEndMatch = areaAvailability.match(/do (\d{2}\.\d{2}\.\d{4})/);
+                if (availabilityEndMatch) {
+                    const dateParts = availabilityEndMatch[1].split('.');
+                    dateTo = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+                } else {
+                    // Jeśli nie ma "do" w tekście, spróbuj użyć innego formatu
+                    const dateMatch = areaAvailability.match(/(\d{2}\.\d{2}\.\d{4})/);
+                    if (dateMatch) {
+                        const dateParts = dateMatch[1].split('.');
+                        dateTo = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+                    }
+                }
+                
+                // Przykładowe dane dla nowych pól
+                const maxHives = 15; // Przykładowa wartość
+                const pricePerHive = 5.50; // Przykładowa wartość
+                const description = "Obszar znajduje się w malowniczej okolicy, z dala od zanieczyszczeń i dróg. Idealne warunki dla pszczół i produkcji zdrowego miodu."; // Przykładowy opis
+                
+                // Wypełnij formularz danymi
+                document.getElementById('edit-area-title').value = areaTitle;
+                document.getElementById('edit-area-status-switch').checked = areaStatus;
+                document.getElementById('edit-area-size-display').textContent = areaSize + ' ha';
+                document.getElementById('edit-area-location-display').textContent = areaLocation;
+                document.getElementById('edit-area-size').value = areaSize;
+                document.getElementById('edit-area-location').value = areaLocation;
+                document.getElementById('edit-area-flowers').value = areaFlowers;
+                document.getElementById('edit-area-date-to').value = dateTo;
+                document.getElementById('edit-area-max-hives').value = maxHives;
+                document.getElementById('edit-area-price').value = pricePerHive;
+                document.getElementById('edit-area-description').value = description;
+                document.getElementById('edit-area-current-image').src = areaImageSrc;
+                
+                // Otwórz modal
+                openModal('edit-area-modal');
+            });
+        });
+
+        // NOWA FUNKCJONALNOŚĆ: Obsługa przycisku edycji produktu
+        document.querySelectorAll('.edit-product-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                document.getElementById('edit-product-id').value = productId;
+                
+                // Znajdź kartę z danym produktem
+                const productCard = this.closest('.card');
+                
+                // Pobierz dane z karty
+                const productTitle = productCard.querySelector('.card-header-title').textContent;
+                const productStatus = productCard.querySelector('.card-header-status').classList.contains('card-status-active');
+                const productType = productCard.querySelectorAll('.card-property-value')[0].textContent.toLowerCase();
+                
+                // Parsowanie ilości, np. "15 słoików (30 kg)"
+                const quantityText = productCard.querySelectorAll('.card-property-value')[1].textContent;
+                const quantityMatch = quantityText.match(/(\d+)\s+(\w+)/);
+                const quantity = quantityMatch ? quantityMatch[1] : "";
+                const unit = quantityMatch ? quantityMatch[2] : "";
+                
+                // Parsowanie ceny, np. "35 PLN / słoik (0,9l)"
+                const priceText = productCard.querySelectorAll('.card-property-value')[2].textContent;
+                const priceMatch = priceText.match(/(\d+)\s+PLN\s+\/\s+(.*)/);
+                const price = priceMatch ? priceMatch[1] : "";
+                const priceUnit = priceMatch ? priceMatch[2] : "";
+                
+                // Przykładowy opis dla nowego pola
+                const description = "Wysokiej jakości miód zebrany z ekologicznych terenów. Bogaty w enzymy i substancje odżywcze, idealny do codziennego spożycia i wzmacniania odporności.";
+                
+                const productImageSrc = productCard.querySelector('.product-image img').src;
+                
+                // Wypełnij formularz danymi
+                document.getElementById('edit-product-title').value = productTitle;
+                document.getElementById('edit-product-status-switch').checked = productStatus;
+                document.getElementById('edit-product-type').value = productType;
+                document.getElementById('edit-product-quantity').value = quantity;
+                document.getElementById('edit-product-price').value = price;
+                document.getElementById('edit-product-description').value = description;
+                document.getElementById('edit-product-current-image').src = productImageSrc;
+                
+                // Otwórz modal
+                openModal('edit-product-modal');
+            });
+        });
+
+        // NOWA FUNKCJONALNOŚĆ: Zapisywanie zmian w obszarze
+        document.querySelector('.submit-edit-area-btn').addEventListener('click', function() {
+            // Normalnie wysłałbyś dane do serwera
+            alert('Obszar został zaktualizowany!');
+            closeAllModals();
+        });
+
+        // NOWA FUNKCJONALNOŚĆ: Zapisywanie zmian w produkcie
+        document.querySelector('.submit-edit-product-btn').addEventListener('click', function() {
+            // Normalnie wysłałbyś dane do serwera
+            alert('Produkt został zaktualizowany!');
+            closeAllModals();
+        });
+    </script>
+</body>
+</html>
