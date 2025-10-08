@@ -367,9 +367,73 @@
         });
     });
 
-    document.getElementById('profile-form').addEventListener('submit', function(e) {
+    document.getElementById('profile-form').addEventListener('submit', async function(e) {
         e.preventDefault();
-        alert('Dane zostały zaktualizowane!');
+
+        console.log('\n=== FRONTEND: Użytkownik kliknął Zapisz ===');
+
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+
+        const data = {
+            phone: phone,
+            email: email
+        };
+
+        console.log('Dane do wysłania:', data);
+        console.log('Wysyłam PUT request...');
+
+        try {
+            const response = await fetch(`${API_BASE}/api/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+
+            console.log('Status odpowiedzi:', response.status);
+
+            if (response.ok) {
+                const updatedUser = await response.json();
+                console.log('✅ Zaktualizowane dane:', updatedUser);
+
+                alert('✅ Profil zaktualizowany pomyślnie!');
+
+                document.getElementById('phone').value = updatedUser.phone || '';
+                document.getElementById('email').value = updatedUser.email || '';
+
+                if (localStorage.getItem('currentUser')) {
+                    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                    currentUser.phone = updatedUser.phone;
+                    currentUser.email = updatedUser.email;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+
+            } else if (response.status === 400) {
+                const errorData = await response.json();
+                console.log('❌ Błąd walidacji:', errorData);
+                alert('❌ ' + (errorData.error || 'Nieprawidłowe dane'));
+
+            } else if (response.status === 401) {
+                console.log('❌ Sesja wygasła');
+                alert('Sesja wygasła. Zaloguj się ponownie.');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } else {
+                const errorData = await response.json();
+                console.log('❌ Błąd:', errorData);
+                alert('❌ ' + (errorData.error || 'Wystąpił błąd podczas aktualizacji profilu'));
+            }
+        } catch (error) {
+            console.error('❌ Błąd połączenia:', error);
+            alert('❌ Błąd połączenia z serwerem');
+        }
+
+        console.log('=== FRONTEND: Koniec ===\n');
     });
 
     document.getElementById('password-form').addEventListener('submit', function(e) {
