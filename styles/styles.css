@@ -61,9 +61,14 @@ h1, h2, h3, h4, .welcome-message, .btn {
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo a {
     width: 42px;
     height: 42px;
-    margin-right: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -71,6 +76,7 @@ h1, h2, h3, h4, .welcome-message, .btn {
     border-radius: 50%;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-right: 16px;
 }
 
 .logo img {

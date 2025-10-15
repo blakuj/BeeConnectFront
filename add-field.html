@@ -18,7 +18,9 @@
     <div class="header">
         <div class="logo-container">
             <div class="logo">
-                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
+                <a href="home.html">
+                    <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
+                </a>
             </div>
             <div class="page-title">Dodaj nowy obszar</div>
         </div>
@@ -221,9 +223,9 @@
             pricePerDay: parseFloat(pricePerDay),
             dateAdded: new Date().toISOString()
         };
+        const API_BASE = 'http://localhost:8080';
 
-       
-        fetch('/api/areas', {
+        fetch(`${API_BASE}/api/addArea`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(newArea),
@@ -240,7 +242,7 @@
         })
         .then(message => {
             alert(message || 'Obszar został dodany pomyślnie!');
-            window.location.href = 'index.html';
+            window.location.href = 'home.html';
         })
         .catch(error => {
             alert('Błąd: ' + error.message);
