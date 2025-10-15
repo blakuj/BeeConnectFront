@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/styles.css">
+    <script src="scripts/auth.js"></script>
     <style>
         body {
             height: 100vh;
@@ -88,7 +89,9 @@
 <div class="header">
     <div class="logo-container">
         <div class="logo">
-            <img src="assets/BeeConnect.png" alt="BeeConnect Logo" style="max-height: 24px;">
+            <a href="home.html">
+                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
+            </a>
         </div>
         <div class="page-title">BeeConnect</div>
     </div>
@@ -370,21 +373,73 @@
     document.getElementById('profile-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        console.log('\n=== FRONTEND: Użytkownik kliknął Zapisz ===');
-
         const phone = document.getElementById('phone').value.trim();
         const email = document.getElementById('email').value.trim();
 
-        const data = {
-            phone: phone,
-            email: email
-        };
-
-        console.log('Dane do wysłania:', data);
-        console.log('Wysyłam PUT request...');
+        const data = { phone, email };
 
         try {
-            const response = await fetch(`${API_BASE}/api/profile`, {
+            const response = await fetch(`${API_BASE}/api/person/updateProfile`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                let updatedUser = {};
+                try {
+                    updatedUser = await response.json();
+                } catch {}
+
+                alert('✅ Profil zaktualizowany pomyślnie!');
+
+                if (updatedUser.phone) document.getElementById('phone').value = updatedUser.phone;
+                if (updatedUser.email) document.getElementById('email').value = updatedUser.email;
+
+                if (localStorage.getItem('currentUser')) {
+                    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                    if (updatedUser.phone) currentUser.phone = updatedUser.phone;
+                    if (updatedUser.email) currentUser.email = updatedUser.email;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+
+            } else {
+                const errorText = await response.text();
+                alert('❌ ' + (errorText || 'Nie udało się zaktualizować profilu.'));
+            }
+        } catch (error) {
+            console.error('❌ Błąd połączenia:', error);
+            alert('❌ Wystąpił błąd podczas łączenia z serwerem.');
+        }
+    });
+
+
+    document.getElementById('password-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const oldPassword = document.getElementById('current-password').value.trim();
+        const newPassword = document.getElementById('new-password').value.trim();
+        const confirmPassword = document.getElementById('confirm-new-password').value.trim();
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            alert('Uzupełnij wszystkie pola!');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('Hasła nie są identyczne!');
+            return;
+        }
+
+        const data = {
+            oldPassword: oldPassword,
+            newPassword: newPassword,
+            confirmPassword: confirmPassword
+        };
+
+        try {
+            const response = await fetch(`${API_BASE}/api/person/changePassword`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -393,63 +448,19 @@
                 body: JSON.stringify(data)
             });
 
-            console.log('Status odpowiedzi:', response.status);
-
             if (response.ok) {
-                const updatedUser = await response.json();
-                console.log('✅ Zaktualizowane dane:', updatedUser);
-
-                alert('✅ Profil zaktualizowany pomyślnie!');
-
-                document.getElementById('phone').value = updatedUser.phone || '';
-                document.getElementById('email').value = updatedUser.email || '';
-
-                if (localStorage.getItem('currentUser')) {
-                    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-                    currentUser.phone = updatedUser.phone;
-                    currentUser.email = updatedUser.email;
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                }
-
-            } else if (response.status === 400) {
-                const errorData = await response.json();
-                console.log('❌ Błąd walidacji:', errorData);
-                alert('❌ ' + (errorData.error || 'Nieprawidłowe dane'));
-
-            } else if (response.status === 401) {
-                console.log('❌ Sesja wygasła');
-                alert('Sesja wygasła. Zaloguj się ponownie.');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-
+                alert('✅ Hasło zostało pomyślnie zmienione!');
+                this.reset();
             } else {
-                const errorData = await response.json();
-                console.log('❌ Błąd:', errorData);
-                alert('❌ ' + (errorData.error || 'Wystąpił błąd podczas aktualizacji profilu'));
+                const errorText = await response.text();
+                alert('❌ ' + (errorText || 'Nie udało się zmienić hasła.'));
             }
         } catch (error) {
             console.error('❌ Błąd połączenia:', error);
-            alert('❌ Błąd połączenia z serwerem');
+            alert('❌ Wystąpił błąd podczas łączenia z serwerem.');
         }
-
-        console.log('=== FRONTEND: Koniec ===\n');
     });
 
-    document.getElementById('password-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const newPassword = document.getElementById('new-password').value;
-        const confirmPassword = document.getElementById('confirm-new-password').value;
-
-        if (newPassword !== confirmPassword) {
-            alert('Hasła nie są identyczne!');
-            return;
-        }
-
-        alert('Hasło zostało zmienione!');
-        this.reset();
-    });
 
     document.getElementById('document-type').addEventListener('change', function() {
         const otherDocumentContainer = document.getElementById('other-document-container');
@@ -478,7 +489,7 @@
         }
     });
 
-    document.getElementById('verification-form').addEventListener('submit', function(e) {
+    document.getElementById('verification-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         if (!document.querySelector('input[name="terms"]').checked) {
@@ -486,8 +497,58 @@
             return;
         }
 
-        alert('Wniosek o weryfikację został wysłany! Poinformujemy Cię o wyniku weryfikacji.');
+        const verificationDTO = {
+            beeGardenName: document.getElementById('apiary-name').value.trim(),
+            countHives: parseInt(document.getElementById('apiary-size').value) || 0,
+            yearsOfExperience: parseInt(document.getElementById('experience').value) || 0,
+            adress: document.getElementById('apiary-address').value.trim(),
+            honeyType: document.getElementById('honey-types').value.trim(),
+            docType: document.getElementById('document-type').value
+        };
+
+        if (!verificationDTO.beeGardenName || !verificationDTO.docType || verificationDTO.countHives <= 0) {
+            alert('Wypełnij wymagane pola: Nazwa pasieki, Rodzaj dokumentu i Liczba uli.');
+            return;
+        }
+
+        const fileInput = document.getElementById('document-upload');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert('Proszę wybrać plik do przesłania.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('verificationDTO', new Blob(
+            [JSON.stringify(verificationDTO)],
+            { type: 'application/json' }
+        ));
+
+        try {
+            const response = await fetch(`${API_BASE}/api/verification/submit`, {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert('✅ Wniosek o weryfikację został wysłany! Poinformujemy Cię o wyniku.');
+                this.reset();
+                document.getElementById('selected-file-info').textContent = '';
+                document.querySelector('.file-upload-text').textContent = 'Wybierz plik';
+            } else {
+                const errorText = await response.text();
+                alert('❌ Wystąpił błąd: ' + (errorText || 'Nie udało się wysłać wniosku.'));
+            }
+        } catch (error) {
+            console.error('Błąd połączenia:', error);
+            alert('❌ Wystąpił błąd podczas łączenia z serwerem.');
+        }
     });
+
+
+
+
 </script>
 </body>
 </html>
