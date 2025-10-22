@@ -7,6 +7,65 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex !important;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
         :root {
             --primary: #F2A900;         /* Miodowy żółty */
             --primary-light: #FFD875;   /* Jasny miód */
@@ -769,7 +828,7 @@
                 height: auto;
                 overflow: visible;
             }
-            
+
             .admin-sidebar {
                 width: 100%;
                 height: auto;
@@ -778,7 +837,7 @@
                 flex-wrap: wrap;
                 padding: 10px;
             }
-            
+
             .admin-info {
                 padding: 10px;
                 width: 100%;
@@ -786,45 +845,45 @@
                 align-items: center;
                 justify-content: flex-start;
             }
-            
+
             .admin-avatar {
                 width: 50px;
                 height: 50px;
                 margin-bottom: 0;
                 margin-right: 15px;
             }
-            
+
             .admin-name, .admin-email {
                 text-align: left;
             }
-            
+
             .sidebar-nav {
                 display: flex;
                 flex-wrap: wrap;
                 padding: 10px 0;
                 width: 100%;
             }
-            
+
             .sidebar-nav-item {
                 padding: 8px 16px;
                 margin: 5px;
                 border-radius: var(--radius);
                 border-left: none;
             }
-            
+
             .sidebar-nav-item.active {
                 border-left: none;
                 background-color: rgba(90, 57, 33, 0.2);
             }
-            
+
             .logout-btn {
                 margin: 5px;
             }
-            
+
             .admin-content {
                 padding: 15px;
             }
-            
+
             .card-container, .stats-container {
                 grid-template-columns: 1fr;
             }
@@ -835,21 +894,21 @@
                 display: block;
                 overflow-x: auto;
             }
-            
+
             .dashboard-heading {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
-            
+
             .search-container {
                 flex-direction: column;
             }
-            
+
             .search-input {
                 border-radius: var(--radius) var(--radius) 0 0;
             }
-            
+
             .search-btn {
                 border-radius: 0 0 var(--radius) var(--radius);
                 padding: 10px;
@@ -912,7 +971,7 @@
                 Wyloguj się
             </a>
         </div>
-        
+
         <!-- Content -->
         <div class="admin-content">
             <!-- Dashboard Tab -->
@@ -920,7 +979,7 @@
                 <div class="dashboard-heading">
                     <h1 class="dashboard-title">Pulpit</h1>
                 </div>
-                
+
                 <div class="stats-container">
                     <div class="stat-card">
                         <div class="stat-icon stat-icon-primary">
@@ -929,7 +988,7 @@
                         <div class="stat-value">124</div>
                         <div class="stat-label">Zarejestrowanych użytkowników</div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-icon stat-icon-success">
                             <i class="fas fa-check-circle"></i>
@@ -937,7 +996,7 @@
                         <div class="stat-value">85</div>
                         <div class="stat-label">Zweryfikowanych pszczelarzy</div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-icon stat-icon-warning">
                             <i class="fas fa-clock"></i>
@@ -945,7 +1004,7 @@
                         <div class="stat-value">12</div>
                         <div class="stat-label">Oczekujących wniosków weryfikacyjnych</div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-icon stat-icon-primary">
                             <i class="fas fa-map-marker-alt"></i>
@@ -954,11 +1013,11 @@
                         <div class="stat-label">Zarejestrowanych obszarów</div>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-heading">
                     <h2 class="dashboard-title">Najnowsze wnioski weryfikacyjne</h2>
                 </div>
-                
+
                 <div class="table-container">
                     <table class="admin-table">
                         <thead>
@@ -996,11 +1055,11 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 <div class="dashboard-heading">
                     <h2 class="dashboard-title">Ostatnio dodane obszary</h2>
                 </div>
-                
+
                 <div class="table-container">
                     <table class="admin-table">
                         <thead>
@@ -1039,27 +1098,27 @@
                     </table>
                 </div>
             </div>
-            
+
             <!-- Verify Beekeepers Tab -->
             <div class="tab-content active" id="verify-beekeepers">
                 <div class="dashboard-heading">
                     <h1 class="dashboard-title">Weryfikacja Pszczelarzy</h1>
                 </div>
-                
+
                 <div class="search-container">
                     <input type="text" class="search-input" placeholder="Szukaj według nazwiska, e-maila lub nazwy pasieki...">
                     <button class="search-btn">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
-                
+
                 <div class="filter-container">
-                    <button class="filter-btn active">Wszystkie (12)</button>
-                    <button class="filter-btn">Oczekujące (9)</button>
-                    <button class="filter-btn">Zatwierdzone (142)</button>
-                    <button class="filter-btn">Odrzucone (7)</button>
+                    <button class="filter-btn active">Wszystkie</button>
+                    <button class="filter-btn">Oczekujące</button>
+                    <button class="filter-btn">Zatwierdzone</button>
+                    <button class="filter-btn">Odrzucone</button>
                 </div>
-                
+
                 <div class="table-container">
                     <table class="admin-table">
                         <thead>
@@ -1073,127 +1132,33 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Marta Kowalska</td>
-                                <td>marta.kowalska@mail.pl</td>
-                                <td>24.04.2025</td>
-                                <td>Pszczółka Maja</td>
-                                <td><span class="status-badge status-pending">Oczekujący</span></td>
-                                <td>
-                                    <button class="btn btn-primary card-btn view-beekeeper-btn" data-id="101">
-                                        <i class="fas fa-eye"></i> Szczegóły
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Jan Nowak</td>
-                                <td>jan.nowak@mail.pl</td>
-                                <td>23.04.2025</td>
-                                <td>Miodowa Kraina</td>
-                                <td><span class="status-badge status-pending">Oczekujący</span></td>
-                                <td>
-                                    <button class="btn btn-primary card-btn view-beekeeper-btn" data-id="102">
-                                        <i class="fas fa-eye"></i> Szczegóły
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Piotr Wiśniewski</td>
-                                <td>piotr.wisniewski@mail.pl</td>
-                                <td>21.04.2025</td>
-                                <td>Pasieka Pod Lipą</td>
-                                <td><span class="status-badge status-pending">Oczekujący</span></td>
-                                <td>
-                                    <button class="btn btn-primary card-btn view-beekeeper-btn" data-id="103">
-                                        <i class="fas fa-eye"></i> Szczegóły
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Anna Malinowska</td>
-                                <td>anna.malinowska@mail.pl</td>
-                                <td>20.04.2025</td>
-                                <td>Lipowa Pasieka</td>
-                                <td><span class="status-badge status-pending">Oczekujący</span></td>
-                                <td>
-                                    <button class="btn btn-primary card-btn view-beekeeper-btn" data-id="104">
-                                        <i class="fas fa-eye"></i> Szczegóły
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Tomasz Kowalczyk</td>
-                                <td>tomasz.kowalczyk@mail.pl</td>
-                                <td>19.04.2025</td>
-                                <td>Słodka Pasieka</td>
-                                <td><span class="status-badge status-pending">Oczekujący</span></td>
-                                <td>
-                                    <button class="btn btn-primary card-btn view-beekeeper-btn" data-id="105">
-                                        <i class="fas fa-eye"></i> Szczegóły
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Adam Lipiński</td>
-                                <td>adam.lipinski@mail.pl</td>
-                                <td>18.04.2025</td>
-                                <td>Pasieka nad Łąką</td>
-                                <td><span class="status-badge status-approved">Zatwierdzony</span></td>
-                                <td>
-                                    <button class="btn btn-primary card-btn view-beekeeper-btn" data-id="106">
-                                        <i class="fas fa-eye"></i> Szczegóły
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Katarzyna Nowacka</td>
-                                <td>katarzyna.nowacka@mail.pl</td>
-                                <td>17.04.2025</td>
-                                <td>Miodowa Polana</td>
-                                <td><span class="status-badge status-rejected">Odrzucony</span></td>
-                                <td>
-                                    <button class="btn btn-primary card-btn view-beekeeper-btn" data-id="107">
-                                        <i class="fas fa-eye"></i> Szczegóły
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Michał Dąbrowski</td>
-                                <td>michal.dabrowski@mail.pl</td>
-                                <td>16.04.2025</td>
-                                <td>Słodki Miód</td>
-                                <td><span class="status-badge status-pending">Oczekujący</span></td>
-                                <td>
-                                    <button class="btn btn-primary card-btn view-beekeeper-btn" data-id="108">
-                                        <i class="fas fa-eye"></i> Szczegóły
-                                    </button>
-                                </td>
-                            </tr>
+
+
                         </tbody>
                     </table>
                 </div>
             </div>
-            
+
             <!-- Manage Areas Tab -->
             <div class="tab-content" id="manage-areas">
                 <div class="dashboard-heading">
                     <h1 class="dashboard-title">Zarządzanie Obszarami</h1>
                 </div>
-                
+
                 <div class="search-container">
                     <input type="text" class="search-input" placeholder="Szukaj według nazwy, właściciela lub lokalizacji...">
                     <button class="search-btn">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
-                
+
                 <div class="filter-container">
                     <button class="filter-btn active">Wszystkie (156)</button>
                     <button class="filter-btn">Aktywne (124)</button>
                     <button class="filter-btn">Nieaktywne (28)</button>
                     <button class="filter-btn">Zgłoszone (4)</button>
                 </div>
-                
+
                 <div class="card-container">
                     <!-- Obszar 1 -->
                     <div class="card">
@@ -1233,7 +1198,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Obszar 2 -->
                     <div class="card">
                         <div class="card-header card-header-primary">
@@ -1272,7 +1237,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Obszar 3 (ze zgłoszeniem) -->
                     <div class="card">
                         <div class="card-header card-header-danger">
@@ -1311,7 +1276,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Obszar 4 -->
                     <div class="card">
                         <div class="card-header card-header-secondary">
@@ -1352,20 +1317,20 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Manage Users Tab -->
             <div class="tab-content" id="manage-users">
                 <div class="dashboard-heading">
                     <h1 class="dashboard-title">Zarządzanie Użytkownikami</h1>
                 </div>
-                
+
                 <div class="search-container">
                     <input type="text" class="search-input" placeholder="Szukaj użytkownika po nazwie, emailu lub statusie...">
                     <button class="search-btn">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
-                
+
                 <div class="table-container">
                     <table class="admin-table">
                         <thead>
@@ -1443,13 +1408,13 @@
                     </table>
                 </div>
             </div>
-            
+
             <!-- System Settings Tab -->
             <div class="tab-content" id="system-settings">
                 <div class="dashboard-heading">
                     <h1 class="dashboard-title">Ustawienia Systemu</h1>
                 </div>
-                
+
                 <!-- Ta sekcja będzie zawierać ustawienia systemu -->
                 <div class="card">
                     <div class="card-header card-header-secondary">
@@ -1464,11 +1429,11 @@
     </div>
 
     <!-- Modals -->
-    <!-- Modal szczegółów weryfikacji pszczelarza -->
+    <!-- Modal szczegółów weryfikacji -->
     <div class="modal-overlay" id="beekeeper-verification-modal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title">Weryfikacja pszczelarza - Jan Nowak</div>
+                <div class="modal-title">Weryfikacja pszczelarza</div>
                 <button class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
@@ -1479,23 +1444,23 @@
                     <div class="card-body">
                         <div class="card-property">
                             <div class="card-property-label">Imię i nazwisko:</div>
-                            <div class="card-property-value">Jan Nowak</div>
+                            <div class="card-property-value" data-field="name">-</div>
                         </div>
                         <div class="card-property">
                             <div class="card-property-label">E-mail:</div>
-                            <div class="card-property-value">jan.nowak@mail.pl</div>
+                            <div class="card-property-value" data-field="email">-</div>
                         </div>
                         <div class="card-property">
                             <div class="card-property-label">Telefon:</div>
-                            <div class="card-property-value">+48 123 456 789</div>
+                            <div class="card-property-value" data-field="phone">-</div>
                         </div>
                         <div class="card-property">
                             <div class="card-property-label">Data wniosku:</div>
-                            <div class="card-property-value">23.04.2025</div>
+                            <div class="card-property-value" data-field="creationDate">-</div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="card" style="margin-top: 20px;">
                     <div class="card-header card-header-secondary">
                         <div class="card-header-title">Informacje o pasiece</div>
@@ -1503,55 +1468,60 @@
                     <div class="card-body">
                         <div class="card-property">
                             <div class="card-property-label">Nazwa pasieki:</div>
-                            <div class="card-property-value">Miodowa Kraina</div>
+                            <div class="card-property-value" data-field="beeGardenName">-</div>
                         </div>
                         <div class="card-property">
                             <div class="card-property-label">Liczba uli:</div>
-                            <div class="card-property-value">25</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Doświadczenie:</div>
-                            <div class="card-property-value">8 lat</div>
+                            <div class="card-property-value" data-field="hiveCount">-</div>
                         </div>
                         <div class="card-property">
                             <div class="card-property-label">Adres pasieki:</div>
-                            <div class="card-property-value">ul. Pszczela 15, 05-520 Miodowo</div>
+                            <div class="card-property-value" data-field="beeGardenAddress">-</div>
                         </div>
                         <div class="card-property">
-                            <div class="card-property-label">Rodzaje produkowanego miodu:</div>
-                            <div class="card-property-value">wielokwiatowy, lipowy, akacjowy, gryczany</div>
+                            <div class="card-property-label">Rodzaj miodu:</div>
+                            <div class="card-property-value" data-field="honeyType">-</div>
                         </div>
                     </div>
                 </div>
-                
-                <div style="margin-top: 20px;">
-                    <h3 style="margin-bottom: 10px; color: var(--secondary);">Dokument potwierdzający kwalifikacje</h3>
-                    <div class="document-viewer">
-                        <img src="assets/certificate-example.jpg" alt="Certyfikat pszczelarza">
+
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header card-header-secondary">
+                        <div class="card-header-title">Dokumenty</div>
                     </div>
-                    <div class="card-property">
-                        <div class="card-property-label">Typ dokumentu:</div>
-                        <div class="card-property-value">Zaświadczenie o ukończeniu kursu pszczelarskiego</div>
+                    <div class="card-body" data-field="documents">
+                        <p>Brak dokumentów</p>
                     </div>
                 </div>
-                
-                <div class="form-group" style="margin-top: 20px;">
-                    <label for="verification-notes">Notatki dotyczące weryfikacji:</label>
-                    <textarea id="verification-notes" placeholder="Wprowadź uwagi dotyczące weryfikacji..."></textarea>
+
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header card-header-secondary">
+                        <div class="card-header-title">Status weryfikacji</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-property">
+                            <div class="card-property-label">Status:</div>
+                            <div class="card-property-value" data-field="status">-</div>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label for="verification-notes">Notatki / Powód odrzucenia:</label>
+                            <textarea id="verification-notes" class="form-control" rows="4" placeholder="Dodaj komentarz..."></textarea>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline close-modal-btn">Anuluj</button>
+                <button class="btn btn-outline" onclick="closeAllModals()">Anuluj</button>
                 <button class="btn btn-danger reject-verification-btn">
-                    <i class="fas fa-times-circle"></i> Odrzuć
+                    <i class="fas fa-times"></i> Odrzuć
                 </button>
                 <button class="btn btn-success approve-verification-btn">
-                    <i class="fas fa-check-circle"></i> Zatwierdź
+                    <i class="fas fa-check"></i> Zatwierdź
                 </button>
             </div>
         </div>
     </div>
-    
+
     <!-- Modal usuwania obszaru -->
     <div class="modal-overlay" id="delete-area-modal">
         <div class="modal">
@@ -1562,12 +1532,12 @@
             <div class="modal-body">
                 <p style="margin-bottom: 20px;">Czy na pewno chcesz usunąć obszar <strong id="area-name-to-delete">Łąka przy lesie</strong>?</p>
                 <p>Ta operacja jest nieodwracalna. Obszar zostanie całkowicie usunięty z systemu.</p>
-                
+
                 <div class="form-group" style="margin-top: 20px;">
                     <label for="delete-reason">Powód usunięcia:</label>
                     <textarea id="delete-reason" placeholder="Wprowadź powód usunięcia obszaru..."></textarea>
                 </div>
-                
+
                 <div style="margin-top: 20px;">
                     <label class="checkbox-container" style="display: flex; align-items: center; cursor: pointer;">
                         <input type="checkbox" id="notify-user" style="margin-right: 10px;">
@@ -1589,51 +1559,51 @@
         document.querySelectorAll('.sidebar-nav-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
-                
+
                 // Remove active class from all items
                 document.querySelectorAll('.sidebar-nav-item').forEach(i => {
                     i.classList.remove('active');
                 });
-                
+
                 // Add active class to clicked item
                 this.classList.add('active');
-                
+
                 // Hide all tab contents
                 document.querySelectorAll('.tab-content').forEach(content => {
                     content.classList.remove('active');
                 });
-                
+
                 // Show the corresponding tab content
                 const tabId = this.getAttribute('data-tab');
                 document.getElementById(tabId).classList.add('active');
             });
         });
-        
+
         // Modal functionality
         function openModal(modalId) {
             document.getElementById(modalId).style.display = 'block';
             document.body.style.overflow = 'hidden'; // Prevent scrolling
         }
-        
+
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
             document.body.style.overflow = 'auto'; // Allow scrolling
         }
-        
+
         function closeAllModals() {
             document.querySelectorAll('.modal-overlay').forEach(modal => {
                 modal.style.display = 'none';
             });
             document.body.style.overflow = 'auto';
         }
-        
+
         // Close modal buttons
         document.querySelectorAll('.modal-close, .close-modal-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 closeAllModals();
             });
         });
-        
+
         // Close modal when clicking outside
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', function(e) {
@@ -1642,31 +1612,31 @@
                 }
             });
         });
-        
+
         // View beekeeper verification details
         document.querySelectorAll('.view-beekeeper-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const beekeeperId = this.getAttribute('data-id');
                 // W prawdziwej aplikacji tutaj pobralibyśmy dane pszczelarza
                 // na podstawie ID i wypełnili modal
-                
+
                 openModal('beekeeper-verification-modal');
             });
         });
-        
+
         // Delete area button
         document.querySelectorAll('.delete-area-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const areaId = this.getAttribute('data-id');
                 const areaName = this.closest('.card').querySelector('.card-header-title').textContent;
-                
+
                 // Ustawienie nazwy obszaru w modalu
                 document.getElementById('area-name-to-delete').textContent = areaName;
-                
+
                 openModal('delete-area-modal');
             });
         });
-        
+
         // Filter buttons
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1674,60 +1644,60 @@
                     b.classList.remove('active');
                 });
                 this.classList.add('active');
-                
+
                 // W prawdziwej aplikacji tutaj filtrowalibyśmy dane
             });
         });
-        
+
         // Approve verification button
         document.querySelector('.approve-verification-btn').addEventListener('click', function() {
             const notes = document.getElementById('verification-notes').value;
-            
+
             // W prawdziwej aplikacji tutaj wysłalibyśmy dane do serwera
             alert('Wniosek o weryfikację został zatwierdzony!');
             closeAllModals();
-            
+
             // Dla celów demonstracyjnych - zmiana statusu w tabeli
             // W prawdziwej aplikacji ta zmiana byłaby w odpowiedzi z serwera
             const tableRow = document.querySelector('tr td button[data-id="102"]').closest('tr');
             const statusCell = tableRow.querySelector('td:nth-child(5)');
             statusCell.innerHTML = '<span class="status-badge status-approved">Zatwierdzony</span>';
         });
-        
+
         // Reject verification button
         document.querySelector('.reject-verification-btn').addEventListener('click', function() {
             const notes = document.getElementById('verification-notes').value;
-            
+
             if (!notes.trim()) {
                 alert('Proszę podać powód odrzucenia wniosku.');
                 return;
             }
-            
+
             // W prawdziwej aplikacji tutaj wysłalibyśmy dane do serwera
             alert('Wniosek o weryfikację został odrzucony!');
             closeAllModals();
-            
+
             // Dla celów demonstracyjnych - zmiana statusu w tabeli
             // W prawdziwej aplikacji ta zmiana byłaby w odpowiedzi z serwera
             const tableRow = document.querySelector('tr td button[data-id="102"]').closest('tr');
             const statusCell = tableRow.querySelector('td:nth-child(5)');
             statusCell.innerHTML = '<span class="status-badge status-rejected">Odrzucony</span>';
         });
-        
+
         // Delete area confirmation
         document.querySelector('.confirm-delete-area-btn').addEventListener('click', function() {
             const reason = document.getElementById('delete-reason').value;
             const notifyUser = document.getElementById('notify-user').checked;
-            
+
             if (!reason.trim()) {
                 alert('Proszę podać powód usunięcia obszaru.');
                 return;
             }
-            
+
             // W prawdziwej aplikacji tutaj wysłalibyśmy dane do serwera
             alert('Obszar został usunięty' + (notifyUser ? ' i właściciel został powiadomiony.' : '.'));
             closeAllModals();
-            
+
             // Dla celów demonstracyjnych - usunięcie karty obszaru
             // W prawdziwej aplikacji ta zmiana byłaby w odpowiedzi z serwera
             const deletedArea = document.querySelector('.delete-area-btn[data-id="1"]').closest('.card');
@@ -1736,7 +1706,7 @@
                 deletedArea.remove();
             }, 300);
         });
-        
+
         // Search functionality
         document.querySelectorAll('.search-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1747,7 +1717,7 @@
                 }
             });
         });
-        
+
         // Enter key in search input
         document.querySelectorAll('.search-input').forEach(input => {
             input.addEventListener('keypress', function(e) {
@@ -1758,4 +1728,5 @@
             });
         });
     </script>
+<script src="scripts/admin-panel.js"></script>
 </body>
