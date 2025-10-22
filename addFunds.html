@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doładowanie konta - Pszczeli Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/styles.css">
+    <script src="scripts/auth.js"></script>
+</head>
+<body>
+<div class="header">
+    <div class="logo-container">
+        <div class="logo">
+            <a href="home.html">
+                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
+            </a>
+        </div>
+        <div class="page-title">Doładowanie konta</div>
+    </div>
+    <div class="header-controls">
+        <a href="home.html" class="btn btn-outline back-btn"><i class="fas fa-arrow-left"></i>Wróć</a>
+    </div>
+</div>
+
+<div class="topup-container">
+    <div class="topup-card">
+        <div class="balance-section">
+            <div class="balance-title">Aktualne saldo</div>
+            <div class="balance-amount" id="balance-amount">0,00 PLN</div>
+        </div>
+        <form class="topup-form" id="topup-form">
+            <div class="form-section">
+                <h3 class="form-section-title">Doładowanie konta</h3>
+                <div class="form-group">
+                    <label for="amount">Kwota doładowania</label>
+                    <div class="amount-options">
+                        <div class="amount-option" data-amount="20">20 PLN</div>
+                        <div class="amount-option" data-amount="50">50 PLN</div>
+                        <div class="amount-option" data-amount="100">100 PLN</div>
+                        <div class="amount-option" data-amount="200">200 PLN</div>
+                    </div>
+                    <input type="number" id="amount" name="amount" placeholder="Własna kwota (PLN)" min="10" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Kod BLIK</label>
+                    <div class="blik-code-container">
+                        <input type="text" id="blik-code-1" maxlength="3" placeholder="123" required>
+                        <input type="text" id="blik-code-2" maxlength="3" placeholder="456" required>
+                    </div>
+                    <small class="form-info">Wprowadź 6-cyfrowy kod BLIK z aplikacji bankowej.</small>
+                </div>
+                <button type="submit" class="btn btn-accent topup-btn"><i class="fas fa-wallet"></i> Doładuj konto</button>
+                <div class="error-message" id="error-message"></div>
+                <div class="success-message" id="success-message"></div>
+                <div class="topup-info">
+                    Doładowanie jest realizowane za pomocą bezpiecznego systemu BLIK. Po zatwierdzeniu środki pojawią się na Twoim koncie w ciągu kilku minut.
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:8080';
+
+
+    function formatBalance(amount) {
+        return (amount || 0).toFixed(2).replace('.', ',') + ' PLN';
+    }
+
+
+    async function fetchBalance() {
+        try {
+            const response = await fetch(`${API_BASE}/api/auth/user`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                document.getElementById('balance-amount').textContent = formatBalance(user.balance);
+            } else if (response.status === 401) {
+                alert('Sesja wygasła. Zaloguj się ponownie.');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else {
+                const errorText = await response.text();
+                document.getElementById('error-message').textContent = errorText || 'Nie udało się pobrać salda.';
+                document.getElementById('error-message').style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Błąd:', error);
+            document.getElementById('error-message').textContent = 'Wystąpił błąd podczas łączenia z serwerem.';
+            document.getElementById('error-message').style.display = 'block';
+        }
+    }
+
+
+    async function addFunds(amount) {
+        try {
+            const response = await fetch(`${API_BASE}/api/person/addFunds`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ amount })
+            });
+
+            if (response.ok) {
+                document.getElementById('success-message').style.display = 'block';
+                document.getElementById('error-message').style.display = 'none';
+                fetchBalance();
+                document.getElementById('topup-form').reset();
+                document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+            } else {
+                const errorText = await response.text();
+                document.getElementById('error-message').textContent = errorText || 'Nie udało się doładować konta.';
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('success-message').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Błąd:', error);
+            document.getElementById('error-message').textContent = 'Wystąpił błąd podczas łączenia z serwerem.';
+            document.getElementById('error-message').style.display = 'block';
+            document.getElementById('success-message').style.display = 'none';
+        }
+    }
+
+    document.querySelectorAll('.amount-option').forEach(option => {
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            document.getElementById('amount').value = option.getAttribute('data-amount');
+        });
+    });
+
+    document.getElementById('topup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const button = document.querySelector('.topup-btn');
+        button.disabled = true;
+        button.textContent = 'Ładowanie...';
+
+        const amount = parseInt(document.getElementById('amount').value);
+        const blikCode1 = document.getElementById('blik-code-1').value;
+        const blikCode2 = document.getElementById('blik-code-2').value;
+
+        // Walidacja kodu BLIK
+        if (blikCode1.length !== 3 || blikCode2.length !== 3 || !/^\d+$/.test(blikCode1 + blikCode2)) {
+            document.getElementById('error-message').textContent = 'Nieprawidłowy kod BLIK. Wprowadź 6 cyfr.';
+            document.getElementById('error-message').style.display = 'block';
+            document.getElementById('success-message').style.display = 'none';
+            button.disabled = false;
+            button.textContent = 'Doładuj konto';
+            return;
+        }
+
+        if (amount < 10) {
+            document.getElementById('error-message').textContent = 'Minimalna kwota doładowania to 10 PLN.';
+            document.getElementById('error-message').style.display = 'block';
+            document.getElementById('success-message').style.display = 'none';
+            button.disabled = false;
+            button.textContent = 'Doładuj konto';
+            return;
+        }
+
+        await addFunds(amount);
+        button.disabled = false;
+        button.textContent = 'Doładuj konto';
+    });
+
+    window.addEventListener('DOMContentLoaded', fetchBalance);
+</script>
+</body>
+</html>
