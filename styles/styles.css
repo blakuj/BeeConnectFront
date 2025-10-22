@@ -1811,3 +1811,139 @@ select option {
     border: none;
 }
 
+.topup-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 70px);
+    padding: 2rem;
+    background-color: var(--light);
+}
+
+.topup-card {
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 600px;
+    padding: 2rem;
+}
+
+.balance-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: var(--primary-light);
+    border-radius: var(--radius);
+}
+
+.balance-title {
+    font-size: 1.2rem;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+.balance-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.topup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.topup-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.topup-form .form-group label {
+    font-size: 1rem;
+    color: var(--secondary);
+}
+
+.topup-form input[type="text"],
+.topup-form input[type="number"] {
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+.blik-code-container {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.blik-code-container input {
+    flex: 1;
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}
+
+.amount-options {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.amount-option {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--light);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--dark);
+    transition: var(--transition);
+}
+
+.amount-option:hover,
+.amount-option.selected {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.topup-btn {
+    background-color: var(--accent);
+    color: var(--white);
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--radius);
+    transition: var(--transition);
+}
+
+.topup-btn:hover {
+    background-color: var(--accent-dark);
+    transform: translateY(-1px);
+}
+
+.topup-info {
+    font-size: 0.85rem;
+    color: var(--medium);
+    text-align: center;
+    margin-top: 1rem;
+}
+
+@media (max-width: 480px) {
+    .topup-card {
+        padding: 1.5rem;
+    }
+
+    .balance-amount {
+        font-size: 2rem;
+    }
+
+    .amount-options {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .amount-option {
+        width: 100%;
+        text-align: center;
+    }
+}
