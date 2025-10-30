@@ -8,11 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="styles/styles.css">
     <style>
-        /* Dodatkowe style specyficzne dla strony rezerwacji */
         body {
             overflow-y: auto;
         }
-        
+
         .reservation-container {
             max-width: 1000px;
             margin: 30px auto;
@@ -30,6 +29,7 @@
         .area-header {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 20px;
             background-color: var(--primary-light);
             color: var(--secondary);
@@ -38,7 +38,6 @@
         .area-title {
             font-size: 24px;
             font-weight: 600;
-            margin-right: 15px;
         }
 
         .area-status {
@@ -49,9 +48,33 @@
             color: var(--accent-dark);
         }
 
+        .view-details-btn {
+            background: none;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .view-details-btn:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
         .area-image {
             height: 250px;
             overflow: hidden;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .area-image img {
@@ -60,39 +83,33 @@
             object-fit: cover;
         }
 
-        .area-info {
-            display: flex;
+        .area-image-placeholder {
+            font-size: 48px;
+            color: #ccc;
+        }
+
+        .area-quick-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
             padding: 20px;
+            background: #f9f9f9;
         }
 
-        .area-info-section {
-            flex: 1;
-            padding: 0 15px;
+        .quick-info-item {
+            text-align: center;
         }
 
-        .area-info-title {
-            font-weight: 600;
+        .quick-info-label {
+            font-size: 12px;
+            color: var(--medium);
+            margin-bottom: 5px;
+        }
+
+        .quick-info-value {
             font-size: 16px;
-            color: var(--secondary);
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--primary-light);
-        }
-
-        .area-property {
-            display: flex;
-            margin-bottom: 10px;
-        }
-
-        .area-property-label {
-            flex: 0 0 40%;
             font-weight: 600;
             color: var(--secondary);
-        }
-
-        .area-property-value {
-            flex: 1;
-            color: var(--dark);
         }
 
         .reservation-form {
@@ -136,7 +153,8 @@
         }
 
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ddd;
@@ -145,8 +163,14 @@
             transition: var(--transition);
         }
 
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
         .form-group input:focus,
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group textarea:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.2);
             outline: none;
@@ -157,6 +181,28 @@
             margin-top: 5px;
             font-size: 12px;
             color: var(--medium);
+        }
+
+        .user-balance {
+            background-color: #e8f5e9;
+            border: 1px solid #81c784;
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .balance-label {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .balance-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2e7d32;
         }
 
         .reservation-summary {
@@ -195,9 +241,9 @@
             justify-content: space-between;
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px solid #eee;
+            border-top: 2px solid #e0e0e0;
             font-size: 18px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .summary-total-label {
@@ -206,6 +252,16 @@
 
         .summary-total-value {
             color: var(--primary-dark);
+        }
+
+        .insufficient-balance {
+            background-color: #ffebee;
+            border: 1px solid #ef5350;
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-top: 15px;
+            color: #c62828;
+            font-size: 14px;
         }
 
         .reservation-actions {
@@ -217,358 +273,797 @@
         .back-btn {
             display: flex;
             align-items: center;
-        }
-
-        .back-btn i {
-            margin-right: 8px;
+            gap: 8px;
         }
 
         .submit-reservation-btn {
-            padding: 12px 25px;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        @media (max-width: 768px) {
-            .area-info {
-                flex-direction: column;
+        .submit-reservation-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            border: 1px solid #ef5350;
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #c62828;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: var(--medium);
+        }
+
+        .loading i {
+            font-size: 32px;
+            margin-bottom: 15px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
             }
-            
-            .area-info-section {
-                padding: 15px 0;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-            
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-            
-            .reservation-actions {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .submit-reservation-btn {
-                width: 100%;
-            }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--medium);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .modal-info-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .modal-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .modal-info-label {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .modal-info-value {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .modal-warning {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            align-items: start;
+            gap: 12px;
+        }
+
+        .modal-warning i {
+            color: #f57c00;
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .modal-warning-text {
+            flex: 1;
+        }
+
+        .modal-warning-title {
+            font-weight: 600;
+            color: #e65100;
+            margin-bottom: 5px;
+        }
+
+        .modal-warning-desc {
+            font-size: 14px;
+            color: #5d4037;
+        }
+
+        .modal-cost-summary {
+            background: linear-gradient(135deg, #f2a900 0%, #d99400 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .modal-cost-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .modal-cost-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .modal-actions {
+            padding: 20px;
+            border-top: 2px solid #f0f0f0;
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .modal-btn-cancel {
+            background: white;
+            border: 2px solid #ddd;
+            color: var(--dark);
+        }
+
+        .modal-btn-cancel:hover {
+            border-color: #999;
+            background: #f5f5f5;
+        }
+
+        .modal-btn-confirm {
+            background: var(--primary);
+            border: 2px solid var(--primary);
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(242, 169, 0, 0.3);
+        }
+
+        /* Details Modal */
+        .details-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .details-item {
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .details-label {
+            font-size: 12px;
+            color: var(--medium);
+            margin-bottom: 5px;
+        }
+
+        .details-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--secondary);
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="logo-container">
-            <div class="logo">
-                <a href="home.html">
-                    <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
-                </a>
-            </div>
-            <div class="welcome-message">Witaj, Dawid Pasieka!</div>
+<header class="header">
+    <!-- Header content -->
+</header>
+
+<div class="reservation-container">
+    <div id="loading" class="loading" style="display: none;">
+        <i class="fas fa-spinner"></i>
+        <p>Ładowanie danych...</p>
+    </div>
+
+    <div id="error-container"></div>
+
+    <div class="area-details" id="area-details" style="display: none;">
+        <div class="area-header">
+            <h1 class="area-title" id="area-name">Ładowanie...</h1>
+            <button class="view-details-btn" onclick="showDetailsModal()">
+                <i class="fas fa-info-circle"></i> Szczegóły obszaru
+            </button>
         </div>
-        <div class="header-controls">
-            <!-- Przycisk ustawień -->
-            <div class="settings-dropdown">
-                <button class="settings-btn" onclick="toggleDropdown()">
-                    <i class="fas fa-cog"></i> Ustawienia
-                </button>
-                <div id="settingsDropdown" class="dropdown-content">
-                    <a href="#"><i class="fas fa-user-edit"></i> Edytuj profil</a>
-                    <a href="#"><i class="fas fa-wallet"></i> Doładuj konto</a>
-                    <a href="#"><i class="fas fa-bell"></i> Powiadomienia</a>
-                    <a href="#"><i class="fas fa-question-circle"></i> Pomoc</a>
+
+        <div class="area-image" id="area-image">
+            <i class="fas fa-image area-image-placeholder"></i>
+        </div>
+
+        <div class="area-quick-info">
+            <div class="quick-info-item">
+                <div class="quick-info-label">Typ</div>
+                <div class="quick-info-value" id="area-type-quick">-</div>
+            </div>
+            <div class="quick-info-item">
+                <div class="quick-info-label">Powierzchnia</div>
+                <div class="quick-info-value" id="area-size-quick">-</div>
+            </div>
+            <div class="quick-info-item">
+                <div class="quick-info-label">Max uli</div>
+                <div class="quick-info-value" id="area-hives-quick">-</div>
+            </div>
+            <div class="quick-info-item">
+                <div class="quick-info-label">Cena/dzień</div>
+                <div class="quick-info-value" id="area-price-quick">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="reservation-form" id="reservation-form-container" style="display: none;">
+        <h2 class="reservation-form-title">Rezerwacja obszaru</h2>
+        <p class="reservation-form-description">
+            Uzupełnij poniższe informacje, aby zarezerwować obszar. Po kliknięciu "Zarezerwuj obszar" środki zostaną natychmiast pobrane z Twojego konta.
+        </p>
+
+        <div class="user-balance">
+            <span class="balance-label">Twoje saldo:</span>
+            <span class="balance-value" id="user-balance">0.00 PLN</span>
+        </div>
+
+        <form id="reservation-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="start-date">Data od: *</label>
+                    <input type="date" id="start-date" name="start-date" required>
+                    <small>Wybierz datę rozpoczęcia wynajmu</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="end-date">Data do: *</label>
+                    <input type="date" id="end-date" name="end-date" required>
+                    <small>Wybierz datę zakończenia wynajmu</small>
                 </div>
             </div>
-            <button class="btn btn-primary">
-                <i class="fas fa-sign-in-alt"></i> Zaloguj się
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="hives-count">Liczba uli: *</label>
+                    <input type="number" id="hives-count" name="hives-count" min="1" value="1" required>
+                    <small>Podaj liczbę uli (maksymalnie <span id="max-hives-hint">-</span>)</small>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="reservation-notes">Uwagi (opcjonalne):</label>
+                    <textarea id="reservation-notes" name="notes" placeholder="Dodatkowe informacje dla właściciela..."></textarea>
+                </div>
+            </div>
+
+            <div class="reservation-summary">
+                <h3 class="summary-title">Podsumowanie rezerwacji</h3>
+
+                <div class="summary-item">
+                    <div class="summary-item-label">Wybrany okres:</div>
+                    <div class="summary-item-value"><span id="summary-date-range">-</span> (<span id="summary-days">0</span> dni)</div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="summary-item-label">Liczba uli:</div>
+                    <div class="summary-item-value"><span id="summary-hives">0</span> uli</div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="summary-item-label">Cena za dzień:</div>
+                    <div class="summary-item-value"><span id="summary-daily">0</span> PLN</div>
+                </div>
+
+                <div class="summary-total">
+                    <div class="summary-total-label">Całkowity koszt:</div>
+                    <div class="summary-total-value"><span id="summary-total">0</span> PLN</div>
+                </div>
+
+                <div id="insufficient-balance-warning" class="insufficient-balance" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Niewystarczające saldo! Potrzebujesz doładować konto o <strong><span id="missing-amount">0</span> PLN</strong>.
+                </div>
+            </div>
+
+            <div class="reservation-actions">
+                <button type="button" class="btn btn-outline back-btn" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> Anuluj
+                </button>
+
+                <button type="submit" class="btn btn-primary submit-reservation-btn" id="submit-btn">
+                    <i class="fas fa-calendar-check"></i> Zarezerwuj obszar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Szczegóły Obszaru -->
+<div id="details-modal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">
+                <i class="fas fa-info-circle"></i>
+                Szczegóły obszaru
+            </div>
+            <button class="modal-close" onclick="closeDetailsModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="details-grid">
+                <div class="details-item">
+                    <div class="details-label">Nazwa obszaru</div>
+                    <div class="details-value" id="detail-name">-</div>
+                </div>
+                <div class="details-item">
+                    <div class="details-label">Typ roślinności</div>
+                    <div class="details-value" id="detail-type">-</div>
+                </div>
+                <div class="details-item">
+                    <div class="details-label">Powierzchnia</div>
+                    <div class="details-value" id="detail-size">-</div>
+                </div>
+                <div class="details-item">
+                    <div class="details-label">Maksymalna liczba uli</div>
+                    <div class="details-value" id="detail-hives">-</div>
+                </div>
+                <div class="details-item">
+                    <div class="details-label">Cena za dzień</div>
+                    <div class="details-value" id="detail-price">-</div>
+                </div>
+                <div class="details-item">
+                    <div class="details-label">Właściciel</div>
+                    <div class="details-value" id="detail-owner">-</div>
+                </div>
+                <div class="details-item">
+                    <div class="details-label">Dostępny od</div>
+                    <div class="details-value" id="detail-available">-</div>
+                </div>
+                <div class="details-item">
+                    <div class="details-label">Opis</div>
+                    <div class="details-value" id="detail-description">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Potwierdzenia -->
+<div id="confirmation-modal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">
+                <i class="fas fa-exclamation-circle" style="color: #ff9800;"></i>
+                Potwierdź rezerwację
+            </div>
+            <button class="modal-close" onclick="closeConfirmationModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-warning">
+                <i class="fas fa-info-circle"></i>
+                <div class="modal-warning-text">
+                    <div class="modal-warning-title">Czy na pewno chcesz zarezerwować ten obszar?</div>
+                    <div class="modal-warning-desc">Środki zostaną natychmiast pobrane z Twojego konta.</div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Szczegóły rezerwacji</div>
+                <div class="modal-info-grid">
+                    <div class="modal-info-row">
+                        <span class="modal-info-label">Obszar:</span>
+                        <span class="modal-info-value" id="modal-area-name">-</span>
+                    </div>
+                    <div class="modal-info-row">
+                        <span class="modal-info-label">Okres:</span>
+                        <span class="modal-info-value" id="modal-date-range">-</span>
+                    </div>
+                    <div class="modal-info-row">
+                        <span class="modal-info-label">Liczba dni:</span>
+                        <span class="modal-info-value" id="modal-days">-</span>
+                    </div>
+                    <div class="modal-info-row">
+                        <span class="modal-info-label">Liczba uli:</span>
+                        <span class="modal-info-value" id="modal-hives">-</span>
+                    </div>
+                    <div class="modal-info-row">
+                        <span class="modal-info-label">Cena za dzień:</span>
+                        <span class="modal-info-value" id="modal-daily-price">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-cost-summary">
+                <div class="modal-cost-label">Całkowity koszt rezerwacji:</div>
+                <div class="modal-cost-value"><span id="modal-total-price">0</span> PLN</div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeConfirmationModal()">
+                <i class="fas fa-times"></i> Nie, wróć
+            </button>
+            <button class="modal-btn modal-btn-confirm" onclick="confirmReservation()">
+                <i class="fas fa-check"></i> Tak, rezerwuj ostatecznie
             </button>
         </div>
     </div>
+</div>
 
-    <!-- Main Content -->
-    <div class="reservation-container">
-        <!-- Breadcrumbs -->
-        <div style="margin-bottom: 20px; font-size: 14px; color: var(--medium);">
-            <a href="index.html" style="color: var(--medium); text-decoration: none;">Strona główna</a> 
-            <i class="fas fa-angle-right" style="margin: 0 8px;"></i> 
-            <a href="#" style="color: var(--medium); text-decoration: none;">Mapa obszarów</a> 
-            <i class="fas fa-angle-right" style="margin: 0 8px;"></i> 
-            <span style="color: var(--dark);">Rezerwacja obszaru</span>
-        </div>
+<script>
+    const API_BASE_URL = 'http://localhost:8080/api';
+    let currentArea = null;
+    let userBalance = 0;
+    let areaId = null;
 
-        <!-- Szczegóły obszaru -->
-        <div class="area-details">
-            <div class="area-header">
-                <h1 class="area-title">Obszar lipy - Dolina Warty</h1>
-                <span class="area-status">Dostępny</span>
-            </div>
-            
-            <div class="area-image">
-                <img src="assets/area1.jpg" alt="Obszar lipy - Dolina Warty">
-            </div>
-            
-            <div class="area-info">
-                <div class="area-info-section">
-                    <h2 class="area-info-title">Informacje o obszarze</h2>
-                    <div class="area-property">
-                        <div class="area-property-label">Typ:</div>
-                        <div class="area-property-value">Lipa</div>
-                    </div>
-                    <div class="area-property">
-                        <div class="area-property-label">Powierzchnia:</div>
-                        <div class="area-property-value">12 ha</div>
-                    </div>
-                    <div class="area-property">
-                        <div class="area-property-label">Lokalizacja:</div>
-                        <div class="area-property-value">Dolina Warty, woj. wielkopolskie</div>
-                    </div>
-                    <div class="area-property">
-                        <div class="area-property-label">Ocena:</div>
-                        <div class="area-property-value">
-                            <i class="fas fa-star" style="color: #FFD700;"></i>
-                            <i class="fas fa-star" style="color: #FFD700;"></i>
-                            <i class="fas fa-star" style="color: #FFD700;"></i>
-                            <i class="fas fa-star" style="color: #FFD700;"></i>
-                            <i class="fas fa-star-half-alt" style="color: #FFD700;"></i>
-                            (4.5/5)
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="area-info-section">
-                    <h2 class="area-info-title">Informacje o właścicielu</h2>
-                    <div class="area-property">
-                        <div class="area-property-label">Właściciel:</div>
-                        <div class="area-property-value">Jan Kowalski</div>
-                    </div>
-                    <div class="area-property">
-                        <div class="area-property-label">Cena:</div>
-                        <div class="area-property-value">5 PLN / ul / dzień</div>
-                    </div>
-                    <div class="area-property">
-                        <div class="area-property-label">Maks. liczba uli:</div>
-                        <div class="area-property-value">30</div>
-                    </div>
-                    <div class="area-property">
-                        <div class="area-property-label">Dostępność:</div>
-                        <div class="area-property-value">01.05.2025 - 30.09.2025</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    const urlParams = new URLSearchParams(window.location.search);
+    areaId = urlParams.get('areaId');
 
-        <!-- Formularz rezerwacji -->
-        <div class="reservation-form">
-            <h2 class="reservation-form-title">Rezerwacja obszaru</h2>
-            <p class="reservation-form-description">
-                Uzupełnij poniższe informacje, aby zarezerwować obszar. Określ okres rezerwacji oraz liczbę uli, które chcesz umieścić na wybranym terenie.
-            </p>
-            
-            <form id="reservation-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="start-date">Data od:</label>
-                        <input type="date" id="start-date" name="start-date" required min="2025-04-27">
-                        <small>Wybierz datę rozpoczęcia wynajmu</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="end-date">Data do:</label>
-                        <input type="date" id="end-date" name="end-date" required min="2025-04-28">
-                        <small>Wybierz datę zakończenia wynajmu</small>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="hives-count">Liczba uli:</label>
-                        <input type="number" id="hives-count" name="hives-count" min="1" max="30" value="10" required>
-                        <small>Podaj liczbę uli, które planujesz umieścić (maksymalnie 30)</small>
-                    </div>
-                    
-      
-                </div>
-                
+    if (!areaId) {
+        showError('Nie podano ID obszaru');
+    }
 
-                
-                <div class="reservation-summary">
-                    <h3 class="summary-title">Podsumowanie rezerwacji</h3>
-                    
-                    <div class="summary-item">
-                        <div class="summary-item-label">Wybrany okres:</div>
-                        <div class="summary-item-value"><span id="summary-date-range">01.05.2025 - 30.05.2025</span> (<span id="summary-days">30</span> dni)</div>
-                    </div>
-                    
-                    <div class="summary-item">
-                        <div class="summary-item-label">Liczba uli:</div>
-                        <div class="summary-item-value"><span id="summary-hives">10</span> uli</div>
-                    </div>
-                    
-                    <div class="summary-item">
-                        <div class="summary-item-label">Cena dzienna:</div>
-                        <div class="summary-item-value"><span id="summary-daily">50</span> PLN (<span id="summary-hive-price">5</span> PLN × <span id="summary-hives-count">10</span> uli)</div>
-                    </div>
-                    
-                    <div class="summary-total">
-                        <div class="summary-total-label">Szacowany koszt:</div>
-                        <div class="summary-total-value"><span id="summary-total">1500</span> PLN</div>
-                    </div>
+    function showError(message) {
+        const container = document.getElementById('error-container');
+        container.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i> ${message}
                 </div>
-                
-                <div class="reservation-actions">
-                    <a href="#" class="btn btn-outline back-btn" onclick="goBack()">
-                        <i class="fas fa-arrow-left"></i> Anuluj
-                    </a>
-                    
-                    <button type="submit" class="btn btn-primary submit-reservation-btn">
-                        <i class="fas fa-calendar-check"></i> Zarezerwuj obszar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+            `;
+    }
 
-    <script>
-        // Funkcja do przełączania dropdown menu
-        function toggleDropdown() {
-            document.getElementById("settingsDropdown").classList.toggle("show");
-        }
+    function goBack() {
+        window.history.back();
+    }
 
-        // Zamknij dropdown gdy kliknięto poza nim
-        window.onclick = function(event) {
-            if (!event.target.matches('.settings-btn') && !event.target.matches('.fa-cog')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
-        }
-        
-        // Funkcja powrotu do poprzedniej strony
-        function goBack() {
-            window.history.back();
-        }
-        
-        // Ustaw domyślne daty (dzisiaj i za 30 dni)
-        window.addEventListener('DOMContentLoaded', function() {
-            const today = new Date();
-            const thirtyDaysLater = new Date();
-            thirtyDaysLater.setDate(today.getDate() + 30);
-            
-            // Formatowanie dat do formatu YYYY-MM-DD
-            const formatDate = (date) => {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            };
-            
-            document.getElementById('start-date').value = formatDate(today);
-            document.getElementById('end-date').value = formatDate(thirtyDaysLater);
-            
-            // Ustaw minimalne daty
-            document.getElementById('start-date').min = formatDate(today);
-            document.getElementById('end-date').min = formatDate(new Date(today.setDate(today.getDate() + 1)));
-            
-            // Pierwszy raz zaktualizuj podsumowanie
-            updateSummary();
-        });
-        
-        // Aktualizuj podsumowanie przy zmianie wartości
-        document.getElementById('start-date').addEventListener('change', updateSummary);
-        document.getElementById('end-date').addEventListener('change', updateSummary);
-        document.getElementById('hives-count').addEventListener('change', updateSummary);
-        
-        // Funkcja aktualizująca podsumowanie
-        function updateSummary() {
-            const startDate = new Date(document.getElementById('start-date').value);
-            const endDate = new Date(document.getElementById('end-date').value);
-            const hivesCount = parseInt(document.getElementById('hives-count').value) || 0;
-            const pricePerHive = 5; // PLN per hive per day
-            
-            // Sprawdź czy daty są poprawne
-            if (startDate && endDate && startDate < endDate) {
-                // Oblicz liczbę dni
-                const diffTime = Math.abs(endDate - startDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
-                // Oblicz koszt dzienny i całkowity
-                const dailyCost = hivesCount * pricePerHive;
-                const totalCost = dailyCost * diffDays;
-                
-                // Formatowanie dat do wyświetlenia
-                const formatDisplayDate = (date) => {
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    return `${day}.${month}.${year}`;
-                };
-                
-                const dateRange = `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
-                
-                // Zaktualizuj wartości w podsumowaniu
-                document.getElementById('summary-date-range').textContent = dateRange;
-                document.getElementById('summary-days').textContent = diffDays;
-                document.getElementById('summary-hives').textContent = hivesCount;
-                document.getElementById('summary-daily').textContent = dailyCost;
-                document.getElementById('summary-hive-price').textContent = pricePerHive;
-                document.getElementById('summary-hives-count').textContent = hivesCount;
-                document.getElementById('summary-total').textContent = totalCost;
-            } else if (startDate >= endDate) {
-                // Jeśli data końcowa jest wcześniejsza lub równa dacie początkowej
-                alert('Data końcowa musi być późniejsza niż data początkowa.');
-                
-                // Ustaw datę końcową na 1 dzień po początkowej
-                const newEndDate = new Date(startDate);
-                newEndDate.setDate(startDate.getDate() + 1);
-                
-                const formatDate = (date) => {
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    return `${year}-${month}-${day}`;
-                };
-                
-                document.getElementById('end-date').value = formatDate(newEndDate);
-                
-                // Ponownie zaktualizuj podsumowanie
-                updateSummary();
-            }
-        }
-        
-        // Obsługa formularza
-        document.getElementById('reservation-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Pobierz dane z formularza
-            const startDate = document.getElementById('start-date').value;
-            const endDate = document.getElementById('end-date').value;
-            const hivesCount = document.getElementById('hives-count').value;
-            const hiveType = document.getElementById('hive-type').value;
-            const notes = document.getElementById('reservation-notes').value;
-            
-            // Podstawowa walidacja
-            if (!startDate || !endDate || !hivesCount) {
-                alert('Proszę wypełnić wszystkie wymagane pola.');
-                return;
-            }
-            
-            // W rzeczywistej aplikacji tutaj byłoby wysyłanie danych do serwera
-            console.log("Dane rezerwacji:", {
-                startDate,
-                endDate,
-                hivesCount,
-                hiveType,
-                notes
+    async function loadData() {
+        document.getElementById('loading').style.display = 'block';
+
+        try {
+            const userResponse = await fetch(`${API_BASE_URL}/auth/user`, {
+                credentials: 'include'
             });
-            
-            // Pokaż komunikat potwierdzający
-            alert('Rezerwacja została złożona! Oczekuj na potwierdzenie od właściciela obszaru.');
-            
-            // Przekierowanie z powrotem do mapy
-            window.location.href = 'index.html';
-        });
-    </script>
+
+            if (!userResponse.ok) {
+                throw new Error('Musisz być zalogowany');
+            }
+
+            const userData = await userResponse.json();
+            userBalance = userData.balance || 0;
+            document.getElementById('user-balance').textContent = userBalance.toFixed(2) + ' PLN';
+
+            const areaResponse = await fetch(`${API_BASE_URL}/areas`, {
+                credentials: 'include'
+            });
+
+            if (!areaResponse.ok) {
+                throw new Error('Nie udało się pobrać danych obszaru');
+            }
+
+            const areas = await areaResponse.json();
+            currentArea = areas.find(a => a.id == areaId);
+
+            if (!currentArea) {
+                throw new Error('Nie znaleziono obszaru');
+            }
+
+            if (currentArea.status !== 'AVAILABLE') {
+                throw new Error('Ten obszar nie jest już dostępny do rezerwacji');
+            }
+
+            displayAreaDetails(currentArea);
+            initializeForm();
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('area-details').style.display = 'block';
+            document.getElementById('reservation-form-container').style.display = 'block';
+
+        } catch (error) {
+            document.getElementById('loading').style.display = 'none';
+            showError(error.message);
+        }
+    }
+
+    function displayAreaDetails(area) {
+        document.getElementById('area-name').textContent = area.name || 'Obszar pszczelarski';
+
+        document.getElementById('area-type-quick').textContent = area.type || '-';
+        document.getElementById('area-size-quick').textContent = area.area ? area.area.toFixed(2) + ' ha' : '-';
+        document.getElementById('area-hives-quick').textContent = area.maxHives || '-';
+        document.getElementById('area-price-quick').textContent = area.pricePerDay ? area.pricePerDay.toFixed(2) + ' PLN' : '-';
+
+        document.getElementById('detail-name').textContent = area.name || '-';
+        document.getElementById('detail-type').textContent = area.type || '-';
+        document.getElementById('detail-size').textContent = area.area ? area.area.toFixed(2) + ' ha' : '-';
+        document.getElementById('detail-hives').textContent = area.maxHives || '-';
+        document.getElementById('detail-price').textContent = area.pricePerDay ? area.pricePerDay.toFixed(2) + ' PLN' : '-';
+        document.getElementById('detail-owner').textContent =
+            (area.ownerFirstName && area.ownerLastName) ?
+                `${area.ownerFirstName} ${area.ownerLastName}` : '-';
+        document.getElementById('detail-available').textContent = area.availableFrom || '-';
+        document.getElementById('detail-description').textContent = area.description || 'Brak opisu';
+
+        // Image
+        if (area.imgBase64) {
+            document.getElementById('area-image').innerHTML =
+                `<img src="data:image/jpeg;base64,${area.imgBase64}" alt="${area.name}">`;
+        }
+    }
+
+    function showDetailsModal() {
+        document.getElementById('details-modal').classList.add('show');
+    }
+
+    function closeDetailsModal() {
+        document.getElementById('details-modal').classList.remove('show');
+    }
+
+    function initializeForm() {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        document.getElementById('start-date').value = formatDate(tomorrow);
+        document.getElementById('start-date').min = formatDate(tomorrow);
+
+        const nextMonth = new Date(tomorrow);
+        nextMonth.setDate(tomorrow.getDate() + 30);
+        document.getElementById('end-date').value = formatDate(nextMonth);
+
+        const dayAfterTomorrow = new Date(tomorrow);
+        dayAfterTomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('end-date').min = formatDate(dayAfterTomorrow);
+
+        if (currentArea && currentArea.maxHives) {
+            document.getElementById('hives-count').max = currentArea.maxHives;
+            document.getElementById('max-hives-hint').textContent = currentArea.maxHives;
+        }
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const startDate = new Date(document.getElementById('start-date').value);
+        const endDate = new Date(document.getElementById('end-date').value);
+        const hivesCount = parseInt(document.getElementById('hives-count').value) || 0;
+
+        if (!currentArea || !startDate || !endDate || startDate >= endDate) {
+            return;
+        }
+
+        // Poprawne liczenie dni
+        const diffTime = endDate.getTime() - startDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Poprawne liczenie kosztu: cena_za_dzień * liczba_dni
+        const pricePerDay = currentArea.pricePerDay || 0;
+        const totalCost = pricePerDay * diffDays;
+
+        const formatDisplayDate = (date) => {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        };
+
+        const dateRange = `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
+
+        document.getElementById('summary-date-range').textContent = dateRange;
+        document.getElementById('summary-days').textContent = diffDays;
+        document.getElementById('summary-hives').textContent = hivesCount;
+        document.getElementById('summary-daily').textContent = pricePerDay.toFixed(2);
+        document.getElementById('summary-total').textContent = totalCost.toFixed(2);
+
+        const submitBtn = document.getElementById('submit-btn');
+        const warningDiv = document.getElementById('insufficient-balance-warning');
+
+        if (totalCost > userBalance) {
+            const missing = totalCost - userBalance;
+            document.getElementById('missing-amount').textContent = missing.toFixed(2);
+            warningDiv.style.display = 'block';
+            submitBtn.disabled = true;
+        } else {
+            warningDiv.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+
+    document.getElementById('start-date').addEventListener('change', updateSummary);
+    document.getElementById('end-date').addEventListener('change', updateSummary);
+    document.getElementById('hives-count').addEventListener('input', updateSummary);
+
+    document.getElementById('reservation-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        openConfirmationModal();
+    });
+
+    function openConfirmationModal() {
+        const startDate = new Date(document.getElementById('start-date').value);
+        const endDate = new Date(document.getElementById('end-date').value);
+        const hivesCount = parseInt(document.getElementById('hives-count').value);
+
+        const diffTime = endDate.getTime() - startDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const pricePerDay = currentArea.pricePerDay || 0;
+        const totalCost = pricePerDay * diffDays;
+
+        const formatDisplayDate = (date) => {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        };
+
+        document.getElementById('modal-area-name').textContent = currentArea.name;
+        document.getElementById('modal-date-range').textContent =
+            `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
+        document.getElementById('modal-days').textContent = diffDays + ' dni';
+        document.getElementById('modal-hives').textContent = hivesCount + ' uli';
+        document.getElementById('modal-daily-price').textContent = pricePerDay.toFixed(2) + ' PLN';
+        document.getElementById('modal-total-price').textContent = totalCost.toFixed(2);
+
+        document.getElementById('confirmation-modal').classList.add('show');
+    }
+
+    function closeConfirmationModal() {
+        document.getElementById('confirmation-modal').classList.remove('show');
+    }
+
+    async function confirmReservation() {
+        closeConfirmationModal();
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rezerwuję...';
+
+        const reservationData = {
+            areaId: parseInt(areaId),
+            startDate: document.getElementById('start-date').value,
+            endDate: document.getElementById('end-date').value,
+            numberOfHives: parseInt(document.getElementById('hives-count').value),
+            notes: document.getElementById('reservation-notes').value || null
+        };
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/reservations`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(reservationData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Nie udało się utworzyć rezerwacji');
+            }
+
+            alert('Rezerwacja pomyślna! Środki zostały pobrane z Twojego konta.');
+            window.location.href = 'profile.html?tab=rented';
+
+        } catch (error) {
+            showError(error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-calendar-check"></i> Zarezerwuj obszar';
+        }
+    }
+
+    // Zamknięcie modali po kliknięciu poza nimi
+    document.getElementById('details-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeDetailsModal();
+    });
+
+    document.getElementById('confirmation-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeConfirmationModal();
+    });
+
+    loadData();
+</script>
 </body>
 </html>
