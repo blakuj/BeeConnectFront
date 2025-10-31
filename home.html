@@ -320,6 +320,7 @@
         const price = area.pricePerDay ? `${area.pricePerDay} zł/dzień` : "?";
         const ownerName = `${area.ownerFirstName || ""} ${area.ownerLastName || ""}`.trim() || "?";
 
+        //  DODANO data-area-id do przycisku
         return `
                 <div class="custom-popup">
                     <h3>${area.name || "Obszar bez nazwy"}</h3>
