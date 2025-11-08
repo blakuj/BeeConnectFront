@@ -146,7 +146,10 @@ function displayProductDetails() {
                             <label for="buyer-notes">Uwagi dla sprzedawcy (opcjonalnie):</label>
                             <textarea id="buyer-notes" class="form-control" rows="3" placeholder="Np. proszę o kontakt przed dostawą"></textarea>
                         </div>
-
+<button class="btn btn-outline btn-block" onclick="contactSeller()" style="margin-bottom: 15px;">
+    <i class="fas fa-comments"></i>
+    Skontaktuj się ze sprzedawcą
+</button>
                         <button class="btn btn-primary btn-large btn-buy" onclick="buyProduct()">
                             <i class="fas fa-shopping-cart"></i> Kup teraz
                         </button>
@@ -320,6 +323,64 @@ function changeQuantity(delta) {
     value = Math.max(1, Math.min(value, currentProduct.stock));
     input.value = value;
     updateTotalPrice();
+}
+// ==================== KONTAKT ZE SPRZEDAWCĄ ====================
+async function contactSeller() {
+    if (!currentProduct) {
+        showNotification('Nie znaleziono produktu', 'error');
+        return;
+    }
+
+    if (!currentUser) {
+        showNotification('Musisz być zalogowany, aby wysłać wiadomość', 'error');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        return;
+    }
+
+    // Sprawdź czy to nie własny produkt
+    if (currentProduct.sellerId === currentUser.id) {
+        showNotification('To jest Twój własny produkt', 'info');
+        return;
+    }
+
+    try {
+        showNotification('Przekierowuję do czatu...', 'info');
+
+        // Rozpocznij konwersację ze sprzedawcą
+        const response = await fetch(`${API_BASE}/chat/conversations`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                otherUserId: currentProduct.sellerId,
+                initialMessage: `Witam! Interesuje mnie Twój produkt: ${currentProduct.name}`
+            })
+        });
+
+        if (!response.ok) {
+            // Jeśli konwersacja już istnieje, sprawdź czy otrzymujemy jej ID
+            const error = await response.json();
+            if (response.status === 400 && error.id) {
+                // Konwersacja już istnieje, przekieruj do niej
+                window.location.href = `chat.html?conversation=${error.id}`;
+                return;
+            }
+            throw new Error(error.error || 'Nie udało się rozpocząć konwersacji');
+        }
+
+        const conversation = await response.json();
+
+        // Przekieruj do czatu z tą konwersacją
+        window.location.href = `chat.html?conversation=${conversation.id}`;
+
+    } catch (error) {
+        console.error('Błąd kontaktu ze sprzedawcą:', error);
+        showNotification(error.message, 'error');
+    }
 }
 
 function updateTotalPrice() {

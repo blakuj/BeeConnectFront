@@ -6,6 +6,7 @@
     <title>Szczegóły Produktu - BeeConnect</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/styles.css">
     <style>
         :root {
             --primary: #F2A900;         /* Miodowy żółty */
@@ -63,28 +64,6 @@
             gap: 16px;
         }
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo {
-            width: 42px;
-            height: 42px;
-            margin-right: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--primary-light);
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .logo img {
-            max-width: 80%;
-            max-height: 80%;
-        }
 
         .welcome-message, .page-title {
             font-size: 18px;
@@ -307,7 +286,23 @@
             gap: 15px;
             margin-bottom: 25px;
         }
+        .btn-outline {
+            background-color: white;
+            color: var(--dark);
+            border: 2px solid var(--primary);
+        }
 
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-block {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
         .buy-now-btn, .contact-seller-btn {
             flex: 1;
             padding: 14px;
