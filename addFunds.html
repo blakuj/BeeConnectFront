@@ -103,6 +103,7 @@
 
 
     async function addFunds(amount) {
+
         try {
             const response = await fetch(`${API_BASE}/api/person/addFunds`, {
                 method: 'PUT',

@@ -36,7 +36,7 @@
                 <a href="edit-profile.html"><i class="fas fa-user-edit"></i> Edytuj profil</a>
                 <a href="addFunds.html"><i class="fas fa-wallet"></i> Doładuj konto</a>
                 <a href="#"><i class="fas fa-bell"></i> Powiadomienia</a>
-                <a href="#"><i class="fas fa-question-circle"></i> Pomoc</a>
+                <a href="https://policja.pl/"><i class="fas fa-question-circle"></i> Pomoc</a>
             </div>
         </div>
         <div class="auth-buttons">
@@ -198,19 +198,13 @@
                 <span>Malina</span>
             </div>
         </div>
-
-        <!-- Przycisk mobilny do pokazania bocznego menu -->
-        <div class="sidebar-toggle" id="sidebarToggle" style="display: none;">
-            <i class="fas fa-bars"></i>
-        </div>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-    const apiUrl = 'http://localhost:8080/api';
+    const apiUrl = "http://localhost:8080/api/auth";
 
-    // Dropdown i sidebar
     function toggleDropdown() {
         document.getElementById("settingsDropdown").classList.toggle("show");
     }
@@ -227,26 +221,13 @@
         }
     }
 
-    function checkScreenSize() {
-        const sidebar = document.querySelector('.sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-
-        if (window.innerWidth <= 768) {
-            sidebarToggle.style.display = 'flex';
-            sidebar.classList.remove('active');
-        } else {
-            sidebarToggle.style.display = 'none';
-            sidebar.classList.remove('active');
-        }
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.querySelector('.sidebar');
-
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-        });
+        function checkScreenSize() {
+            const notificationContainer = document.querySelector('.notifications-container');
+            if (window.innerWidth <= 768 && notificationContainer) {
+                notificationContainer.remove();
+            }
+        }
 
         checkScreenSize();
         window.addEventListener('resize', checkScreenSize);
@@ -316,6 +297,23 @@
         return flowerColors[type.toLowerCase()] || flowerColors["unknown"];
     }
 
+    // ✨ NOWA FUNKCJA: Przekierowanie do strony rezerwacji
+    function redirectToReservation(areaId) {
+        // Sprawdź czy użytkownik jest zalogowany
+        const userJson = localStorage.getItem("currentUser");
+
+        if (!userJson) {
+            // Jeśli nie zalogowany, przekieruj do logowania
+            alert('Musisz być zalogowany, aby zarezerwować obszar.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Przekieruj do strony rezerwacji z parametrem areaId
+        window.location.href = `reservation.html?areaId=${areaId}`;
+    }
+
+    // ✨ ZAKTUALIZOWANA FUNKCJA formatPopup z obsługą kliknięcia
     function formatPopup(area) {
         const isAvailable = area.status && area.status.toLowerCase() === "available";
         const availability = isAvailable
@@ -327,6 +325,7 @@
         const price = area.pricePerDay ? `${area.pricePerDay} zł/dzień` : "?";
         const ownerName = `${area.ownerFirstName || ""} ${area.ownerLastName || ""}`.trim() || "?";
 
+        //  DODANO data-area-id do przycisku
         return `
                 <div class="custom-popup">
                     <h3>${area.name || "Obszar bez nazwy"}</h3>
@@ -350,7 +349,10 @@
                         <span class="prop-label">Cena:</span>
                         <span>${price}</span>
                     </div>
-                    <button class="reserve-btn${isAvailable ? '' : ' disabled-btn'}" ${isAvailable ? '' : 'disabled'}>
+                    <button class="reserve-btn${isAvailable ? '' : ' disabled-btn'}"
+                            ${isAvailable ? '' : 'disabled'}
+                            data-area-id="${area.id}"
+                            onclick="redirectToReservation(${area.id})">
                         <i class="fas ${isAvailable ? 'fa-calendar-check' : 'fa-lock'}"></i>
                         ${buttonText}
                     </button>
@@ -370,7 +372,7 @@
     };
 
     // Pobieranie obszarów
-    fetch(`${apiUrl}/areas`, {
+    fetch(`${apiUrl.replace('/auth', '')}/areas`, {
         method: "GET",
         credentials: "include"
     })
