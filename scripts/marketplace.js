@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadProducts();
     setupEventListeners();
     await checkAuth(); // Sprawdź czy użytkownik jest zalogowany
+    updateUnreadBadge();
 });
 
 // ==================== ŁADOWANIE PRODUKTÓW ====================
@@ -452,6 +453,36 @@ async function checkAuth() {
         console.log('Użytkownik niezalogowany');
     }
 }
+// ==================== BADGE NIEPRZECZYTANYCH WIADOMOŚCI ====================
+async function updateUnreadBadge() {
+    try {
+        const response = await fetch(`${API_BASE}/chat/conversations`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const conversations = await response.json();
+            const totalUnread = conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
+
+            const badge = document.getElementById('unread-badge');
+            if (badge) {
+                if (totalUnread > 0) {
+                    badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Błąd pobierania nieprzeczytanych wiadomości:', error);
+    }
+}
+
+// Aktualizuj badge co 30 sekund
+setInterval(updateUnreadBadge, 30000);
+updateUnreadBadge(); // Początkowe wywołanie
 
 function updateUserInfo(user) {
     const welcomeMessage = document.querySelector('.welcome-message');
