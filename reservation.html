@@ -862,16 +862,13 @@
     }
 
     function displayAreaDetails(area) {
-        // Header
         document.getElementById('area-name').textContent = area.name || 'Obszar pszczelarski';
 
-        // Quick info
         document.getElementById('area-type-quick').textContent = area.type || '-';
         document.getElementById('area-size-quick').textContent = area.area ? area.area.toFixed(2) + ' ha' : '-';
         document.getElementById('area-hives-quick').textContent = area.maxHives || '-';
         document.getElementById('area-price-quick').textContent = area.pricePerDay ? area.pricePerDay.toFixed(2) + ' PLN' : '-';
 
-        // Details modal data
         document.getElementById('detail-name').textContent = area.name || '-';
         document.getElementById('detail-type').textContent = area.type || '-';
         document.getElementById('detail-size').textContent = area.area ? area.area.toFixed(2) + ' ha' : '-';
@@ -942,10 +939,9 @@
         const diffTime = endDate.getTime() - startDate.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        // Poprawne liczenie kosztu: cena_za_ul_za_dzień * liczba_uli * liczba_dni
-        const pricePerHivePerDay = currentArea.pricePerDay || 0;
-        const dailyTotalPrice = pricePerHivePerDay * hivesCount;
-        const totalCost = dailyTotalPrice * diffDays;
+        // Poprawne liczenie kosztu: cena_za_dzień * liczba_dni
+        const pricePerDay = currentArea.pricePerDay || 0;
+        const totalCost = pricePerDay * diffDays;
 
         const formatDisplayDate = (date) => {
             const day = String(date.getDate()).padStart(2, '0');
@@ -959,7 +955,7 @@
         document.getElementById('summary-date-range').textContent = dateRange;
         document.getElementById('summary-days').textContent = diffDays;
         document.getElementById('summary-hives').textContent = hivesCount;
-        document.getElementById('summary-daily').textContent = dailyTotalPrice.toFixed(2);
+        document.getElementById('summary-daily').textContent = pricePerDay.toFixed(2);
         document.getElementById('summary-total').textContent = totalCost.toFixed(2);
 
         const submitBtn = document.getElementById('submit-btn');
@@ -975,6 +971,7 @@
             submitBtn.disabled = false;
         }
     }
+
     document.getElementById('start-date').addEventListener('change', updateSummary);
     document.getElementById('end-date').addEventListener('change', updateSummary);
     document.getElementById('hives-count').addEventListener('input', updateSummary);
@@ -991,10 +988,8 @@
 
         const diffTime = endDate.getTime() - startDate.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        const pricePerHivePerDay = currentArea.pricePerDay || 0;
-        const dailyTotalPrice = pricePerHivePerDay * hivesCount;
-        const totalCost = dailyTotalPrice * diffDays;
+        const pricePerDay = currentArea.pricePerDay || 0;
+        const totalCost = pricePerDay * diffDays;
 
         const formatDisplayDate = (date) => {
             const day = String(date.getDate()).padStart(2, '0');
@@ -1008,7 +1003,7 @@
             `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
         document.getElementById('modal-days').textContent = diffDays + ' dni';
         document.getElementById('modal-hives').textContent = hivesCount + ' uli';
-        document.getElementById('modal-daily-price').textContent = dailyTotalPrice.toFixed(2) + ' PLN';
+        document.getElementById('modal-daily-price').textContent = pricePerDay.toFixed(2) + ' PLN';
         document.getElementById('modal-total-price').textContent = totalCost.toFixed(2);
 
         document.getElementById('confirmation-modal').classList.add('show');

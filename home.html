@@ -297,23 +297,18 @@
         return flowerColors[type.toLowerCase()] || flowerColors["unknown"];
     }
 
-    // ✨ NOWA FUNKCJA: Przekierowanie do strony rezerwacji
     function redirectToReservation(areaId) {
-        // Sprawdź czy użytkownik jest zalogowany
         const userJson = localStorage.getItem("currentUser");
 
         if (!userJson) {
-            // Jeśli nie zalogowany, przekieruj do logowania
             alert('Musisz być zalogowany, aby zarezerwować obszar.');
             window.location.href = 'login.html';
             return;
         }
 
-        // Przekieruj do strony rezerwacji z parametrem areaId
         window.location.href = `reservation.html?areaId=${areaId}`;
     }
 
-    // ✨ ZAKTUALIZOWANA FUNKCJA formatPopup z obsługą kliknięcia
     function formatPopup(area) {
         const isAvailable = area.status && area.status.toLowerCase() === "available";
         const availability = isAvailable
@@ -371,7 +366,6 @@
         malina: L.layerGroup()
     };
 
-    // Pobieranie obszarów
     fetch(`${apiUrl.replace('/auth', '')}/areas`, {
         method: "GET",
         credentials: "include"
