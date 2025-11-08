@@ -7,6 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/styles.css">
+    <script src="scripts/auth.js"></script>
+    <script src="scripts/profile-products.js"></script>
+
 
 </head>
 <body>
@@ -287,135 +290,36 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Twoje Produkty -->
-            <div class="tab-content" id="products">
-                <div class="dashboard-heading">
-                    <h1 class="dashboard-title">Twoje Produkty</h1>
-                    <a href="add-product.html" class="btn btn-accent">
-                        <i class="fas fa-plus"></i>
-                        Dodaj Nowy Produkt
-                    </a>
-                </div>
-                
-                <div class="card-container">
-                    <!-- Produkt 1 -->
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-header-title">Miód lipowy</div>
-                            <div class="card-header-status card-status-active">Dostępny</div>
-                        </div>
-                        <div class="product-image">
-                            <img src="assets/product1.jpg" alt="Miód lipowy">
-                        </div>
-                        <div class="card-body">
-                            <div class="card-property">
-                                <div class="card-property-label">Typ:</div>
-                                <div class="card-property-value">Miód</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Ilość:</div>
-                                <div class="card-property-value">15 słoików (30 kg)</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Cena:</div>
-                                <div class="card-property-value">35 PLN / słoik (0,9l)</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Data produkcji:</div>
-                                <div class="card-property-value">Lipiec 2024</div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-outline card-btn edit-product-btn" data-id="201">
-                                <i class="fas fa-edit"></i>
-                                Edytuj
-                            </button>
-                            <button class="btn btn-danger card-btn delete-product-btn" data-id="201">
-                                <i class="fas fa-trash-alt"></i>
-                                Usuń
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Produkt 2 -->
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-header-title">Miód gryczany</div>
-                            <div class="card-header-status card-status-active">Dostępny</div>
-                        </div>
-                        <div class="product-image">
-                            <img src="assets/product2.jpg" alt="Miód gryczany">
-                        </div>
-                        <div class="card-body">
-                            <div class="card-property">
-                                <div class="card-property-label">Typ:</div>
-                                <div class="card-property-value">Miód</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Ilość:</div>
-                                <div class="card-property-value">8 słoików (12 kg)</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Cena:</div>
-                                <div class="card-property-value">40 PLN / słoik (0,7l)</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Data produkcji:</div>
-                                <div class="card-property-value">Sierpień 2024</div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-outline card-btn edit-product-btn" data-id="202">
-                                <i class="fas fa-edit"></i>
-                                Edytuj
-                            </button>
-                            <button class="btn btn-danger card-btn delete-product-btn" data-id="202">
-                                <i class="fas fa-trash-alt"></i>
-                                Usuń
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Produkt 3 -->
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-header-title">Pyłek pszczeli</div>
-                            <div class="card-header-status card-status-inactive">Wyprzedany</div>
-                        </div>
-                        <div class="product-image">
-                            <img src="assets/product3.jpg" alt="Pyłek pszczeli">
-                        </div>
-                        <div class="card-body">
-                            <div class="card-property">
-                                <div class="card-property-label">Typ:</div>
-                                <div class="card-property-value">Pyłek</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Ilość:</div>
-                                <div class="card-property-value">0 opakowań (wyprzedany)</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Cena:</div>
-                                <div class="card-property-value">25 PLN / 100g</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Data produkcji:</div>
-                                <div class="card-property-value">Czerwiec 2024</div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-primary card-btn restock-product-btn" data-id="203">
-                                <i class="fas fa-plus-circle"></i>
-                                Uzupełnij
-                            </button>
-                            <button class="btn btn-danger card-btn delete-product-btn" data-id="203">
-                                <i class="fas fa-trash-alt"></i>
-                                Usuń
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        </div>
+
+        <!-- Twoje Produkty -->
+        <div class="tab-content" id="products">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Twoje Produkty</h1>
+                <a href="add-product.html" class="btn btn-accent">
+                    <i class="fas fa-plus"></i>
+                    Dodaj Nowy Produkt
+                </a>
+            </div>
+            <div class="card-container" id="my-products-container">
+                <!-- Produkty będą dynamicznie wstawiane tutaj -->
+            </div>
+        </div>
+
+        <!-- Kupione Produkty -->
+        <div class="tab-content" id="bought-products">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Kupione Produkty</h1>
+            </div>
+            <div class="card-container" id="bought-products-container">
+                <!-- Kupione produkty będą dynamicznie wstawiane tutaj -->
+            </div>
+        </div>
+
+        <!-- Edytuj Profil -->
+        <div class="tab-content" id="profile">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Edytuj Profil</h1>
             </div>
             
             <!-- Kupione Produkty -->
@@ -827,10 +731,110 @@
                             <option value="inny">Inny</option>
                         </select>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="edit-product-quantity">Ilość:</label>
-                        <input type="number" id="edit-product-quantity" name="quantity" min="0" placeholder="Np. 15">
+                </div>
+                <div class="form-group">
+                    <label for="edit-product-type">Typ produktu:</label>
+                    <select id="edit-product-type" name="type">
+                        <option value="HONEY">Miód</option>
+                        <option value="POLLEN">Pyłek pszczeli</option>
+                        <option value="WAX">Wosk</option>
+                        <option value="PROPOLIS">Propolis</option>
+                        <option value="BEE_BREAD">Pierzga</option>
+                        <option value="ROYAL_JELLY">Mleczko pszczele</option>
+                        <option value="OTHER">Inny</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-product-quantity">Ilość:</label>
+                    <input type="number" id="edit-product-quantity" name="quantity" min="0" placeholder="Np. 15">
+                </div>
+                <div class="form-group">
+                    <label for="edit-product-price">Cena (PLN):</label>
+                    <input type="number" id="edit-product-price" name="price" step="0.01" min="0" placeholder="Np. 35">
+                </div>
+                <div class="form-group">
+                    <label for="edit-product-description">Opis produktu:</label>
+                    <textarea id="edit-product-description" name="description" rows="4" placeholder="Opisz szczegółowo swój produkt, jego właściwości i zalety..."></textarea>
+                </div>
+                <input type="hidden" id="edit-product-id" name="productId" value="">
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline close-modal-btn">Anuluj</button>
+            <button class="btn btn-primary submit-edit-product-btn">Zapisz zmiany</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8080/api';
+
+    // Function to load user profile
+    async function loadUserProfile() {
+        try {
+            const response = await fetch(`${API_URL}/auth/user`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+
+                document.getElementById('firstname').value = user.firstname || '';
+                document.getElementById('lastname').value = user.lastname || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('phone').value = user.phone || '';
+
+                const userName = document.querySelector('.user-name');
+                if (userName) {
+                    userName.textContent = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Użytkownik';
+                }
+
+                document.getElementById('welcome-name').textContent = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Gość';
+                document.getElementById('user-email').textContent = user.email || 'nieznany@fizyka.com';
+                document.getElementById('user-status').textContent = user.role === 'BEEKEEPER' ? 'Zweryfikowany Pszczelarz' : 'Użytkownik';
+            } else if (response.status === 401) {
+                alert('Sesja wygasła. Zaloguj się ponownie.');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
+        } catch (error) {
+            console.error('Błąd:', error);
+        }
+    }
+
+    async function fetchMyAreas() {
+        try {
+            const response = await fetch(`${API_URL}/ownedAreas`, {
+                method: "GET",
+                credentials: "include"
+            });
+            const areas = await response.json();
+            const container = document.getElementById('my-areas-container');
+            container.innerHTML = '';
+
+            if (areas.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych obszarów. Dodaj pierwszy obszar!</p>';
+                return;
+            }
+
+            areas.forEach(area => {
+                const status = area.status === 'AVAILABLE' ? 'Aktywny' : 'Nieaktywny';
+                const statusClass = area.status === 'AVAILABLE' ? 'card-status-active' : 'card-status-inactive';
+                const availability = area.status === 'AVAILABLE'
+                    ? `Dostępny od ${formatDate(area.availableFrom)}`
+                    : `Nieaktywny od ${formatDate(area.availableFrom)}`;
+
+                const location = area.coordinates && area.coordinates.length > 0
+                    ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
+                    : 'Brak lokalizacji';
+
+                const card = `
+                <div class="card" data-area-id="${area.id || ''}">
+                    <div class="card-header">
+                        <div class="card-header-title">${area.name || 'Brak nazwy'}</div>
+                        <div class="card-header-status ${statusClass}">${status}</div>
                     </div>
                     
                     <div class="form-group">
@@ -931,14 +935,141 @@
                     closeAllModals();
                 }
             });
-        });
-        
-        // Review area button
-        document.querySelectorAll('.review-area-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const areaId = this.getAttribute('data-id');
-                document.getElementById('area-review-id').value = areaId;
-                openModal('area-review-modal');
+        } catch (error) {
+            console.error('Error fetching rented areas:', error);
+            document.getElementById('rented-areas-container').innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania wynajętych obszarów. Sprawdź połączenie z serwerem.</p>';
+        }
+    }
+
+    // Funkcja do tłumaczenia kategorii produktu
+    function translateProductCategory(category) {
+        const translations = {
+            'HONEY': 'Miód',
+            'POLLEN': 'Pyłek pszczeli',
+            'WAX': 'Wosk pszczeli',
+            'PROPOLIS': 'Propolis',
+            'BEE_BREAD': 'Pierzga',
+            'ROYAL_JELLY': 'Mleczko pszczele',
+            'OTHER': 'Inny'
+        };
+        return translations[category] || category;
+    }
+
+    // Funkcja do pobierania produktów użytkownika
+    async function fetchMyProducts() {
+        try {
+            const response = await fetch(`${API_URL}/products/my`, {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const products = await response.json();
+            const container = document.getElementById('my-products-container');
+            container.innerHTML = '';
+
+            if (products.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych produktów. Dodaj pierwszy produkt!</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const status = product.available ? 'Dostępny' : 'Wyprzedany';
+                const statusClass = product.available ? 'card-status-active' : 'card-status-inactive';
+                const categoryName = translateProductCategory(product.category);
+
+                const card = `
+                <div class="card" data-product-id="${product.id || ''}">
+                    <div class="card-header">
+                        <div class="card-header-title">${product.name || 'Brak nazwy'}</div>
+                        <div class="card-header-status ${statusClass}">${status}</div>
+                    </div>
+                    <div class="area-preview">
+                        <img src="${product.imageBase64 ? `data:image/jpeg;base64,${product.imageBase64}` : 'assets/default-product.jpg'}"
+                             alt="Zdjęcie produktu"
+                             onerror="this.src='assets/default-product.jpg'">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-property">
+                            <div class="card-property-label">Typ:</div>
+                            <div class="card-property-value">${categoryName}</div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Ilość:</div>
+                            <div class="card-property-value">${product.stock || 0} szt.</div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Cena:</div>
+                            <div class="card-property-value">${(product.price || 0).toFixed(2)} PLN</div>
+                        </div>
+                        ${product.flowerOrigin ? `
+                        <div class="card-property">
+                            <div class="card-property-label">Pochodzenie:</div>
+                            <div class="card-property-value">${product.flowerOrigin}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-outline card-btn edit-product-btn" data-product='${JSON.stringify(product).replace(/'/g, "&apos;")}'>
+                            <i class="fas fa-edit"></i> Edytuj
+                        </button>
+                        <button class="btn btn-danger card-btn delete-product-btn" data-id="${product.id || ''}">
+                            <i class="fas fa-trash-alt"></i> Usuń
+                        </button>
+                    </div>
+                </div>
+                `;
+                container.insertAdjacentHTML('beforeend', card);
+            });
+
+            // Event listenery dla przycisków edycji produktu
+            document.querySelectorAll('.edit-product-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productData = this.getAttribute('data-product');
+                    const product = JSON.parse(productData);
+
+                    console.log('Product data:', product);
+
+                    document.getElementById('edit-product-id').value = product.id || '';
+                    document.getElementById('edit-product-title').value = product.name || '';
+                    document.getElementById('edit-product-status-switch').checked = product.available;
+                    document.getElementById('edit-product-type').value = product.category || 'OTHER';
+                    document.getElementById('edit-product-quantity').value = product.stock || 0;
+                    document.getElementById('edit-product-price').value = product.price || 0;
+                    document.getElementById('edit-product-description').value = product.description || '';
+                    document.getElementById('edit-product-current-image').src = product.imageBase64
+                        ? `data:image/jpeg;base64,${product.imageBase64}`
+                        : 'assets/default-product.jpg';
+
+                    openModal('edit-product-modal');
+                });
+            });
+
+            // Event listenery dla przycisków usuwania produktu
+            document.querySelectorAll('.delete-product-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const itemId = this.getAttribute('data-id');
+                    document.getElementById('delete-item-id').value = itemId;
+                    document.getElementById('delete-item-type').value = 'product';
+                    openModal('delete-confirm-modal');
+                });
+            });
+
+        } catch (error) {
+            console.error('Error fetching my products:', error);
+            document.getElementById('my-products-container').innerHTML =
+                '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania produktów. Sprawdź połączenie z serwerem.</p>';
+        }
+    }
+
+    document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.sidebar-nav-item').forEach(i => {
+                i.classList.remove('active');
             });
         });
         
@@ -949,6 +1080,20 @@
                 document.getElementById('product-review-id').value = productId;
                 openModal('product-review-modal');
             });
+            const tabId = this.getAttribute('data-tab');
+            if (tabId === 'profile') {
+                window.location.href = 'edit-profile.html';
+            } else {
+                document.getElementById(tabId).classList.add('active');
+
+                // Załaduj dane dla odpowiedniej zakładki
+                if (tabId === 'products') {
+                    fetchMyProducts();
+                }
+                if (tabId === 'bought-products') {
+                    loadMyPurchases();
+                }
+            }
         });
         
         // Delete buttons
@@ -1021,30 +1166,15 @@
             }
         });
 
-        // NOWA FUNKCJONALNOŚĆ: Obsługa przycisku edycji obszaru
-        document.querySelectorAll('.edit-area-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const areaId = this.getAttribute('data-id');
-                document.getElementById('edit-area-id').value = areaId;
-                
-                // Znajdź kartę z danym obszarem
-                const areaCard = this.closest('.card');
-                
-                // Pobierz dane z karty
-                const areaTitle = areaCard.querySelector('.card-header-title').textContent;
-                const areaStatus = areaCard.querySelector('.card-header-status').classList.contains('card-status-active');
-                const areaSize = areaCard.querySelector('.card-property-value').textContent.split(' ')[0];
-                const areaLocation = areaCard.querySelectorAll('.card-property-value')[1].textContent;
-                const areaFlowers = areaCard.querySelectorAll('.card-property-value')[2].textContent;
-                const areaAvailability = areaCard.querySelectorAll('.card-property-value')[3].textContent;
-                const areaImageSrc = areaCard.querySelector('.area-preview img').src;
-                
-                // Przygotuj datę zakończenia - przykładowe przetłumaczenie z tekstu na datę
-                let dateTo = '';
-                const availabilityEndMatch = areaAvailability.match(/do (\d{2}\.\d{2}\.\d{4})/);
-                if (availabilityEndMatch) {
-                    const dateParts = availabilityEndMatch[1].split('.');
-                    dateTo = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+        if (itemType === 'area') {
+            try {
+                const response = await fetch(`${API_URL}/deleteArea/${itemId}`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    alert(`Obszar #${itemId} został usunięty!`);
+                    fetchMyAreas();
                 } else {
                     // Jeśli nie ma "do" w tekście, spróbuj użyć innego formatu
                     const dateMatch = areaAvailability.match(/(\d{2}\.\d{2}\.\d{4})/);
@@ -1053,29 +1183,64 @@
                         dateTo = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
                     }
                 }
-                
-                // Przykładowe dane dla nowych pól
-                const maxHives = 15; // Przykładowa wartość
-                const pricePerHive = 5.50; // Przykładowa wartość
-                const description = "Obszar znajduje się w malowniczej okolicy, z dala od zanieczyszczeń i dróg. Idealne warunki dla pszczół i produkcji zdrowego miodu."; // Przykładowy opis
-                
-                // Wypełnij formularz danymi
-                document.getElementById('edit-area-title').value = areaTitle;
-                document.getElementById('edit-area-status-switch').checked = areaStatus;
-                document.getElementById('edit-area-size-display').textContent = areaSize + ' ha';
-                document.getElementById('edit-area-location-display').textContent = areaLocation;
-                document.getElementById('edit-area-size').value = areaSize;
-                document.getElementById('edit-area-location').value = areaLocation;
-                document.getElementById('edit-area-flowers').value = areaFlowers;
-                document.getElementById('edit-area-date-to').value = dateTo;
-                document.getElementById('edit-area-max-hives').value = maxHives;
-                document.getElementById('edit-area-price').value = pricePerHive;
-                document.getElementById('edit-area-description').value = description;
-                document.getElementById('edit-area-current-image').src = areaImageSrc;
-                
-                // Otwórz modal
-                openModal('edit-area-modal');
-            });
+            } catch (error) {
+                console.error('Error deleting area:', error);
+                alert('Nie udało się usunąć obszaru. Sprawdź połączenie z serwerem.');
+            }
+        } else if (itemType === 'product') {
+            try {
+                const response = await fetch(`${API_URL}/products/${itemId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    alert(`Produkt #${itemId} został usunięty!`);
+                    fetchMyProducts();
+                } else {
+                    const errorData = await response.json();
+                    alert(`Błąd podczas usuwania produktu: ${errorData.error || 'Nieznany błąd'}`);
+                    console.error('Delete product error:', response.status);
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                alert('Nie udało się usunąć produktu. Sprawdź połączenie z serwerem.');
+            }
+        }
+
+        closeAllModals();
+    });
+
+    document.getElementById('edit-area-image').addEventListener('change', function() {
+        const fileName = this.files[0] ? this.files[0].name : 'Nie wybrano pliku';
+        this.closest('.image-upload-controls').querySelector('.selected-file-name').textContent = fileName;
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('edit-area-current-image').src = e.target.result;
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    document.getElementById('edit-product-image').addEventListener('change', function() {
+        const fileName = this.files[0] ? this.files[0].name : 'Nie wybrano pliku';
+        this.closest('.image-upload-controls').querySelector('.selected-file-name').textContent = fileName;
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('edit-product-current-image').src = e.target.result;
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    // Function to convert file to Base64
+    function toBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(',')[1]); // Get Base64 string without prefix
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
         });
 
         // NOWA FUNKCJONALNOŚĆ: Obsługa przycisku edycji produktu
@@ -1128,14 +1293,75 @@
             // Normalnie wysłałbyś dane do serwera
             alert('Obszar został zaktualizowany!');
             closeAllModals();
-        });
+            fetchMyAreas();
+        } catch (error) {
+            console.error('Error updating area:', error);
+            alert('Nie udało się zaktualizować obszaru. Sprawdź konsolę dla szczegółów.');
+        }
+    });
 
-        // NOWA FUNKCJONALNOŚĆ: Zapisywanie zmian w produkcie
-        document.querySelector('.submit-edit-product-btn').addEventListener('click', function() {
-            // Normalnie wysłałbyś dane do serwera
+    // Handle edit product submission
+    document.querySelector('.submit-edit-product-btn').addEventListener('click', async function(e) {
+        e.preventDefault();
+
+        const productId = document.getElementById('edit-product-id').value;
+        let imgBase64 = document.getElementById('edit-product-current-image').src.includes('base64')
+            ? document.getElementById('edit-product-current-image').src.split(',')[1]
+            : null;
+
+        const imageFile = document.getElementById('edit-product-image').files[0];
+        if (imageFile) {
+            try {
+                imgBase64 = await toBase64(imageFile);
+            } catch (error) {
+                console.error('Error converting image to Base64:', error);
+                alert('Błąd podczas przetwarzania zdjęcia. Spróbuj ponownie.');
+                return;
+            }
+        }
+
+        const updateProductDTO = {
+            id: parseInt(productId),
+            name: document.getElementById('edit-product-title').value,
+            category: document.getElementById('edit-product-type').value,
+            stock: parseInt(document.getElementById('edit-product-quantity').value) || 0,
+            price: parseFloat(document.getElementById('edit-product-price').value) || 0,
+            description: document.getElementById('edit-product-description').value,
+            imgBase64: imgBase64,
+            available: document.getElementById('edit-product-status-switch').checked
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/products`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(updateProductDTO)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Błąd podczas aktualizacji produktu');
+            }
+
             alert('Produkt został zaktualizowany!');
             closeAllModals();
-        });
-    </script>
+            fetchMyProducts();
+        } catch (error) {
+            console.error('Error updating product:', error);
+            alert(`Nie udało się zaktualizować produktu: ${error.message}`);
+        }
+    });
+
+    // Load data on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+        await loadUserProfile();
+        fetchMyAreas();
+        fetchRentedAreas();
+        fetchMyProducts();
+    });
+</script>
 </body>
 </html>
