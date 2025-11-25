@@ -9,8 +9,6 @@
     <link rel="stylesheet" href="styles/styles.css">
     <script src="scripts/auth.js"></script>
     <script src="scripts/profile-products.js"></script>
-
-
 </head>
 <body>
 <!-- Header -->
@@ -115,74 +113,9 @@
                 <!-- Kupione produkty będą dynamicznie wstawiane tutaj -->
             </div>
         </div>
-
-        <!-- Edytuj Profil -->
-        <div class="tab-content" id="profile">
-            <div class="dashboard-heading">
-                <h1 class="dashboard-title">Edytuj Profil</h1>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <form id="profile-form">
-                        <div class="form-section">
-                            <h3 class="form-section-title">Dane osobowe</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="firstname">Imię</label>
-                                    <input type="text" id="firstname" name="firstname" value="" readonly>
-                                    <small class="field-info">Pole tylko do odczytu</small>
-                                </div>
-                                <div class="form-group">
-                                    <label for="lastname">Nazwisko</label>
-                                    <input type="text" id="lastname" name="lastname" value="" readonly>
-                                    <small class="field-info">Pole tylko do odczytu</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-section">
-                            <h3 class="form-section-title">Dane kontaktowe</h3>
-                            <div class="form-group">
-                                <label for="phone">Numer telefonu</label>
-                                <input type="tel" id="phone" name="phone" value="">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Adres e-mail</label>
-                                <input type="email" id="email" name="email" value="" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="address">Adres</label>
-                                <input type="text" id="address" name="address" value="">
-                            </div>
-                        </div>
-                        <div class="form-section">
-                            <h3 class="form-section-title">Zmiana hasła</h3>
-                            <div class="form-group">
-                                <label for="current-password">Aktualne hasło</label>
-                                <input type="password" id="current-password" name="current-password" placeholder="Wprowadź aktualne hasło">
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="new-password">Nowe hasło</label>
-                                    <input type="password" id="new-password" name="new-password" placeholder="Wprowadź nowe hasło">
-                                </div>
-                                <div class="form-group">
-                                    <label for="confirm-new-password">Potwierdź nowe hasło</label>
-                                    <input type="password" id="confirm-new-password" name="confirm-new-password" placeholder="Potwierdź nowe hasło">
-                                </div>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary save-btn">
-                            <i class="fas fa-save"></i>
-                            Zapisz zmiany
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
-<!-- Modals -->
 <!-- Modal opinii dla obszaru -->
 <div class="modal-overlay" id="area-review-modal">
     <div class="modal">
@@ -198,20 +131,16 @@
                         <div class="star active" data-value="1"><i class="fas fa-star"></i></div>
                         <div class="star active" data-value="2"><i class="fas fa-star"></i></div>
                         <div class="star active" data-value="3"><i class="fas fa-star"></i></div>
-                        <div class="star" data-value="4"><i class="fas fa-star"></i></div>
-                        <div class="star" data-value="5"><i class="fas fa-star"></i></div>
+                        <div class="star active" data-value="4"><i class="fas fa-star"></i></div>
+                        <div class="star active" data-value="5"><i class="fas fa-star"></i></div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="area-review-title">Tytuł opinii:</label>
-                    <input type="text" id="area-review-title" name="title" placeholder="Np. Doskonała lokalizacja dla pszczół">
-                </div>
-                <div class="form-group">
                     <label for="area-review-content">Twoja opinia:</label>
-                    <textarea id="area-review-content" name="content" rows="5" placeholder="Opisz swoje doświadczenia z tym obszarem..."></textarea>
+                    <textarea id="area-review-content" name="content" rows="5" placeholder="Opisz swoje doświadczenia z tym obszarem..." required></textarea>
                 </div>
-                <input type="hidden" id="area-review-id" name="areaId" value="">
-                <input type="hidden" id="area-review-rating" name="rating" value="3">
+                <input type="hidden" id="area-review-reservation-id" name="reservationId" value="">
+                <input type="hidden" id="area-review-rating" name="rating" value="5">
             </form>
         </div>
         <div class="modal-footer">
@@ -237,19 +166,16 @@
                         <div class="star active" data-value="2"><i class="fas fa-star"></i></div>
                         <div class="star active" data-value="3"><i class="fas fa-star"></i></div>
                         <div class="star active" data-value="4"><i class="fas fa-star"></i></div>
-                        <div class="star" data-value="5"><i class="fas fa-star"></i></div>
+                        <div class="star active" data-value="5"><i class="fas fa-star"></i></div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="product-review-title">Tytuł opinii:</label>
-                    <input type="text" id="product-review-title" name="title" placeholder="Np. Najlepszy miód jaki jadłem">
-                </div>
-                <div class="form-group">
                     <label for="product-review-content">Twoja opinia:</label>
-                    <textarea id="product-review-content" name="content" rows="5" placeholder="Opisz swoje wrażenia z tego produktu..."></textarea>
+                    <textarea id="product-review-content" name="content" rows="5" placeholder="Opisz swoje wrażenia z tego produktu..." required></textarea>
                 </div>
+                <input type="hidden" id="product-review-order-id" name="orderId" value="">
                 <input type="hidden" id="product-review-id" name="productId" value="">
-                <input type="hidden" id="product-review-rating" name="rating" value="4">
+                <input type="hidden" id="product-review-rating" name="rating" value="5">
             </form>
         </div>
         <div class="modal-footer">
@@ -278,7 +204,7 @@
     </div>
 </div>
 
-<!-- NOWY MODAL: Edycja obszaru -->
+<!-- Modal edycji obszaru -->
 <div class="modal-overlay" id="edit-area-modal">
     <div class="modal">
         <div class="modal-header">
@@ -287,7 +213,6 @@
         </div>
         <div class="modal-body">
             <form id="edit-area-form">
-                <!-- Zdjęcie obszaru na górze -->
                 <div class="form-group image-upload-top">
                     <label>Zdjęcie obszaru:</label>
                     <div class="image-preview-container">
@@ -362,7 +287,7 @@
     </div>
 </div>
 
-<!-- NOWY MODAL: Edycja produktu -->
+<!-- Modal edycji produktu -->
 <div class="modal-overlay" id="edit-product-modal">
     <div class="modal">
         <div class="modal-header">
@@ -371,7 +296,6 @@
         </div>
         <div class="modal-body">
             <form id="edit-product-form">
-                <!-- Zdjęcie produktu na górze -->
                 <div class="form-group image-upload-top">
                     <label>Zdjęcie produktu:</label>
                     <div class="image-preview-container">
@@ -436,6 +360,104 @@
     </div>
 </div>
 
+<style>
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-badge.reviewed {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .stars-container {
+        display: flex;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .star {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .star.active {
+        color: #FFD700;
+    }
+
+    .star:hover {
+        transform: scale(1.1);
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal {
+        background: white;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .modal-close:hover {
+        color: #333;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+</style>
 <script>
     const API_URL = 'http://localhost:8080/api';
 

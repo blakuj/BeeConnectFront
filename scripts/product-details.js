@@ -3,7 +3,7 @@
 const API_BASE = 'http://localhost:8080/api';
 let currentProduct = null;
 let currentUser = null;
-
+let productReviews = [];
 // ==================== INICJALIZACJA ====================
 document.addEventListener('DOMContentLoaded', async function() {
     await checkAuth();
@@ -35,6 +35,7 @@ async function loadProductDetails() {
 
         currentProduct = await response.json();
         displayProductDetails();
+        await loadProductReviews();
         await loadSimilarProducts();
 
     } catch (error) {
@@ -44,7 +45,15 @@ async function loadProductDetails() {
         showLoading(false);
     }
 }
-
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pl-PL', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
 // ==================== WYŚWIETLANIE SZCZEGÓŁÓW ====================
 function displayProductDetails() {
     const container = document.querySelector('.product-details-container');
@@ -72,12 +81,12 @@ function displayProductDetails() {
                 <div class="product-category-badge">${categoryName}</div>
                 <h1 class="product-name">${currentProduct.name}</h1>
                 
-                <div class="product-rating-section">
+ <div class="product-rating-section">
                     ${currentProduct.reviewCount > 0 ? `
                         <div class="rating-stars">
                             ${renderStars(currentProduct.rating)}
                             <span class="rating-text">${currentProduct.rating.toFixed(1)}/5</span>
-                            <span class="review-count">(${currentProduct.reviewCount} opinii)</span>
+                            <span class="review-count">(${currentProduct.reviewCount} ${currentProduct.reviewCount === 1 ? 'opinia' : 'opinii'})</span>
                         </div>
                     ` : '<p class="no-reviews">Brak opinii</p>'}
                 </div>
@@ -180,6 +189,23 @@ function displayProductDetails() {
             <h2>Opis produktu</h2>
             <p>${currentProduct.description || 'Brak opisu produktu.'}</p>
         </div>
+             <!-- Zakładki: Opinie -->
+        ${currentProduct.reviewCount > 0 ? `
+            <div class="product-tabs">
+                <div class="tabs-header">
+                    <button class="tab-button active" data-tab="reviews">
+                        Opinie (${currentProduct.reviewCount})
+                    </button>
+                </div>
+                <div class="tabs-content">
+                    <div class="tab-pane active" id="reviews-tab">
+                        <div id="reviews-container">
+                            <!-- Opinie będą załadowane tutaj -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        ` : ''}
     `;
 
     // Aktualizuj ilość przy zmianie
@@ -467,6 +493,63 @@ function showError(message) {
     }
 }
 
+async function loadProductReviews() {
+    if (!currentProduct || currentProduct.reviewCount === 0) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/reviews/products/product/${currentProduct.id}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) return;
+
+        productReviews = await response.json();
+        displayProductReviews();
+
+    } catch (error) {
+        console.error('Błąd ładowania opinii:', error);
+    }
+}
+
+function displayProductReviews() {
+    const container = document.getElementById('reviews-container');
+    if (!container || productReviews.length === 0) return;
+
+    container.innerHTML = `
+        <div class="reviews-summary">
+            <div class="rating-overview">
+                <div class="rating-big">${currentProduct.rating.toFixed(1)}</div>
+                <div class="rating-stars-big">${renderStars(currentProduct.rating)}</div>
+                <div class="rating-count">Na podstawie ${currentProduct.reviewCount} ${currentProduct.reviewCount === 1 ? 'opinii' : 'opinii'}</div>
+            </div>
+        </div>
+        <div class="reviews-list">
+            ${productReviews.map(review => `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div>
+                                <div class="reviewer-name">${review.reviewerFirstname} ${review.reviewerLastname}</div>
+                                <div class="review-date">${formatDate(review.createdAt)}</div>
+                            </div>
+                        </div>
+                        <div class="review-rating">
+                            ${renderStars(review.rating)}
+                        </div>
+                    </div>
+                    <div class="review-content">
+                        <p>${review.comment}</p>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
 function showNotification(message, type = 'info') {
     // Usuń poprzednie powiadomienie jeśli istnieje
     const existing = document.querySelector('.notification-toast');
@@ -615,6 +698,186 @@ style.textContent = `
         background: #f8f9fa;
         border-radius: 6px;
         text-align: center;
+    }
+    
+    /* ==================== GWIAZDKI ==================== */
+    .star-filled {
+        color: #FFD700;
+    }
+    
+    .star-empty {
+        color: #ddd;
+    }
+    
+    .rating-stars {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin: 1rem 0;
+    }
+    
+    .rating-stars i {
+        font-size: 1.2rem;
+    }
+    
+    .rating-text {
+        margin-left: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .review-count {
+        color: #666;
+        font-size: 0.95rem;
+    }
+    
+    .no-reviews {
+        color: #999;
+        font-style: italic;
+        margin: 1rem 0;
+    }
+    
+    /* ==================== ZAKŁADKI ==================== */
+    .product-tabs {
+        margin-top: 3rem;
+        border-top: 2px solid #eee;
+        padding-top: 2rem;
+    }
+    
+    .tabs-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #eee;
+    }
+    
+    .tab-button {
+        padding: 1rem 2rem;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .tab-button.active {
+        color: #F2A900;
+        border-bottom-color: #F2A900;
+    }
+    
+    .tab-pane {
+        display: none;
+    }
+    
+    .tab-pane.active {
+        display: block;
+    }
+    
+    /* ==================== OPINIE ==================== */
+    .reviews-summary {
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    
+    .rating-overview {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .rating-big {
+        font-size: 4rem;
+        font-weight: 700;
+        color: #333;
+    }
+    
+    .rating-stars-big {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .rating-stars-big i {
+        font-size: 2rem;
+    }
+    
+    .rating-count {
+        color: #666;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .reviews-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .review-item {
+        padding: 1.5rem;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        background: white;
+    }
+    
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .reviewer-info {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .reviewer-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .reviewer-avatar i {
+        font-size: 2rem;
+        color: #999;
+    }
+    
+    .reviewer-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .review-date {
+        color: #999;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+    
+    .review-rating {
+        display: flex;
+        gap: 0.2rem;
+    }
+    
+    .review-rating i {
+        font-size: 1rem;
+    }
+    
+    .review-content {
+        color: #666;
+        line-height: 1.6;
     }
 `;
 document.head.appendChild(style);

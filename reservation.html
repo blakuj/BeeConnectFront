@@ -547,6 +547,198 @@
             font-weight: 600;
             color: var(--secondary);
         }
+        /* ==================== GWIAZDKI I OPINIE ==================== */
+        .area-rating-section {
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .star-filled {
+            color: #FFD700;
+        }
+
+        .star-empty {
+            color: #ddd;
+        }
+
+        .rating-stars {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            justify-content: center;
+        }
+
+        .rating-stars i {
+            font-size: 1.2rem;
+        }
+
+        .rating-text {
+            margin-left: 0.5rem;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .review-count {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .no-reviews {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* ZAKŁADKI */
+        .area-tabs {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-button {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* OPINIE */
+        .reviews-summary {
+            padding: 2rem;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .rating-overview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rating-big {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .rating-stars-big {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .rating-stars-big i {
+            font-size: 2rem;
+        }
+
+        .rating-count {
+            color: #666;
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .review-item {
+            padding: 1.5rem;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .reviewer-info {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .reviewer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reviewer-avatar i {
+            font-size: 2rem;
+            color: #999;
+        }
+
+        .reviewer-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .review-date {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .review-rating {
+            display: flex;
+            gap: 0.2rem;
+        }
+
+        .review-rating i {
+            font-size: 1rem;
+        }
+
+        .review-content {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .review-content p {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -573,7 +765,9 @@
         <div class="area-image" id="area-image">
             <i class="fas fa-image area-image-placeholder"></i>
         </div>
-
+        <div class="area-rating-section" id="area-rating-section" style="display: none;">
+            <!-- Zostanie wypełnione przez JavaScript -->
+        </div>
         <div class="area-quick-info">
             <div class="quick-info-item">
                 <div class="quick-info-label">Typ</div>
@@ -674,6 +868,21 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="area-tabs" id="area-tabs-section" style="display: none;">
+    <div class="tabs-header">
+        <button class="tab-button active" data-tab="reviews">
+            Opinie (<span id="reviews-count-tab">0</span>)
+        </button>
+    </div>
+    <div class="tabs-content">
+        <div class="tab-pane active" id="reviews-tab">
+            <div id="reviews-container">
+                <!-- Opinie będą załadowane tutaj -->
+            </div>
+        </div>
     </div>
 </div>
 
@@ -792,6 +1001,7 @@
     let currentArea = null;
     let userBalance = 0;
     let areaId = null;
+    let areaReviews = [];
 
     const urlParams = new URLSearchParams(window.location.search);
     areaId = urlParams.get('areaId');
@@ -808,9 +1018,124 @@
                 </div>
             `;
     }
+    // ==================== ŁADOWANIE I WYŚWIETLANIE OPINII ====================
+    async function loadAreaReviews() {
+        if (!currentArea || !currentArea.reviewCount || currentArea.reviewCount === 0) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/reviews/areas/area/${currentArea.id}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!response.ok) return;
+
+            areaReviews = await response.json();
+            displayAreaRating();
+            displayAreaReviews();
+
+        } catch (error) {
+            console.error('Błąd ładowania opinii:', error);
+        }
+    }
+
+    function displayAreaRating() {
+        const ratingSection = document.getElementById('area-rating-section');
+        if (!ratingSection || !currentArea.reviewCount || currentArea.reviewCount === 0) return;
+
+        ratingSection.style.display = 'block';
+        ratingSection.innerHTML = `
+            <div class="rating-stars">
+                ${renderStars(currentArea.averageRating)}
+                <span class="rating-text">${currentArea.averageRating.toFixed(1)}/5</span>
+                <span class="review-count">(${currentArea.reviewCount} ${currentArea.reviewCount === 1 ? 'opinia' : 'opinii'})</span>
+            </div>
+        `;
+    }
+
+    function displayAreaReviews() {
+        const tabsSection = document.getElementById('area-tabs-section');
+        const container = document.getElementById('reviews-container');
+
+        if (!container || !areaReviews || areaReviews.length === 0) return;
+
+        // Pokaż zakładkę
+        tabsSection.style.display = 'block';
+        document.getElementById('reviews-count-tab').textContent = currentArea.reviewCount;
+
+        container.innerHTML = `
+            <div class="reviews-summary">
+                <div class="rating-overview">
+                    <div class="rating-big">${currentArea.averageRating.toFixed(1)}</div>
+                    <div class="rating-stars-big">${renderStars(currentArea.averageRating)}</div>
+                    <div class="rating-count">Na podstawie ${currentArea.reviewCount} ${currentArea.reviewCount === 1 ? 'opinii' : 'opinii'}</div>
+                </div>
+            </div>
+            <div class="reviews-list">
+                ${areaReviews.map(review => `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div>
+                                    <div class="reviewer-name">${review.reviewerFirstname} ${review.reviewerLastname}</div>
+                                    <div class="review-date">${formatDate(review.createdAt)}</div>
+                                </div>
+                            </div>
+                            <div class="review-rating">
+                                ${renderStars(review.rating)}
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <p>${review.comment}</p>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    loadData();
 
     function goBack() {
         window.history.back();
+    }
+    function renderStars(rating) {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+        let starsHTML = '';
+
+        // Pełne gwiazdki
+        for (let i = 0; i < fullStars; i++) {
+            starsHTML += '<i class="fas fa-star star-filled"></i>';
+        }
+
+        // Półgwiazdka
+        if (hasHalfStar) {
+            starsHTML += '<i class="fas fa-star-half-alt star-filled"></i>';
+        }
+
+        // Puste gwiazdki
+        for (let i = 0; i < emptyStars; i++) {
+            starsHTML += '<i class="far fa-star star-empty"></i>';
+        }
+
+        return starsHTML;
+    }
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pl-PL', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
     }
 
     async function loadData() {
@@ -849,6 +1174,7 @@
             }
 
             displayAreaDetails(currentArea);
+            await loadAreaReviews();
             initializeForm();
 
             document.getElementById('loading').style.display = 'none';
