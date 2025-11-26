@@ -34,6 +34,10 @@ async function loadProductDetails() {
         }
 
         currentProduct = await response.json();
+        // Upewniamy się, że ratingi mają domyślne wartości 0, jeśli brakuje ich w odpowiedzi z API
+        currentProduct.rating = currentProduct.rating || 0;
+        currentProduct.reviewCount = currentProduct.reviewCount || 0;
+
         displayProductDetails();
         await loadProductReviews();
         await loadSimilarProducts();
@@ -81,14 +85,14 @@ function displayProductDetails() {
                 <div class="product-category-badge">${categoryName}</div>
                 <h1 class="product-name">${currentProduct.name}</h1>
                 
- <div class="product-rating-section">
+                <div class="product-rating-section">
                     ${currentProduct.reviewCount > 0 ? `
                         <div class="rating-stars">
                             ${renderStars(currentProduct.rating)}
                             <span class="rating-text">${currentProduct.rating.toFixed(1)}/5</span>
                             <span class="review-count">(${currentProduct.reviewCount} ${currentProduct.reviewCount === 1 ? 'opinia' : 'opinii'})</span>
                         </div>
-                    ` : '<p class="no-reviews">Brak opinii</p>'}
+                    ` : '<p class="no-reviews" style="margin: 0;">Brak opinii</p>'}
                 </div>
 
                 <div class="product-price-section">
@@ -119,19 +123,19 @@ function displayProductDetails() {
                     ` : ''}
                 </div>
 
-<div class="seller-info">
-    <div class="seller-info-header">
-        <i class="fas fa-user-circle"></i>
-        <span>Sprzedawca</span>
-    </div>
-    <div class="seller-info-content">
-        <div class="seller-name">${currentProduct.sellerFirstname} ${currentProduct.sellerLastname}</div>
-        <div class="seller-email">
-            <i class="fas fa-envelope"></i>
-            <span>${currentProduct.sellerEmail}</span>
-        </div>
-    </div>
-</div>
+                <div class="seller-info">
+                    <div class="seller-info-header">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Sprzedawca</span>
+                    </div>
+                    <div class="seller-info-content">
+                        <div class="seller-name">${currentProduct.sellerFirstname} ${currentProduct.sellerLastname}</div>
+                        <div class="seller-email">
+                            <i class="fas fa-envelope"></i>
+                            <span>${currentProduct.sellerEmail}</span>
+                        </div>
+                    </div>
+                </div>
 
                 ${canBuy ? `
                     <div class="purchase-section">
@@ -155,10 +159,10 @@ function displayProductDetails() {
                             <label for="buyer-notes">Uwagi dla sprzedawcy (opcjonalnie):</label>
                             <textarea id="buyer-notes" class="form-control" rows="3" placeholder="Np. proszę o kontakt przed dostawą"></textarea>
                         </div>
-<button class="btn btn-outline btn-block" onclick="contactSeller()" style="margin-bottom: 15px;">
-    <i class="fas fa-comments"></i>
-    Skontaktuj się ze sprzedawcą
-</button>
+                        <button class="btn btn-outline btn-block" onclick="contactSeller()" style="margin-bottom: 15px;">
+                            <i class="fas fa-comments"></i>
+                            Skontaktuj się ze sprzedawcą
+                        </button>
                         <button class="btn btn-primary btn-large btn-buy" onclick="buyProduct()">
                             <i class="fas fa-shopping-cart"></i> Kup teraz
                         </button>
@@ -189,8 +193,7 @@ function displayProductDetails() {
             <h2>Opis produktu</h2>
             <p>${currentProduct.description || 'Brak opisu produktu.'}</p>
         </div>
-             <!-- Zakładki: Opinie -->
-        ${currentProduct.reviewCount > 0 ? `
+             ${currentProduct.reviewCount > 0 ? `
             <div class="product-tabs">
                 <div class="tabs-header">
                     <button class="tab-button active" data-tab="reviews">
@@ -200,8 +203,7 @@ function displayProductDetails() {
                 <div class="tabs-content">
                     <div class="tab-pane active" id="reviews-tab">
                         <div id="reviews-container">
-                            <!-- Opinie będą załadowane tutaj -->
-                        </div>
+                            </div>
                     </div>
                 </div>
             </div>
@@ -424,13 +426,13 @@ function renderStars(rating) {
     let starsHTML = '';
 
     for (let i = 0; i < fullStars; i++) {
-        starsHTML += '<i class="fas fa-star"></i>';
+        starsHTML += '<i class="fas fa-star star-filled"></i>';
     }
     if (hasHalfStar) {
-        starsHTML += '<i class="fas fa-star-half-alt"></i>';
+        starsHTML += '<i class="fas fa-star-half-alt star-filled"></i>';
     }
     for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
-        starsHTML += '<i class="far fa-star"></i>';
+        starsHTML += '<i class="far fa-star star-empty"></i>';
     }
 
     return starsHTML;
@@ -713,7 +715,7 @@ style.textContent = `
         display: flex;
         align-items: center;
         gap: 0.3rem;
-        margin: 1rem 0;
+        /* Usuwamy zbędny margin z tego komponentu, bo jest używany w różnych miejscach */
     }
     
     .rating-stars i {
