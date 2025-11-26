@@ -475,7 +475,10 @@ function setupEventListeners() {
                 await fetchMyAreas();
             } else if (tabId === 'rented-areas') {
                 await fetchRentedAreas();
+            } else if (tabId === 'badges') {
+                await loadMyBadges();
             }
+
         });
     });
 
@@ -876,4 +879,102 @@ function closeAllModals() {
         modal.style.display = 'none';
     });
     document.body.style.overflow = 'auto';
+}
+
+// ==================== ODZNAKI ====================
+
+async function loadMyBadges() {
+    try {
+        const response = await fetch(`${API_URL}/badges/my`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const badges = await response.json();
+        displayMyBadges(badges);
+
+    } catch (error) {
+        console.error('Error fetching badges:', error);
+        document.getElementById('my-badges-container').innerHTML =
+            '<p style="text-align: center; padding: 2rem; color: #999;">Nie udało się załadować odznak.</p>';
+    }
+}
+
+function displayMyBadges(badges) {
+    const container = document.getElementById('my-badges-container');
+
+    if (!badges || badges.length === 0) {
+        container.innerHTML = `
+            <div class="no-badges-message">
+                <i class="fas fa-award" style="font-size: 64px; color: #ddd; margin-bottom: 20px;"></i>
+                <h3 style="color: #999; margin-bottom: 10px;">Nie masz jeszcze żadnych odznak</h3>
+                <p style="color: #999;">Bądź aktywny na platformie, aby zdobywać odznaki!</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = badges.map(badge => `
+        <div class="badge-card">
+            <div class="badge-card-icon" style="background-color: ${badge.color}15; border-color: ${badge.color};">
+                <i class="${badge.icon}" style="color: ${badge.color};"></i>
+            </div>
+            <div class="badge-card-content">
+                <h3 class="badge-card-name">${badge.name}</h3>
+                <p class="badge-card-description">${badge.description}</p>
+            </div>
+            <div class="badge-card-earned">
+                <i class="fas fa-check-circle" style="color: ${badge.color};"></i>
+                <span>Zdobyte!</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function refreshBadges() {
+    // Pokaż spinner lub komunikat ładowania
+    const container = document.getElementById('my-badges-container');
+    const originalContent = container.innerHTML;
+    container.innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #F2A900;"></i>
+            <p style="color: #999; margin-top: 15px;">Sprawdzanie nowych odznak...</p>
+        </div>
+    `;
+
+    try {
+        // Sprawdź i przyznaj nowe odznaki
+        const response = await fetch(`${API_URL}/badges/check`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const badges = await response.json();
+
+        // Animacja sukcesu
+        container.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <i class="fas fa-check-circle" style="font-size: 48px; color: #51CF66;"></i>
+                <p style="color: #51CF66; margin-top: 15px; font-weight: 600;">Odznaki zaktualizowane!</p>
+            </div>
+        `;
+
+        // Po chwili pokaż odznaki
+        setTimeout(() => {
+            displayMyBadges(badges);
+        }, 1000);
+
+    } catch (error) {
+        console.error('Error refreshing badges:', error);
+        container.innerHTML = originalContent;
+        alert('❌ Nie udało się odświeżyć odznak. Spróbuj ponownie później.');
+    }
 }

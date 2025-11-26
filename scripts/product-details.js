@@ -37,6 +37,7 @@ async function loadProductDetails() {
         displayProductDetails();
         await loadProductReviews();
         await loadSimilarProducts();
+        await loadSellerBadges();
 
     } catch (error) {
         console.error('Błąd ładowania produktu:', error);
@@ -44,6 +45,8 @@ async function loadProductDetails() {
     } finally {
         showLoading(false);
     }
+
+
 }
 function formatDate(dateString) {
     if (!dateString) return '';
@@ -119,19 +122,25 @@ function displayProductDetails() {
                     ` : ''}
                 </div>
 
-<div class="seller-info">
-    <div class="seller-info-header">
-        <i class="fas fa-user-circle"></i>
-        <span>Sprzedawca</span>
-    </div>
-    <div class="seller-info-content">
-        <div class="seller-name">${currentProduct.sellerFirstname} ${currentProduct.sellerLastname}</div>
-        <div class="seller-email">
-            <i class="fas fa-envelope"></i>
-            <span>${currentProduct.sellerEmail}</span>
-        </div>
-    </div>
-</div>
+                <div class="seller-info">
+                    <div class="seller-info-header">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Sprzedawca</span>
+                    </div>
+                    <div class="seller-info-content">
+                        <div class="seller-name">${currentProduct.sellerFirstname} ${currentProduct.sellerLastname}</div>
+                        
+                        <!-- SEKCJA ODZNAK -->
+                        <div class="seller-badges" id="seller-badges-container">
+                            <!-- Odznaki będą załadowane dynamicznie przez JavaScript -->
+                        </div>
+                        
+                        <div class="seller-email">
+                            <i class="fas fa-envelope"></i>
+                            <span>${currentProduct.sellerEmail}</span>
+                        </div>
+                    </div>
+                </div>
 
                 ${canBuy ? `
                     <div class="purchase-section">
@@ -213,6 +222,41 @@ function displayProductDetails() {
     if (quantityInput) {
         quantityInput.addEventListener('input', updateTotalPrice);
     }
+}
+
+async function loadSellerBadges() {
+    if (!currentProduct || !currentProduct.sellerId) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/badges/user/${currentProduct.sellerId}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) return;
+
+        const badges = await response.json();
+        displaySellerBadges(badges);
+
+    } catch (error) {
+        console.error('Błąd ładowania odznak sprzedawcy:', error);
+    }
+}
+
+function displaySellerBadges(badges) {
+    const container = document.getElementById('seller-badges-container');
+    if (!container || !badges || badges.length === 0) {
+        if (container) container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'flex';
+    container.innerHTML = badges.map(badge => `
+        <div class="badge-item" title="${badge.description}" style="background-color: ${badge.color}15; border-color: ${badge.color};">
+            <i class="${badge.icon}" style="color: ${badge.color};"></i>
+            <span style="color: ${badge.color};">${badge.name}</span>
+        </div>
+    `).join('');
 }
 
 // ==================== ZAKUP PRODUKTU ====================
