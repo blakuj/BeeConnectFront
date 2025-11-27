@@ -1055,49 +1055,49 @@
         `;
     }
 
-    function displayAreaReviews() {
-        const tabsSection = document.getElementById('area-tabs-section');
-        const container = document.getElementById('reviews-container');
-
-        if (!container || !areaReviews || areaReviews.length === 0) return;
-
-        // Pokaż zakładkę
-        tabsSection.style.display = 'block';
-        document.getElementById('reviews-count-tab').textContent = currentArea.reviewCount;
-
-        container.innerHTML = `
-            <div class="reviews-summary">
-                <div class="rating-overview">
-                    <div class="rating-big">${currentArea.averageRating.toFixed(1)}</div>
-                    <div class="rating-stars-big">${renderStars(currentArea.averageRating)}</div>
-                    <div class="rating-count">Na podstawie ${currentArea.reviewCount} ${currentArea.reviewCount === 1 ? 'opinii' : 'opinii'}</div>
-                </div>
-            </div>
-            <div class="reviews-list">
-                ${areaReviews.map(review => `
-                    <div class="review-item">
-                        <div class="review-header">
-                            <div class="reviewer-info">
-                                <div class="reviewer-avatar">
-                                    <i class="fas fa-user-circle"></i>
-                                </div>
-                                <div>
-                                    <div class="reviewer-name">${review.reviewerFirstname} ${review.reviewerLastname}</div>
-                                    <div class="review-date">${formatDate(review.createdAt)}</div>
-                                </div>
-                            </div>
-                            <div class="review-rating">
-                                ${renderStars(review.rating)}
-                            </div>
-                        </div>
-                        <div class="review-content">
-                            <p>${review.comment}</p>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
+    // function displayAreaReviews() {
+    //     const tabsSection = document.getElementById('area-tabs-section');
+    //     const container = document.getElementById('reviews-container');
+    //
+    //     if (!container || !areaReviews || areaReviews.length === 0) return;
+    //
+    //     // Pokaż zakładkę
+    //     tabsSection.style.display = 'block';
+    //     document.getElementById('reviews-count-tab').textContent = currentArea.reviewCount;
+    //
+    //     container.innerHTML = `
+    //         <div class="reviews-summary">
+    //             <div class="rating-overview">
+    //                 <div class="rating-big">${currentArea.averageRating.toFixed(1)}</div>
+    //                 <div class="rating-stars-big">${renderStars(currentArea.averageRating)}</div>
+    //                 <div class="rating-count">Na podstawie ${currentArea.reviewCount} ${currentArea.reviewCount === 1 ? 'opinii' : 'opinii'}</div>
+    //             </div>
+    //         </div>
+    //         <div class="reviews-list">
+    //             ${areaReviews.map(review => `
+    //                 <div class="review-item">
+    //                     <div class="review-header">
+    //                         <div class="reviewer-info">
+    //                             <div class="reviewer-avatar">
+    //                                 <i class="fas fa-user-circle"></i>
+    //                             </div>
+    //                             <div>
+    //                                 <div class="reviewer-name">${review.reviewerFirstname} ${review.reviewerLastname}</div>
+    //                                 <div class="review-date">${formatDate(review.createdAt)}</div>
+    //                             </div>
+    //                         </div>
+    //                         <div class="review-rating">
+    //                             ${renderStars(review.rating)}
+    //                         </div>
+    //                     </div>
+    //                     <div class="review-content">
+    //                         <p>${review.comment}</p>
+    //                     </div>
+    //                 </div>
+    //             `).join('')}
+    //         </div>
+    //     `;
+    // }
 
     loadData();
 

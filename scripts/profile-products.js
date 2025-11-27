@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 // ==================== ŁADOWANIE PROFILU ====================
 async function loadUserProfile() {
     try {
-        const response = await fetch(`${API_URL}/person`, {
+        const response = await fetch(`${API_URL}/auth/user`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -947,9 +947,8 @@ async function refreshBadges() {
     `;
 
     try {
-        // Sprawdź i przyznaj nowe odznaki
-        const response = await fetch(`${API_URL}/badges/check`, {
-            method: 'POST',
+        const response = await fetch(`${API_URL}/badges/my`, {
+            method: 'GET',
             credentials: 'include'
         });
 

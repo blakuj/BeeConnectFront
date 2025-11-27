@@ -1951,6 +1951,38 @@
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         }
     }
+
+    .seller-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 8px 0;
+    }
+
+    .badge-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        border-radius: 6px;
+        border: 1px solid;
+        font-size: 0.75rem;
+        font-weight: 600;
+        transition: transform 0.2s ease;
+        cursor: help;
+    }
+
+    .badge-item:hover {
+        transform: translateY(-2px);
+    }
+
+    .badge-item i {
+        font-size: 0.85rem;
+    }
+
+    .seller-info-content {
+        gap: 6px;
+    }
 </style>
 
 <!-- JavaScript -->
