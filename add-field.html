@@ -11,139 +11,183 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/styles.css">
     <script src="scripts/auth.js"></script>
+    <style>
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .color-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            margin-left: 5px;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Nagłówek -->
-    <div class="header">
-        <div class="logo-container">
-            <div class="logo">
-                <a href="home.html">
-                    <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
-                </a>
-            </div>
-            <div class="page-title">Dodaj nowy obszar</div>
+<div class="header">
+    <div class="logo-container">
+        <div class="logo">
+            <a href="home.html">
+                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
+            </a>
         </div>
-        <button class="btn back-btn" onclick= history.back() >
-            <i class="fas fa-arrow-left"></i> Powrót
+        <div class="page-title">Dodaj nowy obszar</div>
+    </div>
+    <button class="btn back-btn" onclick="history.back()">
+        <i class="fas fa-arrow-left"></i> Powrót
+    </button>
+</div>
+
+<div class="main-container">
+    <div class="map-container">
+        <div class="instructions">
+            <h4>Jak dodać nowy obszar:</h4>
+            <p><span class="step">Krok 1:</span> Kliknij na mapie, aby umieścić pierwszy róg obszaru.</p>
+            <p><span class="step">Krok 2:</span> Umieść pozostałe 3 punkty, aby utworzyć czworokąt.</p>
+            <p><span class="step">Krok 3:</span> Wybierz dostępne pożytki w formularzu.</p>
+            <p><span class="step">Krok 4:</span> Kliknij "Zapisz obszar".</p>
+        </div>
+
+        <div id="map"></div>
+
+        <button class="btn btn-danger reset-btn" id="resetBtn" style="display: none; position: absolute; bottom: 20px; left: 20px; z-index: 1000;">
+            <i class="fas fa-trash"></i> Wyczyść punkty
         </button>
+
+        <div class="status-bar" id="statusBar">
+            Kliknij na mapie, aby umieścić pierwszy punkt
+        </div>
     </div>
 
-
-
-    <!-- Główny kontener -->
-    <div class="main-container">
-        <!-- Kontener mapy -->
-        <div class="map-container">
-            <!-- Instrukcja -->
-            <div class="instructions">
-                <h4>Jak dodać nowy obszar:</h4>
-                <p><span class="step">Krok 1:</span> Kliknij na mapie, aby umieścić pierwszy róg obszaru.</p>
-                <p><span class="step">Krok 2:</span> Umieść pozostałe 3 punkty, aby utworzyć czworokąt.</p>
-                <p><span class="step">Krok 3:</span> Wypełnij informacje o obszarze w formularzu.</p>
-                <p><span class="step">Krok 4:</span> Kliknij "Zapisz obszar", aby dodać go do systemu.</p>
+    <div class="sidebar">
+        <h3><i class="fas fa-info-circle"></i> Informacje o obszarze</h3>
+        <form id="areaForm">
+            <div class="form-group">
+                <label>Dostępne pożytki (kwiaty):</label>
+                <div class="checkbox-grid" id="flowersContainer">
+                </div>
             </div>
-            
-            <!-- Mapa -->
-            <div id="map"></div>
-            
-            <!-- Przycisk resetowania -->
-            <button class="btn btn-danger reset-btn" id="resetBtn" style="display: none; position: absolute; bottom: 20px; left: 20px; z-index: 1000;">
-                <i class="fas fa-trash"></i> Wyczyść punkty
+
+            <div class="form-group">
+                <label for="area">Powierzchnia (ha):</label>
+                <input type="number" id="area" min="0.1" step="0.1" required readonly>
+                <small>Ta wartość zostanie obliczona po narysowaniu obszaru</small>
+            </div>
+            <div class="form-group">
+                <label for="description">Opis (opcjonalny):</label>
+                <textarea id="description"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="maxHives">Maksymalna ilość uli:</label>
+                <input type="number" id="maxHives" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="pricePerDay">Cena za ul / dzień (zł):</label>
+                <input type="number" id="pricePerDay" min="1" step="0.5" required>
+            </div>
+            <button type="submit" class="btn btn-accent submit-btn" id="saveBtn" disabled>
+                <i class="fas fa-save"></i> Zapisz obszar
             </button>
-            
-            <!-- Status -->
-            <div class="status-bar" id="statusBar">
-                Kliknij na mapie, aby umieścić pierwszy punkt
-            </div>
-        </div>
-        
-        <!-- Pasek boczny z formularzem -->
-        <div class="sidebar">
-            <h3><i class="fas fa-info-circle"></i> Informacje o obszarze</h3>
-            <form id="areaForm">
-                <div class="form-group">
-                    <label for="fieldType">Rodzaj pola:</label>
-                    <select id="fieldType" required>
-                        <option value="" disabled selected>Wybierz rodzaj pola</option>
-                        <option value="lipa">Lipa</option>
-                        <option value="wielokwiat">Wielokwiat</option>
-                        <option value="gryka">Gryka</option>
-                        <option value="rzepak">Rzepak</option>
-                        <option value="spadz">Spadź</option>
-                        <option value="akacja">Akacja</option>
-                        <option value="wrzos">Wrzos</option>
-                        <option value="malina">Malina</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="area">Powierzchnia (ha):</label>
-                    <input type="number" id="area" min="0.1" step="0.1" required readonly>
-                    <small>Ta wartość zostanie obliczona po narysowaniu obszaru</small>
-                </div>
-                <div class="form-group">
-                    <label for="description">Opis (opcjonalny):</label>
-                    <textarea id="description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="maxHives">Maksymalna ilość uli:</label>
-                    <input type="number" id="maxHives" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="pricePerDay">Cena za ul / dzień (zł):</label>
-                    <input type="number" id="pricePerDay" min="1" step="0.5" required>
-                </div>
-                <button type="submit" class="btn btn-accent submit-btn" id="saveBtn" disabled>
-                    <i class="fas fa-save"></i> Zapisz obszar
-                </button>
-            </form>
-        </div>
+        </form>
     </div>
+</div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-    // --- Inicjalizacja mapy bez kontrolek zoom i atrybutów ---
+    // --- Stałe ---
+    const API_BASE = 'http://localhost:8080';
+    const PREDEFINED_FLOWERS = [
+        { name: "Lipa", color: "#FF0000" },
+        { name: "Wielokwiat", color: "#FFA500" },
+        { name: "Gryka", color: "#FFFF00" },
+        { name: "Rzepak", color: "#FFFF99" },
+        { name: "Spadź", color: "#800000" },
+        { name: "Akacja", color: "#7878FF" },
+        { name: "Wrzos", color: "#800080" },
+        { name: "Malina", color: "#FF69B4" }
+    ];
+
+    // --- Inicjalizacja formularza kwiatów ---
+    const flowersContainer = document.getElementById('flowersContainer');
+    PREDEFINED_FLOWERS.forEach(flower => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <label class="checkbox-label">
+                <input type="checkbox" name="flowers" value="${flower.name}">
+                <span class="color-dot" style="background-color: ${flower.color}"></span>
+                ${flower.name}
+            </label>
+        `;
+        flowersContainer.appendChild(div);
+    });
+
+    // --- Inicjalizacja mapy ---
     var map = L.map('map', {
         zoomControl: false,
         attributionControl: false
-    }).setView([52.237049, 21.017532], 7); // Polska
+    }).setView([52.237049, 21.017532], 7);
 
-    // Warstwa bazowa OpenStreetMap (bez atrybutów)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: ''
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(map);
 
-    // --- Zmienne globalne do rysowania ---
     var points = [];
     var markers = [];
     var polygon = null;
     var drawing = true;
 
-    // Elementy UI
     var statusBar = document.getElementById('statusBar');
     var resetBtn = document.getElementById('resetBtn');
     var saveBtn = document.getElementById('saveBtn');
     var areaInput = document.getElementById('area');
 
     // --- Funkcje pomocnicze ---
-
-    // Oblicza powierzchnię wielokąta (w hektarach) za pomocą Leaflet.GeometryUtil
     function calculateArea(points) {
         if (points.length < 3) return 0;
-
         var latlngs = points.map(marker => marker.getLatLng());
         var tempPolygon = L.polygon(latlngs);
-        var areaInSquareMeters = L.GeometryUtil.geodesicArea(tempPolygon.getLatLngs()[0]);
-        
-        // Konwersja na hektary (1 ha = 10 000 m²)
+        var areaInSquareMeters = L.GeometryUtil ? L.GeometryUtil.geodesicArea(tempPolygon.getLatLngs()[0]) : 0;
+
+        // Fallback dla braku GeometryUtil (proste przybliżenie)
+        if (!L.GeometryUtil) {
+            // Uproszczona kalkulacja dla płaskiej powierzchni (mniej dokładna)
+            // Tutaj lepiej użyć zewnętrznej biblioteki, ale dla demo wystarczy to co mamy
+            // W poprzednim kodzie był polyfill, użyjmy go
+            areaInSquareMeters = geodesicAreaPolyfill(latlngs);
+        }
+
         return areaInSquareMeters / 10000;
     }
 
-    // --- Obsługa kliknięć na mapę ---
+    function geodesicAreaPolyfill(latLngs) {
+        var pointsCount = latLngs.length, area = 0.0;
+        if (pointsCount > 2) {
+            for (var i = 0; i < pointsCount; i++) {
+                var p1 = latLngs[i], p2 = latLngs[(i + 1) % pointsCount];
+                area += ((p2.lng - p1.lng) * Math.PI / 180) * (2 + Math.sin(p1.lat * Math.PI / 180) + Math.sin(p2.lat * Math.PI / 180));
+            }
+            area = area * 6378137.0 * 6378137.0 / 2.0;
+        }
+        return Math.abs(area);
+    }
+
+    // --- Obsługa mapy ---
     map.on('click', function(e) {
         if (!drawing) return;
 
-        // Dodaj marker w miejscu kliknięcia
         var marker = L.marker(e.latlng).addTo(map);
         points.push(marker);
         markers.push(marker);
@@ -153,77 +197,60 @@
             statusBar.textContent = `Umieść jeszcze ${pointsLeft} ${pointsLeft === 1 ? 'punkt' : 'punkty'}`;
         }
 
-        // Usuń poprzedni polygon/polyline
-        if (polygon) {
-            map.removeLayer(polygon);
-        }
-
+        if (polygon) map.removeLayer(polygon);
         var latlngs = points.map(marker => marker.getLatLng());
 
-        // Jeśli mamy 4 punkty - zamykamy polygon i wyliczamy pole
         if (points.length === 4) {
             polygon = L.polygon(latlngs, {color: '#8FC31F'}).addTo(map);
             drawing = false;
-            statusBar.textContent = 'Obszar został narysowany! Wypełnij formularz po prawej stronie.';
+            statusBar.textContent = 'Obszar narysowany! Wypełnij formularz.';
             resetBtn.style.display = 'block';
             saveBtn.disabled = false;
 
-            try {
-                var area = calculateArea(points);
-                areaInput.value = area.toFixed(2);
-            } catch (e) {
-                console.error("Error calculating area:", e);
-                areaInput.value = "";
-                areaInput.readOnly = false;
-            }
-
+            var area = calculateArea(points);
+            areaInput.value = area.toFixed(2);
         } else if (points.length >= 2) {
             polygon = L.polyline(latlngs, {color: '#8FC31F'}).addTo(map);
         }
     });
 
-    // --- Obsługa przycisku reset ---
     resetBtn.addEventListener('click', function() {
-   
         points.forEach(marker => map.removeLayer(marker));
         if (polygon) map.removeLayer(polygon);
-
-       
         points = [];
         markers = [];
         polygon = null;
         drawing = true;
-
         statusBar.textContent = 'Kliknij na mapie, aby umieścić pierwszy punkt';
         resetBtn.style.display = 'none';
         saveBtn.disabled = true;
         areaInput.value = '';
     });
 
-    // --- Obsługa formularza dodawania obszaru ---
+    // --- WYSYŁANIE FORMULARZA ---
     document.getElementById('areaForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
-      
-        var fieldType = document.getElementById('fieldType').value;
-        var area = document.getElementById('area').value;
-        var description = document.getElementById('description').value;
-        var maxHives = document.getElementById('maxHives').value;
-        var pricePerDay = document.getElementById('pricePerDay').value;
+        // Zbieranie kwiatów
+        const selectedFlowers = [];
+        document.querySelectorAll('input[name="flowers"]:checked').forEach(cb => {
+            const def = PREDEFINED_FLOWERS.find(f => f.name === cb.value);
+            if(def) selectedFlowers.push(def);
+        });
 
-     
-        var coordinates = points.map(marker => [marker.getLatLng().lat, marker.getLatLng().lng]);
+        if(selectedFlowers.length === 0) {
+            alert("Wybierz przynajmniej jeden rodzaj pożytku (kwiaty).");
+            return;
+        }
 
         var newArea = {
-            type: fieldType,
-            coordinates: coordinates,
-            area: parseFloat(area),
-            description: description,
-            maxHives: parseInt(maxHives),
-            pricePerDay: parseFloat(pricePerDay),
-            dateAdded: new Date().toISOString()
+            flowers: selectedFlowers,
+            coordinates: points.map(marker => [marker.getLatLng().lat, marker.getLatLng().lng]),
+            area: parseFloat(document.getElementById('area').value),
+            description: document.getElementById('description').value,
+            maxHives: parseInt(document.getElementById('maxHives').value),
+            pricePerDay: parseFloat(document.getElementById('pricePerDay').value)
         };
-        const API_BASE = 'http://localhost:8080';
 
         fetch(`${API_BASE}/api/addArea`, {
             method: 'POST',
@@ -231,51 +258,18 @@
             body: JSON.stringify(newArea),
             credentials: 'include'
         })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401) {
-                    throw new Error('Nie jesteś zalogowany. Zaloguj się, aby dodać obszar.');
+            .then(response => {
+                if (response.ok) {
+                    alert('Obszar został dodany pomyślnie!');
+                    window.location.href = 'home.html';
+                } else {
+                    return response.text().then(text => { throw new Error(text || 'Błąd'); });
                 }
-                return response.text().then(text => { throw new Error(text || 'Błąd przy dodawaniu obszaru'); });
-            }
-            return response.text();
-        })
-        .then(message => {
-            alert(message || 'Obszar został dodany pomyślnie!');
-            window.location.href = 'home.html';
-        })
-        .catch(error => {
-            alert('Błąd: ' + error.message);
-            console.error(error);
-        });
+            })
+            .catch(error => {
+                alert('Błąd: ' + error.message);
+            });
     });
-
-    // --- Polyfill Leaflet.GeometryUtil jeśli nie jest dostępny ---
-    if (!L.GeometryUtil) {
-        L.GeometryUtil = {
-            geodesicArea: function(latLngs) {
-                var pointsCount = latLngs.length,
-                    area = 0.0;
-
-                if (pointsCount > 2) {
-                    for (var i = 0; i < pointsCount; i++) {
-                        var p1 = latLngs[i],
-                            p2 = latLngs[(i + 1) % pointsCount];
-                        
-                        area += ((p2.lng - p1.lng) * Math.PI / 180) * 
-                                (2 + Math.sin(p1.lat * Math.PI / 180) + 
-                                 Math.sin(p2.lat * Math.PI / 180));
-                    }
-                    
-                    area = area * 6378137.0 * 6378137.0 / 2.0;
-                }
-
-                return Math.abs(area);
-            }
-        };
-    }
 </script>
-
-
 </body>
 </html>

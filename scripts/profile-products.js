@@ -2,12 +2,24 @@
 
 const API_URL = 'http://localhost:8080/api';
 
+const PREDEFINED_FLOWERS = [
+    { name: "Lipa", color: "#FF0000" },
+    { name: "Wielokwiat", color: "#FFA500" },
+    { name: "Gryka", color: "#FFFF00" },
+    { name: "Rzepak", color: "#FFFF99" },
+    { name: "Spadź", color: "#800000" },
+    { name: "Akacja", color: "#7878FF" },
+    { name: "Wrzos", color: "#800080" },
+    { name: "Malina", color: "#FF69B4" }
+];
+
 // ==================== INICJALIZACJA ====================
 document.addEventListener('DOMContentLoaded', async function() {
     await loadUserProfile();
     await fetchMyAreas();
     await fetchRentedAreas();
     await fetchMyProducts();
+    await loadMyBadges();
 
     setupEventListeners();
 });
@@ -24,10 +36,17 @@ async function loadUserProfile() {
             const user = await response.json();
 
             const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Gość';
-            document.getElementById('welcome-name').textContent = fullName;
-            document.getElementById('user-name').textContent = fullName;
-            document.getElementById('user-email').textContent = user.email || '';
-            document.getElementById('user-status').textContent = user.role === 'BEEKEEPER' ? 'Zweryfikowany Pszczelarz' : 'Użytkownik';
+            const welcomeName = document.getElementById('welcome-name');
+            if (welcomeName) welcomeName.textContent = fullName;
+
+            const userNameEl = document.getElementById('user-name');
+            if (userNameEl) userNameEl.textContent = fullName;
+
+            const userEmailEl = document.getElementById('user-email');
+            if (userEmailEl) userEmailEl.textContent = user.email || '';
+
+            const userStatusEl = document.getElementById('user-status');
+            if (userStatusEl) userStatusEl.textContent = user.role === 'BEEKEEPER' ? 'Zweryfikowany Pszczelarz' : 'Użytkownik';
         } else if (response.status === 401) {
             window.location.href = 'login.html';
         }
@@ -63,6 +82,12 @@ async function fetchMyAreas() {
                 ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
                 : 'Brak lokalizacji';
 
+            // Obsługa listy kwiatów
+            let flowersText = 'Brak danych';
+            if (area.flowers && area.flowers.length > 0) {
+                flowersText = area.flowers.map(f => f.name).join(', ');
+            }
+
             const card = `
                 <div class="card" data-area-id="${area.id || ''}">
                     <div class="card-header">
@@ -85,7 +110,7 @@ async function fetchMyAreas() {
                         </div>
                         <div class="card-property">
                             <div class="card-property-label">Kwiaty: </div>
-                            <div class="card-property-value">${area.type || 'Brak danych'}</div>
+                            <div class="card-property-value">${flowersText}</div>
                         </div>
                         <div class="card-property">
                             <div class="card-property-label">Status: </div>
@@ -96,9 +121,18 @@ async function fetchMyAreas() {
                         <button class="btn btn-outline card-btn edit-area-btn" data-area='${JSON.stringify(area).replace(/'/g, "&apos;")}'>
                             <i class="fas fa-edit"></i> Edytuj
                         </button>
-                        <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
-                            <i class="fas fa-trash-alt"></i> Usuń
-                        </button>
+                        ${area.status === 'AVAILABLE' ? `
+                            <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
+                                <i class="fas fa-trash-alt"></i> Usuń
+                            </button>
+                        ` : `
+                            <button class="btn btn-primary card-btn activate-area-btn" data-id="${area.id || ''}">
+                                <i class="fas fa-check"></i> Aktywuj
+                            </button>
+                            <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
+                                <i class="fas fa-trash-alt"></i> Usuń
+                            </button>
+                        `}
                     </div>
                 </div>
             `;
@@ -120,9 +154,6 @@ async function fetchRentedAreas() {
             credentials: "include"
         });
         const areas = await response.json();
-
-        console.log('Rented areas response:', areas); // DEBUG - sprawdź czy jest reservationId
-
         const container = document.getElementById('rented-areas-container');
         container.innerHTML = '';
 
@@ -286,7 +317,6 @@ async function loadMyPurchases() {
             return;
         }
 
-        // Dla każdego zamówienia sprawdź czy można wystawić opinię
         for (const order of orders) {
             let canReview = false;
             try {
@@ -368,7 +398,6 @@ async function submitProductReview() {
     const rating = parseInt(document.getElementById('product-review-rating').value);
     const comment = document.getElementById('product-review-content').value.trim();
 
-    // Walidacja
     if (!comment || comment.length < 10) {
         alert('⚠️ Proszę wpisać opinię (minimum 10 znaków).');
         return;
@@ -396,7 +425,7 @@ async function submitProductReview() {
         if (response.ok) {
             alert('✅ Dziękujemy za opinię!');
             closeAllModals();
-            await loadMyPurchases(); // Odśwież listę zakupów
+            await loadMyPurchases();
         } else {
             const error = await response.json();
             alert('❌ Błąd: ' + (error.error || 'Nie udało się wysłać opinii.'));
@@ -412,7 +441,6 @@ async function submitAreaReview() {
     const rating = parseInt(document.getElementById('area-review-rating').value);
     const comment = document.getElementById('area-review-content').value.trim();
 
-    // Walidacja
     if (!comment || comment.length < 10) {
         alert('⚠️ Proszę wpisać opinię (minimum 10 znaków).');
         return;
@@ -440,7 +468,7 @@ async function submitAreaReview() {
         if (response.ok) {
             alert('✅ Dziękujemy za opinię!');
             closeAllModals();
-            await fetchRentedAreas(); // Odśwież listę wynajętych obszarów
+            await fetchRentedAreas();
         } else {
             const error = await response.json();
             alert('❌ Błąd: ' + (error.error || 'Nie udało się wysłać opinii.'));
@@ -453,7 +481,6 @@ async function submitAreaReview() {
 
 // ==================== EVENT LISTENERS ====================
 function setupEventListeners() {
-    // Zakładki
     document.querySelectorAll('.sidebar-nav-item').forEach(item => {
         item.addEventListener('click', async function(e) {
             e.preventDefault();
@@ -466,7 +493,6 @@ function setupEventListeners() {
             const tabId = this.getAttribute('data-tab');
             document.getElementById(tabId).classList.add('active');
 
-            // Załaduj dane dla odpowiedniej zakładki
             if (tabId === 'products') {
                 await fetchMyProducts();
             } else if (tabId === 'bought-products') {
@@ -478,17 +504,15 @@ function setupEventListeners() {
             } else if (tabId === 'badges') {
                 await loadMyBadges();
             }
-
         });
     });
 
-    // Gwiazdki w modalach
     document.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', function() {
             const value = parseInt(this.getAttribute('data-value'));
             const stars = this.parentElement.querySelectorAll('.star');
             const ratingInput = this.closest('form').querySelector('input[name="rating"]');
-            ratingInput.value = value;
+            if (ratingInput) ratingInput.value = value;
 
             stars.forEach(s => {
                 if (parseInt(s.getAttribute('data-value')) <= value) {
@@ -500,7 +524,6 @@ function setupEventListeners() {
         });
     });
 
-    // Zamykanie modali
     document.querySelectorAll('.modal-close, .close-modal-btn').forEach(btn => {
         btn.addEventListener('click', closeAllModals);
     });
@@ -513,25 +536,66 @@ function setupEventListeners() {
         });
     });
 
-    // Przyciski wysyłania opinii
-    document.querySelector('.submit-product-review-btn').addEventListener('click', submitProductReview);
-    document.querySelector('.submit-area-review-btn').addEventListener('click', submitAreaReview);
+    const submitProductReviewBtn = document.querySelector('.submit-product-review-btn');
+    if (submitProductReviewBtn) submitProductReviewBtn.addEventListener('click', submitProductReview);
 
-    // Usuwanie
-    document.querySelector('.confirm-delete-btn').addEventListener('click', handleDelete);
+    const submitAreaReviewBtn = document.querySelector('.submit-area-review-btn');
+    if (submitAreaReviewBtn) submitAreaReviewBtn.addEventListener('click', submitAreaReview);
+
+    const confirmDeleteBtn = document.querySelector('.confirm-delete-btn');
+    if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', handleDelete);
+
+    // Obsługa zapisu edycji obszaru
+    const submitEditAreaBtn = document.querySelector('.submit-edit-area-btn');
+    if (submitEditAreaBtn) {
+        submitEditAreaBtn.onclick = handleEditAreaSubmit;
+    }
+
+    // Obsługa zapisu edycji produktu
+    const submitEditProductBtn = document.querySelector('.submit-edit-product-btn');
+    if (submitEditProductBtn) {
+        submitEditProductBtn.onclick = handleEditProductSubmit;
+    }
+
+    // Obsługa zmiany zdjęcia
+    const editAreaImageInput = document.getElementById('edit-area-image');
+    if (editAreaImageInput) {
+        editAreaImageInput.addEventListener('change', handleFilePreview);
+    }
+
+    const editProductImageInput = document.getElementById('edit-product-image');
+    if (editProductImageInput) {
+        editProductImageInput.addEventListener('change', handleFilePreview);
+    }
 }
 
+function handleFilePreview() {
+    const file = this.files[0];
+    const targetImgId = this.id === 'edit-area-image' ? 'edit-area-current-image' : 'edit-product-current-image';
+    const nameSpan = this.closest('.image-upload-controls').querySelector('.selected-file-name');
+
+    if (file) {
+        nameSpan.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById(targetImgId).src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Zaktualizowana funkcja setupAreaButtons dla obsługi wielu kwiatów
 function setupAreaButtons() {
     document.querySelectorAll('.edit-area-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const areaData = this.getAttribute('data-area');
             const area = JSON.parse(areaData);
 
-            console.log('Area data:', area);
-
             document.getElementById('edit-area-id').value = area.id || '';
             document.getElementById('edit-area-title').value = area.name || '';
-            document.getElementById('edit-area-status-switch').checked = area.status === 'AVAILABLE';
+            const statusSwitch = document.getElementById('edit-area-status-switch');
+            if (statusSwitch) statusSwitch.checked = area.status === 'AVAILABLE';
+
             document.getElementById('edit-area-size-display').textContent = `${area.area.toFixed(2)} ha`;
 
             const location = area.coordinates && area.coordinates.length > 0
@@ -541,14 +605,35 @@ function setupAreaButtons() {
 
             document.getElementById('edit-area-size').value = area.area || '';
             document.getElementById('edit-area-location').value = location;
-            document.getElementById('edit-area-flowers').value = area.type || '';
+
+            // Generowanie checkboxów dla kwiatów
+            const flowersContainer = document.getElementById('edit-area-flowers-container');
+            if (flowersContainer) {
+                flowersContainer.innerHTML = '';
+                PREDEFINED_FLOWERS.forEach(pf => {
+                    const isChecked = area.flowers && area.flowers.some(f => f.name === pf.name);
+                    const checkboxHtml = `
+                        <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" name="flowers" value="${pf.name}" ${isChecked ? 'checked' : ''} style="width: auto; margin-right: 8px;">
+                            <span style="display: inline-block; width: 12px; height: 12px; background-color: ${pf.color}; margin-right: 6px; border-radius: 2px;"></span>
+                            ${pf.name}
+                        </label>
+                    `;
+                    flowersContainer.insertAdjacentHTML('beforeend', checkboxHtml);
+                });
+            }
+
             document.getElementById('edit-area-date-to').value = area.endDate || area.availableFrom || '';
             document.getElementById('edit-area-max-hives').value = area.maxHives || '';
             document.getElementById('edit-area-price').value = area.pricePerDay || '';
             document.getElementById('edit-area-description').value = area.description || '';
-            document.getElementById('edit-area-current-image').src = area.imgBase64
-                ? `data:image/jpeg;base64,${area.imgBase64}`
-                : 'assets/default-area.jpg';
+
+            const currentImage = document.getElementById('edit-area-current-image');
+            if(currentImage) {
+                currentImage.src = area.imgBase64
+                    ? `data:image/jpeg;base64,${area.imgBase64}`
+                    : 'assets/default-area.jpg';
+            }
 
             openModal('edit-area-modal');
         });
@@ -572,12 +657,10 @@ function setupAreaReviewButtons() {
             document.getElementById('area-review-content').value = '';
             document.getElementById('area-review-rating').value = '5';
 
-            // Zresetuj gwiazdki na 5
             const stars = document.querySelectorAll('#area-review-modal .star');
-            stars.forEach((star, index) => {
-                if (index < 5) {
-                    star.classList.add('active');
-                }
+            stars.forEach((s, idx) => {
+                if (idx < 5) s.classList.add('active');
+                else s.classList.remove('active');
             });
 
             openModal('area-review-modal');
@@ -591,18 +674,23 @@ function setupProductButtons() {
             const productData = this.getAttribute('data-product');
             const product = JSON.parse(productData);
 
-            console.log('Product data:', product);
-
             document.getElementById('edit-product-id').value = product.id || '';
             document.getElementById('edit-product-title').value = product.name || '';
-            document.getElementById('edit-product-status-switch').checked = product.available;
+
+            const statusSwitch = document.getElementById('edit-product-status-switch');
+            if(statusSwitch) statusSwitch.checked = product.available;
+
             document.getElementById('edit-product-type').value = product.category || 'OTHER';
             document.getElementById('edit-product-quantity').value = product.stock || 0;
             document.getElementById('edit-product-price').value = product.price || 0;
             document.getElementById('edit-product-description').value = product.description || '';
-            document.getElementById('edit-product-current-image').src = product.imageBase64
-                ? `data:image/jpeg;base64,${product.imageBase64}`
-                : 'assets/default-product.jpg';
+
+            const currentImage = document.getElementById('edit-product-current-image');
+            if(currentImage) {
+                currentImage.src = product.imageBase64
+                    ? `data:image/jpeg;base64,${product.imageBase64}`
+                    : 'assets/default-product.jpg';
+            }
 
             openModal('edit-product-modal');
         });
@@ -624,227 +712,196 @@ function setupProductReviewButtons() {
             const orderId = this.getAttribute('data-order-id');
             const productId = this.getAttribute('data-product-id');
             const productName = this.getAttribute('data-product-name');
-
-            // Ustaw dane w modalu
             document.getElementById('product-review-order-id').value = orderId;
             document.getElementById('product-review-id').value = productId;
             document.getElementById('product-review-content').value = '';
             document.getElementById('product-review-rating').value = '5';
 
-            // Zresetuj gwiazdki na 5
             const stars = document.querySelectorAll('#product-review-modal .star');
-            stars.forEach((star, index) => {
-                if (index < 5) {
-                    star.classList.add('active');
-                }
+            stars.forEach((s, idx) => {
+                if (idx < 5) s.classList.add('active');
+                else s.classList.remove('active');
             });
 
-            // Pokaż nazwę produktu w tytule modala
-            document.querySelector('#product-review-modal .modal-title').textContent = `Wystaw opinię: ${productName}`;
+            const modalTitle = document.querySelector('#product-review-modal .modal-title');
+            if(modalTitle) modalTitle.textContent = `Wystaw opinię: ${productName}`;
 
             openModal('product-review-modal');
         });
     });
 }
 
-// ==================== USUWANIE ====================
+// ==================== ZAPIS DANYCH (HANDLERS) ====================
+
+// Funkcja pomocnicza do konwersji wielu plików
+function convertFilesToBase64(files) {
+    return Promise.all(Array.from(files).map(file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    })));
+}
+
+// Obsługa zapisu edycji obszaru
+async function handleEditAreaSubmit(e) {
+    e.preventDefault();
+
+    const form = document.getElementById('edit-area-form');
+    const formData = new FormData(form);
+    const areaId = document.getElementById('edit-area-id').value;
+
+    // Obsługa zdjęć (starych i nowych)
+    let imagesList = null;
+    const imageFiles = document.getElementById('edit-area-image').files;
+
+    if (imageFiles.length > 0) {
+        // Jeśli wybrano nowe pliki, konwertujemy je na listę Base64
+        try {
+            imagesList = await convertFilesToBase64(imageFiles);
+        } catch (error) {
+            alert('Błąd podczas przetwarzania zdjęć.');
+            return;
+        }
+    } else {
+        // Jeśli nie wybrano nowych plików, wysyłamy null (backend nie rusza zdjęć)
+        // LUB jeśli chcemy zachować kompatybilność z polem imgBase64 (starym)
+        // to backend i tak obsłuży to po swojemu.
+        imagesList = null;
+    }
+
+    // Zbieranie zaznaczonych kwiatów
+    const selectedFlowers = [];
+    document.querySelectorAll('#edit-area-flowers-container input[type="checkbox"]:checked').forEach(cb => {
+        const flowerDef = PREDEFINED_FLOWERS.find(pf => pf.name === cb.value);
+        if (flowerDef) {
+            selectedFlowers.push({
+                name: flowerDef.name,
+                color: flowerDef.color
+            });
+        }
+    });
+
+    const editAreaDTO = {
+        id: parseInt(areaId),
+        name: document.getElementById('edit-area-title').value,
+        // imgBase64: imgBase64, // To pole jest ignorowane przez nowy backend dla zdjęć, ale może być używane do podglądu
+        images: imagesList, // <-- Nowa lista zdjęć
+        flowers: selectedFlowers, // Wysyłamy listę obiektów
+        maxHives: parseInt(formData.get('maxHives')) || 0,
+        pricePerDay: parseFloat(formData.get('price')) || 0,
+        description: formData.get('description'),
+        endDate: formData.get('dateTo'),
+        availabilityStatus: formData.get('status') === 'on' ? 'AVAILABLE' : 'UNAVAILABLE'
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/editArea`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(editAreaDTO)
+        });
+
+        if (!response.ok) throw new Error('Błąd HTTP');
+
+        alert('✅ Obszar został zaktualizowany!');
+        closeAllModals();
+        await fetchMyAreas();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Nie udało się zaktualizować obszaru.');
+    }
+}
+
+// Obsługa zapisu edycji produktu
+async function handleEditProductSubmit(e) {
+    e.preventDefault();
+
+    const productId = document.getElementById('edit-product-id').value;
+
+    let imagesList = null;
+    const imageFiles = document.getElementById('edit-product-image').files;
+
+    if (imageFiles.length > 0) {
+        try {
+            imagesList = await convertFilesToBase64(imageFiles);
+        } catch (error) {
+            alert('Błąd przetwarzania zdjęć');
+            return;
+        }
+    }
+
+    const statusSwitch = document.getElementById('edit-product-status-switch');
+
+    const updateProductDTO = {
+        id: parseInt(productId),
+        name: document.getElementById('edit-product-title').value,
+        category: document.getElementById('edit-product-type').value,
+        stock: parseInt(document.getElementById('edit-product-quantity').value) || 0,
+        price: parseFloat(document.getElementById('edit-product-price').value) || 0,
+        description: document.getElementById('edit-product-description').value,
+        images: imagesList, // <-- Nowa lista zdjęć
+        available: statusSwitch ? statusSwitch.checked : true
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/products`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(updateProductDTO)
+        });
+
+        if (!response.ok) throw new Error('Błąd HTTP');
+
+        alert('✅ Produkt został zaktualizowany!');
+        closeAllModals();
+        await fetchMyProducts();
+    } catch (error) {
+        console.error('Error updating product:', error);
+        alert('❌ Nie udało się zaktualizować produktu.');
+    }
+}
+
+// ==================== USUWANIE I PLIKI ====================
 async function handleDelete() {
     const itemId = document.getElementById('delete-item-id').value;
     const itemType = document.getElementById('delete-item-type').value;
 
     if (itemType === 'area') {
         try {
-            const response = await fetch(`${API_URL}/deleteArea/${itemId}`, {
+            await fetch(`${API_URL}/deleteArea/${itemId}`, {
                 method: 'POST',
                 credentials: 'include'
             });
-            if (response.ok) {
-                alert(`✅ Obszar został usunięty!`);
-                await fetchMyAreas();
-            } else {
-                alert('❌ Błąd podczas usuwania obszaru.');
-            }
+            alert('✅ Obszar został usunięty!');
+            await fetchMyAreas();
         } catch (error) {
-            console.error('Error deleting area:', error);
-            alert('❌ Nie udało się usunąć obszaru.');
+            alert('❌ Błąd podczas usuwania obszaru.');
         }
     } else if (itemType === 'product') {
         try {
-            const response = await fetch(`${API_URL}/products/${itemId}`, {
+            await fetch(`${API_URL}/products/${itemId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
-            if (response.ok) {
-                alert(`✅ Produkt został usunięty!`);
-                await fetchMyProducts();
-            } else {
-                const errorData = await response.json();
-                alert(`❌ Błąd: ${errorData.error || 'Nieznany błąd'}`);
-            }
+            alert('✅ Produkt został usunięty!');
+            await fetchMyProducts();
         } catch (error) {
-            console.error('Error deleting product:', error);
-            alert('❌ Nie udało się usunąć produktu.');
+            alert('❌ Błąd podczas usuwania produktu.');
         }
     }
-    const editAreaImageInput = document.getElementById('edit-area-image');
-    if (editAreaImageInput) {
-        editAreaImageInput.addEventListener('change', function() {
-            const fileName = this.files[0] ? this.files[0].name : 'Nie wybrano pliku';
-            this.closest('.image-upload-controls').querySelector('.selected-file-name').textContent = fileName;
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('edit-area-current-image').src = e.target.result;
-                };
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
-    }
-
-// Obsługa zmiany zdjęcia produktu
-    const editProductImageInput = document.getElementById('edit-product-image');
-    if (editProductImageInput) {
-        editProductImageInput.addEventListener('change', function() {
-            const fileName = this.files[0] ? this.files[0].name : 'Nie wybrano pliku';
-            this.closest('.image-upload-controls').querySelector('.selected-file-name').textContent = fileName;
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('edit-product-current-image').src = e.target.result;
-                };
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
-    }
-
-// Funkcja do konwersji pliku na Base64
-    function toBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(',')[1]); // Get Base64 string without prefix
-            reader.onerror = error => reject(error);
-            reader.readAsDataURL(file);
-        });
-    }
-
-// Obsługa wysyłania formularza edycji obszaru
-    const submitEditAreaBtn = document.querySelector('.submit-edit-area-btn');
-    if (submitEditAreaBtn) {
-        submitEditAreaBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
-
-            const form = document.getElementById('edit-area-form');
-            const formData = new FormData(form);
-            const areaId = document.getElementById('edit-area-id').value;
-            let imgBase64 = document.getElementById('edit-area-current-image').src.includes('base64')
-                ? document.getElementById('edit-area-current-image').src.split(',')[1] // Existing Base64
-                : null;
-
-            const imageFile = document.getElementById('edit-area-image').files[0];
-            if (imageFile) {
-                try {
-                    imgBase64 = await toBase64(imageFile);
-                } catch (error) {
-                    console.error('Error converting image to Base64:', error);
-                    alert('Błąd podczas przetwarzania zdjęcia. Spróbuj ponownie.');
-                    return;
-                }
-            }
-
-            const editAreaDTO = {
-                id: parseInt(areaId),
-                name: document.getElementById('edit-area-title').value,
-                imgBase64: imgBase64,
-                type: formData.get('flowers'),
-                maxHives: parseInt(formData.get('maxHives')) || 0,
-                pricePerDay: parseFloat(formData.get('price')) || 0,
-                description: formData.get('description'),
-                endDate: formData.get('dateTo'),
-                availabilityStatus: formData.get('status') === 'on' ? 'AVAILABLE' : 'UNAVAILABLE'
-            };
-
-            try {
-                const response = await fetch(`${API_URL}/editArea`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(editAreaDTO)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                alert('✅ Obszar został zaktualizowany!');
-                closeAllModals();
-                await fetchMyAreas();
-            } catch (error) {
-                console.error('Error updating area:', error);
-                alert('❌ Nie udało się zaktualizować obszaru. Sprawdź konsolę dla szczegółów.');
-            }
-        });
-    }
-
-// Obsługa wysyłania formularza edycji produktu
-    const submitEditProductBtn = document.querySelector('.submit-edit-product-btn');
-    if (submitEditProductBtn) {
-        submitEditProductBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
-
-            const productId = document.getElementById('edit-product-id').value;
-            let imgBase64 = document.getElementById('edit-product-current-image').src.includes('base64')
-                ? document.getElementById('edit-product-current-image').src.split(',')[1]
-                : null;
-
-            const imageFile = document.getElementById('edit-product-image').files[0];
-            if (imageFile) {
-                try {
-                    imgBase64 = await toBase64(imageFile);
-                } catch (error) {
-                    console.error('Error converting image to Base64:', error);
-                    alert('Błąd podczas przetwarzania zdjęcia. Spróbuj ponownie.');
-                    return;
-                }
-            }
-
-            const updateProductDTO = {
-                id: parseInt(productId),
-                name: document.getElementById('edit-product-title').value,
-                category: document.getElementById('edit-product-type').value,
-                stock: parseInt(document.getElementById('edit-product-quantity').value) || 0,
-                price: parseFloat(document.getElementById('edit-product-price').value) || 0,
-                description: document.getElementById('edit-product-description').value,
-                imgBase64: imgBase64,
-                available: document.getElementById('edit-product-status-switch').checked
-            };
-
-            try {
-                const response = await fetch(`${API_URL}/products`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(updateProductDTO)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Błąd podczas aktualizacji produktu');
-                }
-
-                alert('✅ Produkt został zaktualizowany!');
-                closeAllModals();
-                await fetchMyProducts();
-            } catch (error) {
-                console.error('Error updating product:', error);
-                alert(`❌ Nie udało się zaktualizować produktu: ${error.message}`);
-            }
-        });
-    }
     closeAllModals();
+}
+
+function toBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
 }
 
 // ==================== POMOCNICZE ====================
@@ -852,9 +909,7 @@ function formatDate(dateString) {
     if (!dateString) return 'Brak daty';
     const date = new Date(dateString);
     return date.toLocaleDateString('pl-PL', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
+        year: 'numeric', month: '2-digit', day: '2-digit'
     });
 }
 
@@ -890,22 +945,20 @@ async function loadMyBadges() {
             credentials: 'include'
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error('Błąd pobierania odznak');
 
         const badges = await response.json();
         displayMyBadges(badges);
 
     } catch (error) {
-        console.error('Error fetching badges:', error);
-        document.getElementById('my-badges-container').innerHTML =
-            '<p style="text-align: center; padding: 2rem; color: #999;">Nie udało się załadować odznak.</p>';
+        const container = document.getElementById('my-badges-container');
+        if (container) container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #999;">Nie udało się załadować odznak.</p>';
     }
 }
 
 function displayMyBadges(badges) {
     const container = document.getElementById('my-badges-container');
+    if (!container) return;
 
     if (!badges || badges.length === 0) {
         container.innerHTML = `
@@ -936,8 +989,8 @@ function displayMyBadges(badges) {
 }
 
 async function refreshBadges() {
-    // Pokaż spinner lub komunikat ładowania
     const container = document.getElementById('my-badges-container');
+    if (!container) return;
     const originalContent = container.innerHTML;
     container.innerHTML = `
         <div style="text-align: center; padding: 2rem;">
@@ -947,18 +1000,15 @@ async function refreshBadges() {
     `;
 
     try {
-        const response = await fetch(`${API_URL}/badges/my`, {
-            method: 'GET',
+        const response = await fetch(`${API_URL}/badges/check`, {
+            method: 'POST',
             credentials: 'include'
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error('Błąd odświeżania');
 
         const badges = await response.json();
 
-        // Animacja sukcesu
         container.innerHTML = `
             <div style="text-align: center; padding: 2rem;">
                 <i class="fas fa-check-circle" style="font-size: 48px; color: #51CF66;"></i>
@@ -966,7 +1016,6 @@ async function refreshBadges() {
             </div>
         `;
 
-        // Po chwili pokaż odznaki
         setTimeout(() => {
             displayMyBadges(badges);
         }, 1000);
@@ -974,6 +1023,6 @@ async function refreshBadges() {
     } catch (error) {
         console.error('Error refreshing badges:', error);
         container.innerHTML = originalContent;
-        alert('❌ Nie udało się odświeżyć odznak. Spróbuj ponownie później.');
+        alert('❌ Nie udało się odświeżyć odznak.');
     }
 }

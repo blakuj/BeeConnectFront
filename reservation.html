@@ -68,24 +68,35 @@
             color: white;
         }
 
+        /* Stylizacja sekcji zdjęć */
         .area-image {
-            height: 250px;
-            overflow: hidden;
+            /* Usunięto sztywne height, aby kontener dopasował się do zawartości */
+            min-height: 250px;
             background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
             display: flex;
+            flex-direction: column; /* Układ pionowy dla zdjęcia głównego i miniatur */
             align-items: center;
             justify-content: center;
         }
 
-        .area-image img {
+        .area-image img#main-area-img {
             width: 100%;
-            height: 100%;
+            height: 400px; /* Większa wysokość dla głównego zdjęcia */
             object-fit: cover;
         }
 
         .area-image-placeholder {
             font-size: 48px;
             color: #ccc;
+            padding: 100px 0;
+        }
+
+        /* Stylizacja miniatur */
+        #area-thumbs-container {
+            width: 100%;
+            background-color: #fff;
+            padding: 10px;
+            border-top: 1px solid #eee;
         }
 
         .area-quick-info {
@@ -743,7 +754,19 @@
 </head>
 <body>
 <header class="header">
-    <!-- Header content -->
+    <div class="logo-container">
+        <div class="logo">
+            <a href="home.html">
+                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
+            </a>
+        </div>
+        <div class="page-title">BeeConnect</div>
+    </div>
+    <div class="header-controls">
+        <button class="btn btn-outline back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Wróć
+        </button>
+    </div>
 </header>
 
 <div class="reservation-container">
@@ -766,7 +789,6 @@
             <i class="fas fa-image area-image-placeholder"></i>
         </div>
         <div class="area-rating-section" id="area-rating-section" style="display: none;">
-            <!-- Zostanie wypełnione przez JavaScript -->
         </div>
         <div class="area-quick-info">
             <div class="quick-info-item">
@@ -880,13 +902,11 @@
     <div class="tabs-content">
         <div class="tab-pane active" id="reviews-tab">
             <div id="reviews-container">
-                <!-- Opinie będą załadowane tutaj -->
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Szczegóły Obszaru -->
 <div id="details-modal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
@@ -935,7 +955,6 @@
     </div>
 </div>
 
-<!-- Modal Potwierdzenia -->
 <div id="confirmation-modal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
@@ -1055,49 +1074,49 @@
         `;
     }
 
-    // function displayAreaReviews() {
-    //     const tabsSection = document.getElementById('area-tabs-section');
-    //     const container = document.getElementById('reviews-container');
-    //
-    //     if (!container || !areaReviews || areaReviews.length === 0) return;
-    //
-    //     // Pokaż zakładkę
-    //     tabsSection.style.display = 'block';
-    //     document.getElementById('reviews-count-tab').textContent = currentArea.reviewCount;
-    //
-    //     container.innerHTML = `
-    //         <div class="reviews-summary">
-    //             <div class="rating-overview">
-    //                 <div class="rating-big">${currentArea.averageRating.toFixed(1)}</div>
-    //                 <div class="rating-stars-big">${renderStars(currentArea.averageRating)}</div>
-    //                 <div class="rating-count">Na podstawie ${currentArea.reviewCount} ${currentArea.reviewCount === 1 ? 'opinii' : 'opinii'}</div>
-    //             </div>
-    //         </div>
-    //         <div class="reviews-list">
-    //             ${areaReviews.map(review => `
-    //                 <div class="review-item">
-    //                     <div class="review-header">
-    //                         <div class="reviewer-info">
-    //                             <div class="reviewer-avatar">
-    //                                 <i class="fas fa-user-circle"></i>
-    //                             </div>
-    //                             <div>
-    //                                 <div class="reviewer-name">${review.reviewerFirstname} ${review.reviewerLastname}</div>
-    //                                 <div class="review-date">${formatDate(review.createdAt)}</div>
-    //                             </div>
-    //                         </div>
-    //                         <div class="review-rating">
-    //                             ${renderStars(review.rating)}
-    //                         </div>
-    //                     </div>
-    //                     <div class="review-content">
-    //                         <p>${review.comment}</p>
-    //                     </div>
-    //                 </div>
-    //             `).join('')}
-    //         </div>
-    //     `;
-    // }
+    function displayAreaReviews() {
+        const tabsSection = document.getElementById('area-tabs-section');
+        const container = document.getElementById('reviews-container');
+
+        if (!container || !areaReviews || areaReviews.length === 0) return;
+
+        // Pokaż zakładkę
+        tabsSection.style.display = 'block';
+        document.getElementById('reviews-count-tab').textContent = currentArea.reviewCount;
+
+        container.innerHTML = `
+            <div class="reviews-summary">
+                <div class="rating-overview">
+                    <div class="rating-big">${currentArea.averageRating.toFixed(1)}</div>
+                    <div class="rating-stars-big">${renderStars(currentArea.averageRating)}</div>
+                    <div class="rating-count">Na podstawie ${currentArea.reviewCount} ${currentArea.reviewCount === 1 ? 'opinii' : 'opinii'}</div>
+                </div>
+            </div>
+            <div class="reviews-list">
+                ${areaReviews.map(review => `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div>
+                                    <div class="reviewer-name">${review.reviewerFirstname} ${review.reviewerLastname}</div>
+                                    <div class="review-date">${formatDate(review.createdAt)}</div>
+                                </div>
+                            </div>
+                            <div class="review-rating">
+                                ${renderStars(review.rating)}
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <p>${review.comment}</p>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
 
     loadData();
 
@@ -1191,15 +1210,21 @@
         // Header
         document.getElementById('area-name').textContent = area.name || 'Obszar pszczelarski';
 
+        // Obsługa listy kwiatów
+        let flowersText = '-';
+        if (area.flowers && area.flowers.length > 0) {
+            flowersText = area.flowers.map(f => f.name).join(', ');
+        }
+
         // Quick info
-        document.getElementById('area-type-quick').textContent = area.type || '-';
+        document.getElementById('area-type-quick').textContent = flowersText;
         document.getElementById('area-size-quick').textContent = area.area ? area.area.toFixed(2) + ' ha' : '-';
         document.getElementById('area-hives-quick').textContent = area.maxHives || '-';
         document.getElementById('area-price-quick').textContent = area.pricePerDay ? area.pricePerDay.toFixed(2) + ' PLN' : '-';
 
         // Details modal data
         document.getElementById('detail-name').textContent = area.name || '-';
-        document.getElementById('detail-type').textContent = area.type || '-';
+        document.getElementById('detail-type').textContent = flowersText;
         document.getElementById('detail-size').textContent = area.area ? area.area.toFixed(2) + ' ha' : '-';
         document.getElementById('detail-hives').textContent = area.maxHives || '-';
         document.getElementById('detail-price').textContent = area.pricePerDay ? area.pricePerDay.toFixed(2) + ' PLN' : '-';
@@ -1209,10 +1234,39 @@
         document.getElementById('detail-available').textContent = area.availableFrom || '-';
         document.getElementById('detail-description').textContent = area.description || 'Brak opisu';
 
-        // Image
-        if (area.imgBase64) {
-            document.getElementById('area-image').innerHTML =
-                `<img src="data:image/jpeg;base64,${area.imgBase64}" alt="${area.name}">`;
+        // GALERIA ZDJĘĆ
+        const imageContainer = document.getElementById('area-image');
+        const images = (area.images && area.images.length > 0) ? area.images : null;
+
+        if (images) {
+            // Wyświetl pierwsze zdjęcie jako główne
+            const mainImgHtml = `<img id="main-area-img" src="data:image/jpeg;base64,${images[0]}" alt="${area.name}" style="width:100%; height:100%; object-fit:cover;">`;
+
+            // Jeśli jest więcej niż 1 zdjęcie, dodaj miniatury pod spodem
+            let thumbsHtml = '';
+            if (images.length > 1) {
+                thumbsHtml = `<div style="display:flex; gap:10px; padding:10px; overflow-x:auto;">
+                    ${images.map((img, i) => `
+                        <img src="data:image/jpeg;base64,${img}"
+                             onclick="document.getElementById('main-area-img').src = this.src"
+                             style="width:60px; height:60px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid #ddd;">
+                    `).join('')}
+                </div>`;
+            }
+
+            imageContainer.innerHTML = mainImgHtml;
+
+            // Sprawdźmy czy kontener miniatur już istnieje, jeśli nie to stwórzmy
+            let thumbsContainer = document.getElementById('area-thumbs-container');
+            if(!thumbsContainer) {
+                thumbsContainer = document.createElement('div');
+                thumbsContainer.id = 'area-thumbs-container';
+                imageContainer.parentNode.insertBefore(thumbsContainer, imageContainer.nextSibling);
+            }
+            thumbsContainer.innerHTML = thumbsHtml;
+
+        } else {
+            imageContainer.innerHTML = '<i class="fas fa-image area-image-placeholder"></i>';
         }
     }
 
@@ -1376,7 +1430,7 @@
             }
 
             alert('Rezerwacja pomyślna! Środki zostały pobrane z Twojego konta.');
-            window.location.href = 'profile.html?tab=rented';
+            window.location.href = 'profile.html?tab=rented-areas';
 
         } catch (error) {
             showError(error.message);
