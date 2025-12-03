@@ -40,14 +40,6 @@
             font-weight: 600;
         }
 
-        .area-status {
-            font-size: 14px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            background-color: rgba(143, 195, 31, 0.2);
-            color: var(--accent-dark);
-        }
-
         .view-details-btn {
             background: none;
             border: 1px solid var(--secondary);
@@ -68,35 +60,85 @@
             color: white;
         }
 
-        /* Stylizacja sekcji zdjęć */
-        .area-image {
-            /* Usunięto sztywne height, aby kontener dopasował się do zawartości */
-            min-height: 250px;
-            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-            display: flex;
-            flex-direction: column; /* Układ pionowy dla zdjęcia głównego i miniatur */
-            align-items: center;
-            justify-content: center;
+        /* --- NOWE STYLE GALERII (Spójne z Product Details) --- */
+        .area-gallery-container {
+            width: 100%;
+            background-color: #fff;
         }
 
-        .area-image img#main-area-img {
+        .area-image-main {
             width: 100%;
-            height: 400px; /* Większa wysokość dla głównego zdjęcia */
+            height: 400px;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .area-image-main img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+            transition: opacity 0.3s ease;
         }
 
         .area-image-placeholder {
-            font-size: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             color: #ccc;
-            padding: 100px 0;
+            height: 100%;
         }
 
-        /* Stylizacja miniatur */
-        #area-thumbs-container {
-            width: 100%;
+        .area-image-placeholder i {
+            font-size: 64px;
+            margin-bottom: 10px;
+        }
+
+        .area-thumbnails {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            overflow-x: auto;
             background-color: #fff;
-            padding: 10px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .area-thumbnail {
+            width: 80px;
+            height: 60px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .area-thumbnail.active {
+            border-color: #F2A900;
+            opacity: 1;
+        }
+
+        .area-thumbnail:hover {
+            opacity: 1;
+        }
+
+        .area-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* ---------------------------------------------------- */
+
+        .area-rating-section {
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
         }
 
         .area-quick-info {
@@ -105,6 +147,7 @@
             gap: 15px;
             padding: 20px;
             background: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
         }
 
         .quick-info-item {
@@ -558,13 +601,8 @@
             font-weight: 600;
             color: var(--secondary);
         }
-        /* ==================== GWIAZDKI I OPINIE ==================== */
-        .area-rating-section {
-            padding: 15px 20px;
-            background: #f9f9f9;
-            border-top: 1px solid #e0e0e0;
-        }
 
+        /* ==================== GWIAZDKI I OPINIE ==================== */
         .star-filled {
             color: #FFD700;
         }
@@ -785,11 +823,12 @@
             </button>
         </div>
 
-        <div class="area-image" id="area-image">
-            <i class="fas fa-image area-image-placeholder"></i>
+        <div class="area-gallery-container" id="area-gallery-container">
         </div>
+
         <div class="area-rating-section" id="area-rating-section" style="display: none;">
         </div>
+
         <div class="area-quick-info">
             <div class="quick-info-item">
                 <div class="quick-info-label">Typ</div>
@@ -1206,6 +1245,7 @@
         }
     }
 
+    // --- ZAKTUALIZOWANA FUNKCJA WYŚWIETLANIA GALERII OBSZARU ---
     function displayAreaDetails(area) {
         // Header
         document.getElementById('area-name').textContent = area.name || 'Obszar pszczelarski';
@@ -1235,40 +1275,53 @@
         document.getElementById('detail-description').textContent = area.description || 'Brak opisu';
 
         // GALERIA ZDJĘĆ
-        const imageContainer = document.getElementById('area-image');
+        const galleryContainer = document.getElementById('area-gallery-container');
         const images = (area.images && area.images.length > 0) ? area.images : null;
 
         if (images) {
-            // Wyświetl pierwsze zdjęcie jako główne
-            const mainImgHtml = `<img id="main-area-img" src="data:image/jpeg;base64,${images[0]}" alt="${area.name}" style="width:100%; height:100%; object-fit:cover;">`;
+            // Główne zdjęcie (pierwsze)
+            const mainImgHtml = `
+                <div class="area-image-main">
+                    <img id="main-area-img" src="data:image/jpeg;base64,${images[0]}" alt="${area.name}">
+                </div>
+            `;
 
-            // Jeśli jest więcej niż 1 zdjęcie, dodaj miniatury pod spodem
+            // Miniatury (jeśli więcej niż jedno)
             let thumbsHtml = '';
             if (images.length > 1) {
-                thumbsHtml = `<div style="display:flex; gap:10px; padding:10px; overflow-x:auto;">
-                    ${images.map((img, i) => `
-                        <img src="data:image/jpeg;base64,${img}"
-                             onclick="document.getElementById('main-area-img').src = this.src"
-                             style="width:60px; height:60px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid #ddd;">
-                    `).join('')}
-                </div>`;
+                thumbsHtml = `
+                    <div class="area-thumbnails">
+                        ${images.map((img, i) => `
+                            <div class="area-thumbnail ${i === 0 ? 'active' : ''}" 
+                                 onclick="changeMainAreaImage(this, '${img}')">
+                                <img src="data:image/jpeg;base64,${img}" alt="Miniatura ${i + 1}">
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             }
 
-            imageContainer.innerHTML = mainImgHtml;
-
-            // Sprawdźmy czy kontener miniatur już istnieje, jeśli nie to stwórzmy
-            let thumbsContainer = document.getElementById('area-thumbs-container');
-            if(!thumbsContainer) {
-                thumbsContainer = document.createElement('div');
-                thumbsContainer.id = 'area-thumbs-container';
-                imageContainer.parentNode.insertBefore(thumbsContainer, imageContainer.nextSibling);
-            }
-            thumbsContainer.innerHTML = thumbsHtml;
+            galleryContainer.innerHTML = mainImgHtml + thumbsHtml;
 
         } else {
-            imageContainer.innerHTML = '<i class="fas fa-image area-image-placeholder"></i>';
+            // Placeholder, gdy brak zdjęć
+            galleryContainer.innerHTML = `
+                <div class="area-image-main">
+                    <div class="area-image-placeholder">
+                        <i class="fas fa-image"></i>
+                        <p>Brak zdjęć obszaru</p>
+                    </div>
+                </div>
+            `;
         }
     }
+
+    // Funkcja globalna do zmiany głównego zdjęcia obszaru
+    window.changeMainAreaImage = function(element, base64) {
+        document.getElementById('main-area-img').src = `data:image/jpeg;base64,${base64}`;
+        document.querySelectorAll('.area-thumbnail').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+    };
 
     function showDetailsModal() {
         document.getElementById('details-modal').classList.add('show');

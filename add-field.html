@@ -35,6 +35,81 @@
             margin-right: 8px;
             margin-left: 5px;
         }
+
+        /* Style dla galerii zdjęć (identyczne jak w add-product) */
+        .image-preview-container {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .preview-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            min-height: 120px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px dashed #ddd;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            color: #dc3545;
+            transition: all 0.2s;
+        }
+
+        .preview-item .remove-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .empty-preview {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            padding: 20px 0;
+        }
+
+        .image-upload-controls {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -59,7 +134,7 @@
             <h4>Jak dodać nowy obszar:</h4>
             <p><span class="step">Krok 1:</span> Kliknij na mapie, aby umieścić pierwszy róg obszaru.</p>
             <p><span class="step">Krok 2:</span> Umieść pozostałe 3 punkty, aby utworzyć czworokąt.</p>
-            <p><span class="step">Krok 3:</span> Wybierz dostępne pożytki w formularzu.</p>
+            <p><span class="step">Krok 3:</span> Dodaj zdjęcia i wybierz pożytki w formularzu.</p>
             <p><span class="step">Krok 4:</span> Kliknij "Zapisz obszar".</p>
         </div>
 
@@ -77,6 +152,31 @@
     <div class="sidebar">
         <h3><i class="fas fa-info-circle"></i> Informacje o obszarze</h3>
         <form id="areaForm">
+            <div class="form-group">
+                <label>Zdjęcia obszaru:</label>
+                <div class="image-preview-container">
+                    <div class="preview-gallery" id="preview-gallery">
+                        <div class="empty-preview">
+                            <i class="fas fa-camera" style="font-size: 24px; margin-bottom: 5px;"></i>
+                            <span style="font-size: 12px;">Brak zdjęć</span>
+                        </div>
+                    </div>
+
+                    <div class="image-upload-controls">
+                        <label for="area-images" class="btn btn-outline" style="width: 100%; text-align: center; justify-content: center;">
+                            <i class="fas fa-upload"></i> Wybierz zdjęcia
+                        </label>
+                        <input type="file" id="area-images" name="images" accept="image/*" multiple style="display: none;">
+                    </div>
+                    <small style="display: block; margin-top: 5px; color: #777; font-size: 11px;">Możesz dodać wiele zdjęć. Format JPG/PNG.</small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nazwa obszaru:</label>
+                <input type="text" id="areaName" placeholder="Np. Łąka pod lasem" required>
+            </div>
+
             <div class="form-group">
                 <label>Dostępne pożytki (kwiaty):</label>
                 <div class="checkbox-grid" id="flowersContainer">
@@ -122,6 +222,9 @@
         { name: "Malina", color: "#FF69B4" }
     ];
 
+    // --- Stan zdjęć ---
+    let selectedFiles = [];
+
     // --- Inicjalizacja formularza kwiatów ---
     const flowersContainer = document.getElementById('flowersContainer');
     PREDEFINED_FLOWERS.forEach(flower => {
@@ -154,22 +257,77 @@
     var saveBtn = document.getElementById('saveBtn');
     var areaInput = document.getElementById('area');
 
-    // --- Funkcje pomocnicze ---
+    // --- Obsługa zdjęć ---
+    document.getElementById('area-images').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+
+        files.forEach(file => {
+            // Unikaj duplikatów
+            if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                selectedFiles.push(file);
+            }
+        });
+
+        updateImagePreview();
+        this.value = ''; // Reset inputa
+    });
+
+    function updateImagePreview() {
+        const gallery = document.getElementById('preview-gallery');
+        gallery.innerHTML = '';
+
+        if (selectedFiles.length === 0) {
+            gallery.innerHTML = `
+                <div class="empty-preview">
+                    <i class="fas fa-camera" style="font-size: 24px; margin-bottom: 5px;"></i>
+                    <span style="font-size: 12px;">Brak zdjęć</span>
+                </div>
+            `;
+            return;
+        }
+
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                item.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <div class="remove-btn" onclick="removeFile(${index})" title="Usuń">
+                        <i class="fas fa-times"></i>
+                    </div>
+                `;
+                gallery.appendChild(item);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    window.removeFile = function(index) {
+        selectedFiles.splice(index, 1);
+        updateImagePreview();
+    };
+
+    function filesToBase64List(files) {
+        return Promise.all(files.map(file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64String = reader.result.split(',')[1];
+                resolve(base64String);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        })));
+    }
+
+    // --- Funkcje mapy ---
     function calculateArea(points) {
         if (points.length < 3) return 0;
         var latlngs = points.map(marker => marker.getLatLng());
-        var tempPolygon = L.polygon(latlngs);
-        var areaInSquareMeters = L.GeometryUtil ? L.GeometryUtil.geodesicArea(tempPolygon.getLatLngs()[0]) : 0;
 
-        // Fallback dla braku GeometryUtil (proste przybliżenie)
-        if (!L.GeometryUtil) {
-            // Uproszczona kalkulacja dla płaskiej powierzchni (mniej dokładna)
-            // Tutaj lepiej użyć zewnętrznej biblioteki, ale dla demo wystarczy to co mamy
-            // W poprzednim kodzie był polyfill, użyjmy go
-            areaInSquareMeters = geodesicAreaPolyfill(latlngs);
-        }
-
-        return areaInSquareMeters / 10000;
+        // Uproszczona kalkulacja dla płaskiej powierzchni
+        var areaInSquareMeters = geodesicAreaPolyfill(latlngs);
+        return areaInSquareMeters / 10000; // m2 na hektary
     }
 
     function geodesicAreaPolyfill(latLngs) {
@@ -184,7 +342,6 @@
         return Math.abs(area);
     }
 
-    // --- Obsługa mapy ---
     map.on('click', function(e) {
         if (!drawing) return;
 
@@ -228,7 +385,7 @@
     });
 
     // --- WYSYŁANIE FORMULARZA ---
-    document.getElementById('areaForm').addEventListener('submit', function(e) {
+    document.getElementById('areaForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         // Zbieranie kwiatów
@@ -243,32 +400,47 @@
             return;
         }
 
-        var newArea = {
-            flowers: selectedFlowers,
-            coordinates: points.map(marker => [marker.getLatLng().lat, marker.getLatLng().lng]),
-            area: parseFloat(document.getElementById('area').value),
-            description: document.getElementById('description').value,
-            maxHives: parseInt(document.getElementById('maxHives').value),
-            pricePerDay: parseFloat(document.getElementById('pricePerDay').value)
-        };
+        const submitBtn = document.getElementById('saveBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Zapisywanie...';
 
-        fetch(`${API_BASE}/api/addArea`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(newArea),
-            credentials: 'include'
-        })
-            .then(response => {
-                if (response.ok) {
-                    alert('Obszar został dodany pomyślnie!');
-                    window.location.href = 'home.html';
-                } else {
-                    return response.text().then(text => { throw new Error(text || 'Błąd'); });
-                }
-            })
-            .catch(error => {
-                alert('Błąd: ' + error.message);
+        try {
+            // Konwersja zdjęć
+            let imagesBase64List = [];
+            if (selectedFiles.length > 0) {
+                imagesBase64List = await filesToBase64List(selectedFiles);
+            }
+
+            var newArea = {
+                name: document.getElementById('areaName').value, // Dodano pole name
+                flowers: selectedFlowers,
+                coordinates: points.map(marker => [marker.getLatLng().lat, marker.getLatLng().lng]),
+                area: parseFloat(document.getElementById('area').value),
+                description: document.getElementById('description').value,
+                maxHives: parseInt(document.getElementById('maxHives').value),
+                pricePerDay: parseFloat(document.getElementById('pricePerDay').value),
+                images: imagesBase64List // Wysyłanie listy zdjęć
+            };
+
+            const response = await fetch(`${API_BASE}/api/addArea`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(newArea),
+                credentials: 'include'
             });
+
+            if (response.ok) {
+                alert('Obszar został dodany pomyślnie!');
+                window.location.href = 'home.html';
+            } else {
+                const text = await response.text();
+                throw new Error(text || 'Błąd serwera');
+            }
+        } catch(error) {
+            alert('Błąd: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Zapisz obszar';
+        }
     });
 </script>
 </body>

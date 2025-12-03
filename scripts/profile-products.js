@@ -13,6 +13,15 @@ const PREDEFINED_FLOWERS = [
     { name: "Malina", color: "#FF69B4" }
 ];
 
+// --- Stan plików dla EDYCJI OBSZARU ---
+let editAreaFiles = []; // Nowe pliki (File objects)
+let editAreaExistingImages = []; // Istniejące zdjęcia (Base64 strings)
+
+// --- Stan plików dla EDYCJI PRODUKTU ---
+let editProductFiles = []; // Nowe pliki (File objects)
+let editProductExistingImages = []; // Istniejące zdjęcia (Base64 strings)
+
+
 // ==================== INICJALIZACJA ====================
 document.addEventListener('DOMContentLoaded', async function() {
     await loadUserProfile();
@@ -82,11 +91,15 @@ async function fetchMyAreas() {
                 ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
                 : 'Brak lokalizacji';
 
-            // Obsługa listy kwiatów
             let flowersText = 'Brak danych';
             if (area.flowers && area.flowers.length > 0) {
                 flowersText = area.flowers.map(f => f.name).join(', ');
             }
+
+            // Używamy pierwszego zdjęcia jako miniatury lub default
+            const thumbnail = (area.images && area.images.length > 0)
+                ? `data:image/jpeg;base64,${area.images[0]}`
+                : 'assets/default-area.jpg';
 
             const card = `
                 <div class="card" data-area-id="${area.id || ''}">
@@ -95,9 +108,7 @@ async function fetchMyAreas() {
                         <div class="card-header-status ${statusClass}">${status}</div>
                     </div>
                     <div class="area-preview">
-                        <img src="${area.imgBase64 ? `data:image/jpeg;base64,${area.imgBase64}` : 'assets/default-area.jpg'}"
-                             alt="Podgląd obszaru"
-                             onerror="this.src='assets/default-area.jpg'">
+                        <img src="${thumbnail}" alt="Podgląd obszaru">
                     </div>
                     <div class="card-body">
                         <div class="card-property">
@@ -126,9 +137,6 @@ async function fetchMyAreas() {
                                 <i class="fas fa-trash-alt"></i> Usuń
                             </button>
                         ` : `
-                            <button class="btn btn-primary card-btn activate-area-btn" data-id="${area.id || ''}">
-                                <i class="fas fa-check"></i> Aktywuj
-                            </button>
                             <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
                                 <i class="fas fa-trash-alt"></i> Usuń
                             </button>
@@ -170,6 +178,10 @@ async function fetchRentedAreas() {
                 ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
                 : 'Brak lokalizacji';
 
+            const thumbnail = (area.images && area.images.length > 0)
+                ? `data:image/jpeg;base64,${area.images[0]}`
+                : 'assets/default-area.jpg';
+
             const card = `
                 <div class="card" data-area-id="${area.id || ''}">
                     <div class="card-header">
@@ -177,8 +189,7 @@ async function fetchRentedAreas() {
                         <div class="card-header-status ${statusClass}">${status}</div>
                     </div>
                     <div class="area-preview">
-                        <img src="${area.imgBase64 ? `data:image/jpeg;base64,${area.imgBase64}` : 'assets/default-area.jpg'}"
-                             alt="Podgląd obszaru">
+                        <img src="${thumbnail}" alt="Podgląd obszaru">
                     </div>
                     <div class="card-body">
                         <div class="card-property">
@@ -251,6 +262,10 @@ async function fetchMyProducts() {
             const statusClass = product.available ? 'card-status-active' : 'card-status-inactive';
             const categoryName = translateProductCategory(product.category);
 
+            const thumbnail = (product.images && product.images.length > 0)
+                ? `data:image/jpeg;base64,${product.images[0]}`
+                : 'assets/default-product.jpg';
+
             const card = `
                 <div class="card" data-product-id="${product.id || ''}">
                     <div class="card-header">
@@ -258,8 +273,7 @@ async function fetchMyProducts() {
                         <div class="card-header-status ${statusClass}">${status}</div>
                     </div>
                     <div class="area-preview">
-                        <img src="${product.imageBase64 ? `data:image/jpeg;base64,${product.imageBase64}` : 'assets/default-product.jpg'}"
-                             alt="Zdjęcie produktu">
+                        <img src="${thumbnail}" alt="Zdjęcie produktu">
                     </div>
                     <div class="card-body">
                         <div class="card-property">
@@ -340,6 +354,10 @@ async function loadMyPurchases() {
                     <i class="fas fa-check-circle"></i> Oceniono
                    </div>`;
 
+            const thumbnail = order.productImage
+                ? `data:image/jpeg;base64,${order.productImage}`
+                : 'assets/default-product.jpg';
+
             const card = `
                 <div class="card">
                     <div class="card-header">
@@ -347,8 +365,7 @@ async function loadMyPurchases() {
                         <div class="card-header-status card-status-active">Zakupiono</div>
                     </div>
                     <div class="area-preview">
-                        <img src="${order.productImage ? `data:image/jpeg;base64,${order.productImage}` : 'assets/default-product.jpg'}" 
-                             alt="${order.productName}">
+                        <img src="${thumbnail}" alt="${order.productName}">
                     </div>
                     <div class="card-body">
                         <div class="card-property">
@@ -392,91 +409,131 @@ async function loadMyPurchases() {
     }
 }
 
-// ==================== WYSYŁANIE OPINII ====================
-async function submitProductReview() {
-    const orderId = parseInt(document.getElementById('product-review-order-id').value);
-    const rating = parseInt(document.getElementById('product-review-rating').value);
-    const comment = document.getElementById('product-review-content').value.trim();
+// ==================== ZARZĄDZANIE GALERIĄ ZDJĘĆ ====================
 
-    if (!comment || comment.length < 10) {
-        alert('⚠️ Proszę wpisać opinię (minimum 10 znaków).');
+// Funkcja globalna do usuwania zdjęcia z edycji obszaru (wywoływana z onclick w HTML)
+window.removeEditAreaFile = function(index, isExisting) {
+    if (isExisting) {
+        editAreaExistingImages.splice(index, 1);
+    } else {
+        editAreaFiles.splice(index, 1);
+    }
+    updateEditAreaPreview();
+};
+
+// Funkcja globalna do usuwania zdjęcia z edycji produktu (wywoływana z onclick w HTML)
+window.removeEditProductFile = function(index, isExisting) {
+    if (isExisting) {
+        editProductExistingImages.splice(index, 1);
+    } else {
+        editProductFiles.splice(index, 1);
+    }
+    updateEditProductPreview();
+};
+
+function updateEditAreaPreview() {
+    const gallery = document.getElementById('edit-area-gallery');
+    gallery.innerHTML = '';
+
+    if (editAreaExistingImages.length === 0 && editAreaFiles.length === 0) {
+        gallery.innerHTML = `
+            <div class="empty-preview">
+                <i class="fas fa-images" style="font-size: 24px; margin-bottom: 5px;"></i>
+                <span>Brak zdjęć</span>
+            </div>
+        `;
         return;
     }
 
-    if (rating < 1 || rating > 5) {
-        alert('⚠️ Ocena musi być w zakresie 1-5.');
-        return;
-    }
+    // Wyświetl istniejące zdjęcia
+    editAreaExistingImages.forEach((imgBase64, index) => {
+        const item = document.createElement('div');
+        item.className = 'preview-item existing';
+        item.title = 'Istniejące zdjęcie';
+        item.innerHTML = `
+            <img src="data:image/jpeg;base64,${imgBase64}" alt="Existing">
+            <div class="remove-btn" onclick="removeEditAreaFile(${index}, true)" title="Usuń">
+                <i class="fas fa-times"></i>
+            </div>
+        `;
+        gallery.appendChild(item);
+    });
 
-    try {
-        const response = await fetch(`${API_URL}/reviews/products`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                orderId: orderId,
-                rating: rating,
-                comment: comment
-            })
-        });
-
-        if (response.ok) {
-            alert('✅ Dziękujemy za opinię!');
-            closeAllModals();
-            await loadMyPurchases();
-        } else {
-            const error = await response.json();
-            alert('❌ Błąd: ' + (error.error || 'Nie udało się wysłać opinii.'));
-        }
-    } catch (error) {
-        console.error('Error submitting review:', error);
-        alert('❌ Wystąpił błąd podczas wysyłania opinii.');
-    }
+    // Wyświetl nowe zdjęcia
+    editAreaFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            item.innerHTML = `
+                <img src="${e.target.result}" alt="New">
+                <div class="remove-btn" onclick="removeEditAreaFile(${index}, false)" title="Usuń">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            gallery.appendChild(item);
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
-async function submitAreaReview() {
-    const reservationId = parseInt(document.getElementById('area-review-reservation-id').value);
-    const rating = parseInt(document.getElementById('area-review-rating').value);
-    const comment = document.getElementById('area-review-content').value.trim();
+function updateEditProductPreview() {
+    const gallery = document.getElementById('edit-product-gallery');
+    gallery.innerHTML = '';
 
-    if (!comment || comment.length < 10) {
-        alert('⚠️ Proszę wpisać opinię (minimum 10 znaków).');
+    if (editProductExistingImages.length === 0 && editProductFiles.length === 0) {
+        gallery.innerHTML = `
+            <div class="empty-preview">
+                <i class="fas fa-images" style="font-size: 24px; margin-bottom: 5px;"></i>
+                <span>Brak zdjęć</span>
+            </div>
+        `;
         return;
     }
 
-    if (rating < 1 || rating > 5) {
-        alert('⚠️ Ocena musi być w zakresie 1-5.');
-        return;
-    }
+    // Wyświetl istniejące zdjęcia
+    editProductExistingImages.forEach((imgBase64, index) => {
+        const item = document.createElement('div');
+        item.className = 'preview-item existing';
+        item.title = 'Istniejące zdjęcie';
+        item.innerHTML = `
+            <img src="data:image/jpeg;base64,${imgBase64}" alt="Existing">
+            <div class="remove-btn" onclick="removeEditProductFile(${index}, true)" title="Usuń">
+                <i class="fas fa-times"></i>
+            </div>
+        `;
+        gallery.appendChild(item);
+    });
 
-    try {
-        const response = await fetch(`${API_URL}/reviews/areas`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                reservationId: reservationId,
-                rating: rating,
-                comment: comment
-            })
-        });
+    // Wyświetl nowe zdjęcia
+    editProductFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            item.innerHTML = `
+                <img src="${e.target.result}" alt="New">
+                <div class="remove-btn" onclick="removeEditProductFile(${index}, false)" title="Usuń">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            gallery.appendChild(item);
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
-        if (response.ok) {
-            alert('✅ Dziękujemy za opinię!');
-            closeAllModals();
-            await fetchRentedAreas();
-        } else {
-            const error = await response.json();
-            alert('❌ Błąd: ' + (error.error || 'Nie udało się wysłać opinii.'));
-        }
-    } catch (error) {
-        console.error('Error submitting review:', error);
-        alert('❌ Wystąpił błąd podczas wysyłania opinii.');
-    }
+// Helper: Konwersja wielu plików na Base64 (taki sam jak w add-product.html)
+function filesToBase64List(files) {
+    return Promise.all(files.map(file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    })));
 }
 
 // ==================== EVENT LISTENERS ====================
@@ -491,8 +548,10 @@ function setupEventListeners() {
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
             const tabId = this.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
+            const tabElement = document.getElementById(tabId);
+            if (tabElement) tabElement.classList.add('active');
 
+            // Logika ładowania danych dla zakładek
             if (tabId === 'products') {
                 await fetchMyProducts();
             } else if (tabId === 'bought-products') {
@@ -507,6 +566,7 @@ function setupEventListeners() {
         });
     });
 
+    // Gwiazdki w modalach opinii
     document.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', function() {
             const value = parseInt(this.getAttribute('data-value'));
@@ -524,6 +584,7 @@ function setupEventListeners() {
         });
     });
 
+    // Modale
     document.querySelectorAll('.modal-close, .close-modal-btn').forEach(btn => {
         btn.addEventListener('click', closeAllModals);
     });
@@ -557,34 +618,37 @@ function setupEventListeners() {
         submitEditProductBtn.onclick = handleEditProductSubmit;
     }
 
-    // Obsługa zmiany zdjęcia
+    // Obsługa wyboru plików w modalach (inputy z 'multiple')
     const editAreaImageInput = document.getElementById('edit-area-image');
     if (editAreaImageInput) {
-        editAreaImageInput.addEventListener('change', handleFilePreview);
+        editAreaImageInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                if (!editAreaFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    editAreaFiles.push(file);
+                }
+            });
+            updateEditAreaPreview();
+            this.value = ''; // Reset inputa
+        });
     }
 
     const editProductImageInput = document.getElementById('edit-product-image');
     if (editProductImageInput) {
-        editProductImageInput.addEventListener('change', handleFilePreview);
+        editProductImageInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                if (!editProductFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    editProductFiles.push(file);
+                }
+            });
+            updateEditProductPreview();
+            this.value = ''; // Reset inputa
+        });
     }
 }
 
-function handleFilePreview() {
-    const file = this.files[0];
-    const targetImgId = this.id === 'edit-area-image' ? 'edit-area-current-image' : 'edit-product-current-image';
-    const nameSpan = this.closest('.image-upload-controls').querySelector('.selected-file-name');
-
-    if (file) {
-        nameSpan.textContent = file.name;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById(targetImgId).src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-// Zaktualizowana funkcja setupAreaButtons dla obsługi wielu kwiatów
+// Funkcja setupAreaButtons - wypełnianie modalu edycji obszaru
 function setupAreaButtons() {
     document.querySelectorAll('.edit-area-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -596,7 +660,7 @@ function setupAreaButtons() {
             const statusSwitch = document.getElementById('edit-area-status-switch');
             if (statusSwitch) statusSwitch.checked = area.status === 'AVAILABLE';
 
-            document.getElementById('edit-area-size-display').textContent = `${area.area.toFixed(2)} ha`;
+            document.getElementById('edit-area-size-display').textContent = `${(area.area || 0).toFixed(2)} ha`;
 
             const location = area.coordinates && area.coordinates.length > 0
                 ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
@@ -628,12 +692,14 @@ function setupAreaButtons() {
             document.getElementById('edit-area-price').value = area.pricePerDay || '';
             document.getElementById('edit-area-description').value = area.description || '';
 
-            const currentImage = document.getElementById('edit-area-current-image');
-            if(currentImage) {
-                currentImage.src = area.imgBase64
-                    ? `data:image/jpeg;base64,${area.imgBase64}`
-                    : 'assets/default-area.jpg';
+            // Obsługa zdjęć - reset i załadowanie istniejących
+            editAreaFiles = []; // Wyczyść nowe pliki
+            editAreaExistingImages = []; // Wyczyść listę istniejących
+
+            if (area.images && Array.isArray(area.images)) {
+                editAreaExistingImages = [...area.images]; // Kopia tablicy
             }
+            updateEditAreaPreview();
 
             openModal('edit-area-modal');
         });
@@ -668,6 +734,7 @@ function setupAreaReviewButtons() {
     });
 }
 
+// Funkcja setupProductButtons - wypełnianie modalu edycji produktu
 function setupProductButtons() {
     document.querySelectorAll('.edit-product-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -685,12 +752,14 @@ function setupProductButtons() {
             document.getElementById('edit-product-price').value = product.price || 0;
             document.getElementById('edit-product-description').value = product.description || '';
 
-            const currentImage = document.getElementById('edit-product-current-image');
-            if(currentImage) {
-                currentImage.src = product.imageBase64
-                    ? `data:image/jpeg;base64,${product.imageBase64}`
-                    : 'assets/default-product.jpg';
+            // Obsługa zdjęć - reset i załadowanie istniejących
+            editProductFiles = [];
+            editProductExistingImages = [];
+
+            if (product.images && Array.isArray(product.images)) {
+                editProductExistingImages = [...product.images];
             }
+            updateEditProductPreview();
 
             openModal('edit-product-modal');
         });
@@ -733,16 +802,6 @@ function setupProductReviewButtons() {
 
 // ==================== ZAPIS DANYCH (HANDLERS) ====================
 
-// Funkcja pomocnicza do konwersji wielu plików
-function convertFilesToBase64(files) {
-    return Promise.all(Array.from(files).map(file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    })));
-}
-
 // Obsługa zapisu edycji obszaru
 async function handleEditAreaSubmit(e) {
     e.preventDefault();
@@ -751,23 +810,19 @@ async function handleEditAreaSubmit(e) {
     const formData = new FormData(form);
     const areaId = document.getElementById('edit-area-id').value;
 
-    // Obsługa zdjęć (starych i nowych)
-    let imagesList = null;
-    const imageFiles = document.getElementById('edit-area-image').files;
+    // Przetwarzanie zdjęć:
+    // 1. Weź istniejące (te, których user nie usunął)
+    const finalImagesList = [...editAreaExistingImages];
 
-    if (imageFiles.length > 0) {
-        // Jeśli wybrano nowe pliki, konwertujemy je na listę Base64
+    // 2. Skonwertuj i dodaj nowe
+    if (editAreaFiles.length > 0) {
         try {
-            imagesList = await convertFilesToBase64(imageFiles);
+            const newImagesBase64 = await filesToBase64List(editAreaFiles);
+            finalImagesList.push(...newImagesBase64);
         } catch (error) {
-            alert('Błąd podczas przetwarzania zdjęć.');
+            alert('Błąd podczas przetwarzania nowych zdjęć.');
             return;
         }
-    } else {
-        // Jeśli nie wybrano nowych plików, wysyłamy null (backend nie rusza zdjęć)
-        // LUB jeśli chcemy zachować kompatybilność z polem imgBase64 (starym)
-        // to backend i tak obsłuży to po swojemu.
-        imagesList = null;
     }
 
     // Zbieranie zaznaczonych kwiatów
@@ -785,9 +840,8 @@ async function handleEditAreaSubmit(e) {
     const editAreaDTO = {
         id: parseInt(areaId),
         name: document.getElementById('edit-area-title').value,
-        // imgBase64: imgBase64, // To pole jest ignorowane przez nowy backend dla zdjęć, ale może być używane do podglądu
-        images: imagesList, // <-- Nowa lista zdjęć
-        flowers: selectedFlowers, // Wysyłamy listę obiektów
+        images: finalImagesList, // <-- Połączona lista zdjęć (stare + nowe)
+        flowers: selectedFlowers,
         maxHives: parseInt(formData.get('maxHives')) || 0,
         pricePerDay: parseFloat(formData.get('price')) || 0,
         description: formData.get('description'),
@@ -820,12 +874,13 @@ async function handleEditProductSubmit(e) {
 
     const productId = document.getElementById('edit-product-id').value;
 
-    let imagesList = null;
-    const imageFiles = document.getElementById('edit-product-image').files;
+    // Przetwarzanie zdjęć:
+    const finalImagesList = [...editProductExistingImages];
 
-    if (imageFiles.length > 0) {
+    if (editProductFiles.length > 0) {
         try {
-            imagesList = await convertFilesToBase64(imageFiles);
+            const newImagesBase64 = await filesToBase64List(editProductFiles);
+            finalImagesList.push(...newImagesBase64);
         } catch (error) {
             alert('Błąd przetwarzania zdjęć');
             return;
@@ -841,7 +896,7 @@ async function handleEditProductSubmit(e) {
         stock: parseInt(document.getElementById('edit-product-quantity').value) || 0,
         price: parseFloat(document.getElementById('edit-product-price').value) || 0,
         description: document.getElementById('edit-product-description').value,
-        images: imagesList, // <-- Nowa lista zdjęć
+        images: finalImagesList, // <-- Połączona lista zdjęć
         available: statusSwitch ? statusSwitch.checked : true
     };
 
@@ -864,7 +919,74 @@ async function handleEditProductSubmit(e) {
     }
 }
 
-// ==================== USUWANIE I PLIKI ====================
+// ==================== INNE FUNKCJE ====================
+
+// Review submitting functions (takie same jak wcześniej)
+async function submitProductReview() {
+    const orderId = parseInt(document.getElementById('product-review-order-id').value);
+    const rating = parseInt(document.getElementById('product-review-rating').value);
+    const comment = document.getElementById('product-review-content').value.trim();
+
+    if (!comment || comment.length < 10) {
+        alert('⚠️ Proszę wpisać opinię (minimum 10 znaków).');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/reviews/products`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ orderId, rating, comment })
+        });
+
+        if (response.ok) {
+            alert('✅ Dziękujemy za opinię!');
+            closeAllModals();
+            await loadMyPurchases();
+        } else {
+            const error = await response.json();
+            alert('❌ Błąd: ' + (error.error || 'Nie udało się wysłać opinii.'));
+        }
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        alert('❌ Wystąpił błąd podczas wysyłania opinii.');
+    }
+}
+
+async function submitAreaReview() {
+    const reservationId = parseInt(document.getElementById('area-review-reservation-id').value);
+    const rating = parseInt(document.getElementById('area-review-rating').value);
+    const comment = document.getElementById('area-review-content').value.trim();
+
+    if (!comment || comment.length < 10) {
+        alert('⚠️ Proszę wpisać opinię (minimum 10 znaków).');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/reviews/areas`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ reservationId, rating, comment })
+        });
+
+        if (response.ok) {
+            alert('✅ Dziękujemy za opinię!');
+            closeAllModals();
+            await fetchRentedAreas();
+        } else {
+            const error = await response.json();
+            alert('❌ Błąd: ' + (error.error || 'Nie udało się wysłać opinii.'));
+        }
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        alert('❌ Wystąpił błąd podczas wysyłania opinii.');
+    }
+}
+
+// Delete handlers
 async function handleDelete() {
     const itemId = document.getElementById('delete-item-id').value;
     const itemType = document.getElementById('delete-item-type').value;
@@ -895,16 +1017,7 @@ async function handleDelete() {
     closeAllModals();
 }
 
-function toBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-    });
-}
-
-// ==================== POMOCNICZE ====================
+// Helpers
 function formatDate(dateString) {
     if (!dateString) return 'Brak daty';
     const date = new Date(dateString);
@@ -921,14 +1034,6 @@ function openModal(modalId) {
     }
 }
 
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
 function closeAllModals() {
     document.querySelectorAll('.modal-overlay').forEach(modal => {
         modal.style.display = 'none';
@@ -936,8 +1041,7 @@ function closeAllModals() {
     document.body.style.overflow = 'auto';
 }
 
-// ==================== ODZNAKI ====================
-
+// Odznaki
 async function loadMyBadges() {
     try {
         const response = await fetch(`${API_URL}/badges/my`, {

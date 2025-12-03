@@ -9,6 +9,91 @@
     <link rel="stylesheet" href="styles/styles.css">
     <script src="scripts/auth.js"></script>
     <script src="scripts/profile-products.js"></script>
+    <style>
+        /* Style dla galerii w modalach edycji */
+        .image-preview-container {
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .preview-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            min-height: 120px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px dashed #ddd;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: #fff;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            color: #dc3545;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .preview-item .remove-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .preview-item.existing {
+            border: 2px solid #F2A900; /* Oznaczenie istniejących zdjęć */
+        }
+
+        .empty-preview {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            padding: 20px 0;
+        }
+
+        .image-upload-controls {
+            width: 100%;
+        }
+
+        .image-upload-btn {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
 <div class="header">
@@ -256,19 +341,23 @@
         <div class="modal-body">
             <form id="edit-area-form">
                 <div class="form-group image-upload-top">
-                    <label>Zdjęcie obszaru:</label>
+                    <label>Zdjęcia obszaru:</label>
                     <div class="image-preview-container">
-                        <div class="image-preview">
-                            <img id="edit-area-current-image" src="assets/default-area.jpg" alt="Zdjęcie obszaru">
+                        <div class="preview-gallery" id="edit-area-gallery">
+                            <div class="empty-preview">
+                                <i class="fas fa-images" style="font-size: 24px; margin-bottom: 5px;"></i>
+                                <span>Brak zdjęć</span>
+                            </div>
                         </div>
+
                         <div class="image-upload-controls">
                             <label for="edit-area-image" class="btn btn-outline image-upload-btn">
-                                <i class="fas fa-upload"></i> Wybierz zdjęcie
+                                <i class="fas fa-upload"></i> Wybierz zdjęcia
                             </label>
-                            <input type="file" id="edit-area-image" name="image" accept="image/*" style="display: none;">
-                            <span class="selected-file-name">Nie wybrano pliku</span>
+                            <input type="file" id="edit-area-image" name="image" accept="image/*" multiple style="display: none;">
                         </div>
                     </div>
+                    <small style="display: block; margin-top: 5px; color: #777; font-size: 11px;">Możesz dodać nowe zdjęcia lub usunąć istniejące.</small>
                 </div>
                 <div class="form-group">
                     <label for="edit-area-title">Nazwa obszaru:</label>
@@ -341,19 +430,23 @@
         <div class="modal-body">
             <form id="edit-product-form">
                 <div class="form-group image-upload-top">
-                    <label>Zdjęcie produktu:</label>
+                    <label>Zdjęcia produktu:</label>
                     <div class="image-preview-container">
-                        <div class="image-preview">
-                            <img id="edit-product-current-image" src="/api/placeholder/600/400" alt="Zdjęcie produktu">
+                        <div class="preview-gallery" id="edit-product-gallery">
+                            <div class="empty-preview">
+                                <i class="fas fa-images" style="font-size: 24px; margin-bottom: 5px;"></i>
+                                <span>Brak zdjęć</span>
+                            </div>
                         </div>
+
                         <div class="image-upload-controls">
                             <label for="edit-product-image" class="btn btn-outline image-upload-btn">
-                                <i class="fas fa-upload"></i> Wybierz zdjęcie
+                                <i class="fas fa-upload"></i> Wybierz zdjęcia
                             </label>
-                            <input type="file" id="edit-product-image" name="image" accept="image/*" style="display: none;">
-                            <span class="selected-file-name">Nie wybrano pliku</span>
+                            <input type="file" id="edit-product-image" name="image" accept="image/*" multiple style="display: none;">
                         </div>
                     </div>
+                    <small style="display: block; margin-top: 5px; color: #777; font-size: 11px;">Możesz dodać nowe zdjęcia lub usunąć istniejące.</small>
                 </div>
                 <div class="form-group">
                     <label for="edit-product-title">Nazwa produktu:</label>
@@ -375,7 +468,7 @@
                     <select id="edit-product-type" name="type">
                         <option value="HONEY">Miód</option>
                         <option value="POLLEN">Pyłek pszczeli</option>
-                        <option value="WAX">Wosk</option>
+                        <option value="WAX">Wosk pszczeli</option>
                         <option value="PROPOLIS">Propolis</option>
                         <option value="BEE_BREAD">Pierzga</option>
                         <option value="ROYAL_JELLY">Mleczko pszczele</option>
@@ -403,104 +496,5 @@
         </div>
     </div>
 </div>
-
-<style>
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .status-badge.reviewed {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .stars-container {
-        display: flex;
-        gap: 0.5rem;
-        margin: 1rem 0;
-    }
-
-    .star {
-        font-size: 2rem;
-        color: #ddd;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .star.active {
-        color: #FFD700;
-    }
-
-    .star:hover {
-        transform: scale(1.1);
-    }
-
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .modal {
-        background: white;
-        border-radius: 12px;
-        max-width: 500px;
-        width: 90%;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-
-    .modal-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .modal-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #333;
-    }
-
-    .modal-close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: #999;
-    }
-
-    .modal-close:hover {
-        color: #333;
-    }
-
-    .modal-body {
-        padding: 1.5rem;
-    }
-
-    .modal-footer {
-        padding: 1rem 1.5rem;
-        border-top: 1px solid #eee;
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-    }
-</style>
 </body>
 </html>

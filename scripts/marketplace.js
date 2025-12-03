@@ -86,12 +86,10 @@ function displayProducts() {
 }
 
 function createProductCard(product) {
-    const imageUrl = product.imageBase64
-        ? `data:image/jpeg;base64,${product.imageBase64}`
+    // ZMIANA: Obsługa listy zdjęć zamiast pojedynczego pola
+    const imageUrl = (product.images && product.images.length > 0)
+        ? `data:image/jpeg;base64,${product.images[0]}`
         : 'assets/default-product.jpg';
-
-
-console.log(imageUrl);
 
     const rating = product.rating || 0;
     const reviewCount = product.reviewCount || 0;
@@ -490,79 +488,3 @@ function updateUserInfo(user) {
         welcomeMessage.textContent = `Witaj, ${user.firstname}!`;
     }
 }
-
-// CSS dla spinnera
-const style = document.createElement('style');
-style.textContent = `
-    .spinner {
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid var(--primary);
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-        margin: 0 auto;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
-    .unavailable-badge {
-        background-color: #ff6b6b !important;
-    }
-    
-    .out-of-stock-badge {
-        background-color: #999 !important;
-    }
-    
-    .low-stock-badge {
-        background-color: #ffa500 !important;
-    }
-    
-    .product-card.unavailable {
-        opacity: 0.6;
-    }
-    
-    .product-description {
-        font-size: 13px;
-        color: #666;
-        margin: 8px 0;
-        line-height: 1.4;
-    }
-    
-    .product-meta {
-        display: flex;
-        gap: 12px;
-        font-size: 12px;
-        color: #888;
-        margin: 8px 0;
-    }
-    
-    .product-meta span {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-    
-    .product-seller {
-        font-size: 12px;
-        color: #666;
-        margin: 8px 0;
-        padding: 6px 10px;
-        background-color: #f8f9fa;
-        border-radius: 4px;
-    }
-    
-    .product-seller i {
-        color: var(--primary);
-        margin-right: 4px;
-    }
-    
-    .btn-block {
-        width: 100%;
-        margin-top: 10px;
-    }
-`;
-document.head.appendChild(style);

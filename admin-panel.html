@@ -7,6 +7,85 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* === STYLE GALERII ZDJĘĆ (NOWE) === */
+        .area-gallery-container {
+            width: 100%;
+            background-color: #fff;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .area-image-main {
+            width: 100%;
+            height: 300px;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .area-image-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+
+        .area-image-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            height: 100%;
+        }
+
+        .area-image-placeholder i {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .area-thumbnails {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            overflow-x: auto;
+            background-color: #fff;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .area-thumbnail {
+            width: 70px;
+            height: 50px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .area-thumbnail.active {
+            border-color: #F2A900; /* Kolor primary */
+            opacity: 1;
+        }
+
+        .area-thumbnail:hover {
+            opacity: 1;
+        }
+
+        .area-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* ===================================== */
+
         .modal-overlay {
             display: none;
             position: fixed;
@@ -437,36 +516,6 @@
             gap: 8px;
         }
 
-        /* Document preview */
-        .document-preview {
-            height: 120px;
-            background-color: #e9e9e9;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .document-preview img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .document-preview .placeholder {
-            color: var(--medium);
-            font-size: 12px;
-            text-align: center;
-        }
-
-        .document-icon {
-            margin-right: 8px;
-            font-size: 16px;
-        }
-
         /* Area preview in card */
         .area-preview {
             height: 120px;
@@ -640,88 +689,6 @@
             font-size: 14px;
             color: var(--medium);
             line-height: 1.4;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 9999;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: var(--white);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            width: 90%;
-            max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            padding: 20px;
-            background-color: var(--secondary);
-            color: var(--white);
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 18px;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: rgba(255, 255, 255, 0.8);
-            transition: var(--transition);
-        }
-
-        .modal-close:hover {
-            color: var(--white);
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-footer {
-            padding: 16px 20px;
-            background-color: #f9f9f9;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        /* Document viewer */
-        .document-viewer {
-            background-color: #f0f0f0;
-            border-radius: var(--radius);
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .document-viewer img {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 4px;
-            box-shadow: var(--shadow);
         }
 
         /* Form Groups */
@@ -917,966 +884,838 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="logo-container">
-            <div class="logo">
-                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
-            </div>
-            <div class="page-title">BeeConnect <span class="admin-badge">Admin Panel</span></div>
+<div class="header">
+    <div class="logo-container">
+        <div class="logo">
+            <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
         </div>
-        <div class="header-controls">
-            <div class="welcome-message">Administrator: Dawid Pasieka</div>
-        </div>
+        <div class="page-title">BeeConnect <span class="admin-badge">Admin Panel</span></div>
     </div>
+    <div class="header-controls">
+        <div class="welcome-message">Administrator: Dawid Pasieka</div>
+    </div>
+</div>
 
-    <!-- Main Content -->
-    <div class="admin-container">
-        <!-- Sidebar -->
-        <div class="admin-sidebar">
-            <div class="admin-info">
-                <div class="admin-avatar">
-                    <img src="assets/default-avatar.png" alt="Avatar administratora">
-                </div>
-                <div>
-                    <div class="admin-name">Dawid Pasieka</div>
-                    <div class="admin-email">admin@beeconnect.pl</div>
-                </div>
-                <div class="admin-status">Administrator</div>
+<div class="admin-container">
+    <div class="admin-sidebar">
+        <div class="admin-info">
+            <div class="admin-avatar">
+                <img src="assets/default-avatar.png" alt="Avatar administratora">
             </div>
-            <div class="sidebar-nav">
-                <a href="#" class="sidebar-nav-item" data-tab="dashboard">
-                    <i class="fas fa-chart-line"></i>
-                    Pulpit
-                </a>
-                <a href="#" class="sidebar-nav-item active" data-tab="verify-beekeepers">
-                    <i class="fas fa-user-check"></i>
-                    Weryfikacja Pszczelarzy
-                </a>
-                <a href="#" class="sidebar-nav-item" data-tab="manage-areas">
-                    <i class="fas fa-map-marked-alt"></i>
-                    Zarządzanie Obszarami
-                </a>
-                <a href="#" class="sidebar-nav-item" data-tab="manage-users">
-                    <i class="fas fa-users"></i>
-                    Zarządzanie Użytkownikami
-                </a>
-                <a href="#" class="sidebar-nav-item" data-tab="system-settings">
-                    <i class="fas fa-cog"></i>
-                    Ustawienia Systemu
-                </a>
+            <div>
+                <div class="admin-name">Dawid Pasieka</div>
+                <div class="admin-email">admin@beeconnect.pl</div>
             </div>
-            <a href="logout.html" class="btn btn-outline logout-btn">
-                <i class="fas fa-sign-out-alt"></i>
-                Wyloguj się
+            <div class="admin-status">Administrator</div>
+        </div>
+        <div class="sidebar-nav">
+            <a href="#" class="sidebar-nav-item" data-tab="dashboard">
+                <i class="fas fa-chart-line"></i>
+                Pulpit
+            </a>
+            <a href="#" class="sidebar-nav-item active" data-tab="verify-beekeepers">
+                <i class="fas fa-user-check"></i>
+                Weryfikacja Pszczelarzy
+            </a>
+            <a href="#" class="sidebar-nav-item" data-tab="manage-areas">
+                <i class="fas fa-map-marked-alt"></i>
+                Zarządzanie Obszarami
+            </a>
+            <a href="#" class="sidebar-nav-item" data-tab="manage-users">
+                <i class="fas fa-users"></i>
+                Zarządzanie Użytkownikami
+            </a>
+            <a href="#" class="sidebar-nav-item" data-tab="system-settings">
+                <i class="fas fa-cog"></i>
+                Ustawienia Systemu
             </a>
         </div>
+        <a href="logout.html" class="btn btn-outline logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            Wyloguj się
+        </a>
+    </div>
 
-        <!-- Content -->
-        <div class="admin-content">
-            <!-- ==================== ZAKTUALIZOWANA ZAKŁADKA: DASHBOARD (PULPIT) ==================== -->
-            <!-- Zastąp istniejącą zawartość <div class="tab-content" id="dashboard"> tym fragmentem -->
+    <div class="admin-content">
+        <div class="tab-content" id="dashboard">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Pulpit</h1>
+            </div>
 
-            <div class="tab-content" id="dashboard">
-                <div class="dashboard-heading">
-                    <h1 class="dashboard-title">Pulpit</h1>
-                </div>
-
-                <!-- Statystyki -->
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-primary">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-value">0</div>
-                        <div class="stat-label">Zarejestrowanych użytkowników</div>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-primary">
+                        <i class="fas fa-users"></i>
                     </div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Zarejestrowanych użytkowników</div>
+                </div>
 
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-success">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-value">0</div>
-                        <div class="stat-label">Zweryfikowanych pszczelarzy</div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-success">
+                        <i class="fas fa-check-circle"></i>
                     </div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Zweryfikowanych pszczelarzy</div>
+                </div>
 
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-warning">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stat-value">0</div>
-                        <div class="stat-label">Oczekujących wniosków weryfikacyjnych</div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-warning">
+                        <i class="fas fa-clock"></i>
                     </div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Oczekujących wniosków weryfikacyjnych</div>
+                </div>
 
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-primary">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="stat-value">0</div>
-                        <div class="stat-label">Zarejestrowanych obszarów</div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-primary">
+                        <i class="fas fa-map-marker-alt"></i>
                     </div>
-                </div>
-
-                <!-- Najnowsze wnioski weryfikacyjne -->
-                <div class="dashboard-heading">
-                    <h2 class="dashboard-title">Najnowsze wnioski weryfikacyjne</h2>
-                </div>
-
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                        <tr>
-                            <th>Użytkownik</th>
-                            <th>Email</th>
-                            <th>Data złożenia</th>
-                            <th>Nazwa pasieki</th>
-                            <th>Status</th>
-                            <th>Akcje</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 20px;">
-                                <i class="fas fa-spinner fa-spin"></i> Ładowanie...
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- NOWA SEKCJA: Ostatnio dodane obszary -->
-                <div class="dashboard-heading" style="margin-top: 40px;">
-                    <h2 class="dashboard-title">Ostatnio dodane obszary</h2>
-                </div>
-
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                        <tr>
-                            <th>Nazwa obszaru</th>
-                            <th>Typ pożytku</th>
-                            <th>Właściciel</th>
-                            <th>Powierzchnia</th>
-                            <th>Cena/dzień</th>
-                            <th>Status</th>
-                            <th>Akcje</th>
-                        </tr>
-                        </thead>
-                        <tbody id="recent-areas-table">
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 20px;">
-                                <i class="fas fa-spinner fa-spin"></i> Ładowanie...
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Zarejestrowanych obszarów</div>
                 </div>
             </div>
 
-            <!-- Verify Beekeepers Tab -->
-            <div class="tab-content active" id="verify-beekeepers">
-                <div class="dashboard-heading">
-                    <h1 class="dashboard-title">Weryfikacja Pszczelarzy</h1>
-                </div>
+            <div class="dashboard-heading">
+                <h2 class="dashboard-title">Najnowsze wnioski weryfikacyjne</h2>
+            </div>
 
-                <div class="search-container">
-                    <input type="text" class="search-input" placeholder="Szukaj według nazwiska, e-maila lub nazwy pasieki...">
-                    <button class="search-btn">
-                        <i class="fas fa-search"></i>
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>Użytkownik</th>
+                        <th>Email</th>
+                        <th>Data złożenia</th>
+                        <th>Nazwa pasieki</th>
+                        <th>Status</th>
+                        <th>Akcje</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">
+                            <i class="fas fa-spinner fa-spin"></i> Ładowanie...
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="dashboard-heading" style="margin-top: 40px;">
+                <h2 class="dashboard-title">Ostatnio dodane obszary</h2>
+            </div>
+
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>Nazwa obszaru</th>
+                        <th>Typ pożytku</th>
+                        <th>Właściciel</th>
+                        <th>Powierzchnia</th>
+                        <th>Cena/dzień</th>
+                        <th>Status</th>
+                        <th>Akcje</th>
+                    </tr>
+                    </thead>
+                    <tbody id="recent-areas-table">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            <i class="fas fa-spinner fa-spin"></i> Ładowanie...
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content active" id="verify-beekeepers">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Weryfikacja Pszczelarzy</h1>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Szukaj według nazwiska, e-maila lub nazwy pasieki...">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div class="filter-container">
+                <button class="filter-btn active" data-filter="all">Wszystkie</button>
+                <button class="filter-btn" data-filter="pending">Oczekujące</button>
+                <button class="filter-btn" data-filter="approved">Zatwierdzone</button>
+                <button class="filter-btn" data-filter="rejected">Odrzucone</button>
+            </div>
+
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>Użytkownik</th>
+                        <th>E-mail</th>
+                        <th>Data wniosku</th>
+                        <th>Nazwa pasieki</th>
+                        <th>Status</th>
+                        <th>Akcje</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="manage-areas" style="display: none;">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Zarządzanie Obszarami</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="refreshAreas()">
+                        <i class="fas fa-sync-alt"></i> Odśwież
                     </button>
-                </div>
-
-                <div class="filter-container">
-                    <button class="filter-btn active">Wszystkie</button>
-                    <button class="filter-btn">Oczekujące</button>
-                    <button class="filter-btn">Zatwierdzone</button>
-                    <button class="filter-btn">Odrzucone</button>
-                </div>
-
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Użytkownik</th>
-                                <th>E-mail</th>
-                                <th>Data wniosku</th>
-                                <th>Nazwa pasieki</th>
-                                <th>Status</th>
-                                <th>Akcje</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-
-                        </tbody>
-                    </table>
                 </div>
             </div>
 
-            <!-- ==================== ZAKTUALIZOWANA ZAKŁADKA: ZARZĄDZANIE OBSZARAMI ==================== -->
-            <!-- Zastępuje poprzednią wersję - usunięto przycisk "Edytuj", poprawiono modal usuwania -->
+            <div class="filter-container">
+                <button class="filter-btn active" data-filter-areas="all">
+                    <i class="fas fa-globe"></i> Wszystkie (<span id="count-all">0</span>)
+                </button>
+                <button class="filter-btn" data-filter-areas="available">
+                    <i class="fas fa-check-circle"></i> Dostępne (<span id="count-available">0</span>)
+                </button>
+                <button class="filter-btn" data-filter-areas="unavailable">
+                    <i class="fas fa-ban"></i> Niedostępne (<span id="count-unavailable">0</span>)
+                </button>
+            </div>
 
-            <div class="tab-content" id="manage-areas" style="display: none;">
-                <div class="dashboard-heading">
-                    <h1 class="dashboard-title">Zarządzanie Obszarami</h1>
-                    <div class="header-actions">
-                        <button class="btn btn-primary" onclick="refreshAreas()">
-                            <i class="fas fa-sync-alt"></i> Odśwież
-                        </button>
+            <div class="stats-container" style="margin-bottom: 30px;">
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-primary">
+                        <i class="fas fa-map-marked-alt"></i>
                     </div>
+                    <div class="stat-value" id="total-areas-stat">0</div>
+                    <div class="stat-label">Wszystkie obszary</div>
                 </div>
-
-                <!-- Filtry statusu -->
-                <div class="filter-container">
-                    <button class="filter-btn active" data-filter-areas="all">
-                        <i class="fas fa-globe"></i> Wszystkie (<span id="count-all">0</span>)
-                    </button>
-                    <button class="filter-btn" data-filter-areas="available">
-                        <i class="fas fa-check-circle"></i> Dostępne (<span id="count-available">0</span>)
-                    </button>
-                    <button class="filter-btn" data-filter-areas="unavailable">
-                        <i class="fas fa-ban"></i> Niedostępne (<span id="count-unavailable">0</span>)
-                    </button>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value" id="available-areas-stat">0</div>
+                    <div class="stat-label">Dostępne</div>
                 </div>
-
-                <!-- Statystyki obszarów -->
-                <div class="stats-container" style="margin-bottom: 30px;">
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-primary">
-                            <i class="fas fa-map-marked-alt"></i>
-                        </div>
-                        <div class="stat-value" id="total-areas-stat">0</div>
-                        <div class="stat-label">Wszystkie obszary</div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-warning">
+                        <i class="fas fa-hourglass-half"></i>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-success">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-value" id="available-areas-stat">0</div>
-                        <div class="stat-label">Dostępne</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-warning">
-                            <i class="fas fa-hourglass-half"></i>
-                        </div>
-                        <div class="stat-value" id="rented-areas-stat">0</div>
-                        <div class="stat-label">Wynajęte</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-info">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                        <div class="stat-value" id="avg-price-stat">0 PLN</div>
-                        <div class="stat-label">Średnia cena/dzień</div>
-                    </div>
+                    <div class="stat-value" id="rented-areas-stat">0</div>
+                    <div class="stat-label">Wynajęte</div>
                 </div>
-
-                <!-- Kontener kart obszarów -->
-                <div class="card-container" id="areas-container">
-                    <!-- Obszary będą wstawiane dynamicznie -->
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">
-                        <i class="fas fa-spinner fa-spin fa-3x"></i>
-                        <p style="margin-top: 20px;">Ładowanie obszarów...</p>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-info">
+                        <i class="fas fa-dollar-sign"></i>
                     </div>
+                    <div class="stat-value" id="avg-price-stat">0 PLN</div>
+                    <div class="stat-label">Średnia cena/dzień</div>
                 </div>
             </div>
 
-            <!-- ==================== MODAL: SZCZEGÓŁY OBSZARU ==================== -->
-            <div class="modal-overlay" id="area-details-modal" style="display: none;">
-                <div class="modal-container" style="max-width: 800px;">
-                    <div class="modal-header">
-                        <h2 class="modal-title">Szczegóły obszaru</h2>
-                        <button class="modal-close" onclick="closeModal('area-details-modal')">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body" id="area-details-content">
-                        <!-- Dynamiczna zawartość -->
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline" onclick="closeModal('area-details-modal')">
-                            <i class="fas fa-times"></i> Zamknij
-                        </button>
-                    </div>
+            <div class="card-container" id="areas-container">
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">
+                    <i class="fas fa-spinner fa-spin fa-3x"></i>
+                    <p style="margin-top: 20px;">Ładowanie obszarów...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="manage-users" style="display: none;">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Zarządzanie Użytkownikami</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="refreshUsers()">
+                        <i class="fas fa-sync-alt"></i> Odśwież
+                    </button>
                 </div>
             </div>
 
-            <!-- ==================== MODAL: POTWIERDZENIE USUNIĘCIA (POPRAWIONY) ==================== -->
-            <div class="modal-overlay" id="delete-area-admin-modal" style="display: none;">
-                <div class="modal-container" style="max-width: 500px;">
-                    <div class="modal-header">
-                        <h2 class="modal-title">Potwierdź usunięcie</h2>
-                        <button class="modal-close" onclick="closeModal('delete-area-admin-modal')">
-                            <i class="fas fa-times"></i>
-                        </button>
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Szukaj użytkownika po nazwie, emailu lub roli...">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div class="filter-container">
+                <button class="filter-btn active" data-filter-users="all">
+                    <i class="fas fa-users"></i> Wszyscy (<span id="count-all-users">0</span>)
+                </button>
+                <button class="filter-btn" data-filter-users="admins">
+                    <i class="fas fa-shield-alt"></i> Administratorzy (<span id="count-admins">0</span>)
+                </button>
+                <button class="filter-btn" data-filter-users="beekeepers">
+                    <i class="fas fa-user-check"></i> Pszczelarze (<span id="count-beekeepers">0</span>)
+                </button>
+                <button class="filter-btn" data-filter-users="users">
+                    <i class="fas fa-user"></i> Użytkownicy (<span id="count-users">0</span>)
+                </button>
+            </div>
+
+            <div class="stats-container" style="margin-bottom: 30px;">
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-primary">
+                        <i class="fas fa-users"></i>
                     </div>
-                    <div class="modal-body">
-                        <input type="hidden" id="delete-area-id">
-                        <p style="font-size: 16px; margin-bottom: 20px;">
-                            Czy na pewno chcesz usunąć obszar <strong id="delete-area-name-display">ten obszar</strong>?
-                        </p>
-                        <p style="color: #e74c3c; font-size: 14px;">
-                            <i class="fas fa-exclamation-triangle"></i> Ta operacja jest nieodwracalna!
-                        </p>
+                    <div class="stat-value" id="total-users-stat">0</div>
+                    <div class="stat-label">Wszyscy użytkownicy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-danger">
+                        <i class="fas fa-shield-alt"></i>
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline" onclick="closeModal('delete-area-admin-modal')">
-                            Anuluj
-                        </button>
-                        <button class="btn btn-danger" onclick="confirmDeleteArea()">
-                            <i class="fas fa-trash"></i> Usuń obszar
-                        </button>
+                    <div class="stat-value" id="admins-count-stat">0</div>
+                    <div class="stat-label">Administratorzy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-success">
+                        <i class="fas fa-user-check"></i>
                     </div>
+                    <div class="stat-value" id="beekeepers-count-stat">0</div>
+                    <div class="stat-label">Zweryfikowani pszczelarze</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-warning">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="stat-value" id="regular-users-stat">0</div>
+                    <div class="stat-label">Zwykli użytkownicy</div>
                 </div>
             </div>
 
-            <!-- Style dla modali (jeśli nie ma w głównym CSS) -->
-            <style>
-                .modal-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background-color: rgba(0, 0, 0, 0.5);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 9999;
-                    padding: 20px;
-                }
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Użytkownik</th>
+                        <th>Email</th>
+                        <th>Telefon</th>
+                        <th>Data rejestracji</th>
+                        <th>Rola</th>
+                        <th>Akcje</th>
+                    </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            <i class="fas fa-spinner fa-spin"></i> Ładowanie...
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-                .modal-container {
-                    background-color: white;
-                    border-radius: 12px;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-                    max-height: 90vh;
-                    overflow-y: auto;
-                    width: 100%;
-                    animation: modalSlideIn 0.3s ease;
-                }
-
-                @keyframes modalSlideIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-50px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-
-                .modal-header {
-                    padding: 24px;
-                    border-bottom: 1px solid #eee;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-
-                .modal-title {
-                    font-size: 22px;
-                    font-weight: 600;
-                    color: var(--secondary);
-                    margin: 0;
-                }
-
-                .modal-close {
-                    background: none;
-                    border: none;
-                    font-size: 24px;
-                    color: #999;
-                    cursor: pointer;
-                    padding: 0;
-                    width: 32px;
-                    height: 32px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 4px;
-                    transition: all 0.2s ease;
-                }
-
-                .modal-close:hover {
-                    background-color: #f5f5f5;
-                    color: #333;
-                }
-
-                .modal-body {
-                    padding: 24px;
-                }
-
-                .modal-footer {
-                    padding: 16px 24px;
-                    border-top: 1px solid #eee;
-                    display: flex;
-                    gap: 12px;
-                    justify-content: flex-end;
-                }
-
-                .area-details-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 20px;
-                    margin-bottom: 20px;
-                }
-
-                .area-detail-item {
-                    padding: 12px;
-                    background-color: #f9f9f9;
-                    border-radius: 6px;
-                }
-
-                .area-detail-label {
-                    font-size: 12px;
-                    color: #666;
-                    margin-bottom: 4px;
-                    text-transform: uppercase;
-                    font-weight: 600;
-                }
-
-                .area-detail-value {
-                    font-size: 16px;
-                    color: #333;
-                    font-weight: 500;
-                }
-
-                .area-image-preview {
-                    width: 100%;
-                    max-height: 300px;
-                    object-fit: cover;
-                    border-radius: 8px;
-                    margin-bottom: 20px;
-                }
-
-                @media (max-width: 768px) {
-                    .area-details-grid {
-                        grid-template-columns: 1fr;
-                    }
-                }
-            </style>
-
-            <!-- ==================== ZAKŁADKA: ZARZĄDZANIE UŻYTKOWNIKAMI ==================== -->
-            <!-- Zastąp całą zawartość <div class="tab-content" id="manage-users"> tym kodem -->
-
-            <div class="tab-content" id="manage-users" style="display: none;">
-                <div class="dashboard-heading">
-                    <h1 class="dashboard-title">Zarządzanie Użytkownikami</h1>
-                    <div class="header-actions">
-                        <button class="btn btn-primary" onclick="refreshUsers()">
-                            <i class="fas fa-sync-alt"></i> Odśwież
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Wyszukiwarka -->
-                <div class="search-container">
-                    <input type="text" class="search-input" placeholder="Szukaj użytkownika po nazwie, emailu lub roli...">
-                    <button class="search-btn">
-                        <i class="fas fa-search"></i>
+        <div class="modal-overlay" id="user-details-modal" style="display: none;">
+            <div class="modal-container" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h2 class="modal-title">Szczegóły użytkownika</h2>
+                    <button class="modal-close" onclick="closeModal('user-details-modal')">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
-
-                <!-- Filtry ról -->
-                <div class="filter-container">
-                    <button class="filter-btn active" data-filter-users="all">
-                        <i class="fas fa-users"></i> Wszyscy (<span id="count-all-users">0</span>)
-                    </button>
-                    <button class="filter-btn" data-filter-users="admins">
-                        <i class="fas fa-shield-alt"></i> Administratorzy (<span id="count-admins">0</span>)
-                    </button>
-                    <button class="filter-btn" data-filter-users="beekeepers">
-                        <i class="fas fa-user-check"></i> Pszczelarze (<span id="count-beekeepers">0</span>)
-                    </button>
-                    <button class="filter-btn" data-filter-users="users">
-                        <i class="fas fa-user"></i> Użytkownicy (<span id="count-users">0</span>)
-                    </button>
+                <div class="modal-body" id="user-details-content">
                 </div>
-
-                <!-- Statystyki użytkowników -->
-                <div class="stats-container" style="margin-bottom: 30px;">
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-primary">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-value" id="total-users-stat">0</div>
-                        <div class="stat-label">Wszyscy użytkownicy</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-danger">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="stat-value" id="admins-count-stat">0</div>
-                        <div class="stat-label">Administratorzy</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-success">
-                            <i class="fas fa-user-check"></i>
-                        </div>
-                        <div class="stat-value" id="beekeepers-count-stat">0</div>
-                        <div class="stat-label">Zweryfikowani pszczelarze</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon-warning">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="stat-value" id="regular-users-stat">0</div>
-                        <div class="stat-label">Zwykli użytkownicy</div>
-                    </div>
-                </div>
-
-                <!-- Tabela użytkowników -->
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Użytkownik</th>
-                            <th>Email</th>
-                            <th>Telefon</th>
-                            <th>Data rejestracji</th>
-                            <th>Rola</th>
-                            <th>Akcje</th>
-                        </tr>
-                        </thead>
-                        <tbody id="users-table-body">
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 20px;">
-                                <i class="fas fa-spinner fa-spin"></i> Ładowanie...
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeModal('user-details-modal')">
+                        <i class="fas fa-times"></i> Zamknij
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <!-- ==================== MODAL: SZCZEGÓŁY UŻYTKOWNIKA ==================== -->
-            <div class="modal-overlay" id="user-details-modal" style="display: none;">
-                <div class="modal-container" style="max-width: 700px;">
-                    <div class="modal-header">
-                        <h2 class="modal-title">Szczegóły użytkownika</h2>
-                        <button class="modal-close" onclick="closeModal('user-details-modal')">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body" id="user-details-content">
-                        <!-- Dynamiczna zawartość -->
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline" onclick="closeModal('user-details-modal')">
-                            <i class="fas fa-times"></i> Zamknij
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <style>
+            .user-details-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                margin-top: 20px;
+            }
 
-            <!-- ==================== STYLE DLA SZCZEGÓŁÓW UŻYTKOWNIKA ==================== -->
-            <style>
+            .user-detail-item {
+                padding: 16px;
+                background-color: #f9f9f9;
+                border-radius: 8px;
+                transition: all 0.2s ease;
+            }
+
+            .user-detail-item:hover {
+                background-color: #f0f0f0;
+                transform: translateY(-2px);
+            }
+
+            .user-detail-label {
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 6px;
+                text-transform: uppercase;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }
+
+            .user-detail-value {
+                font-size: 15px;
+                color: #333;
+                font-weight: 500;
+                word-break: break-word;
+            }
+
+            @media (max-width: 768px) {
                 .user-details-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 16px;
-                    margin-top: 20px;
+                    grid-template-columns: 1fr;
                 }
+            }
+        </style>
 
-                .user-detail-item {
-                    padding: 16px;
-                    background-color: #f9f9f9;
-                    border-radius: 8px;
-                    transition: all 0.2s ease;
-                }
+        <div class="tab-content" id="system-settings">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Ustawienia Systemu</h1>
+            </div>
 
-                .user-detail-item:hover {
-                    background-color: #f0f0f0;
-                    transform: translateY(-2px);
-                }
-
-                .user-detail-label {
-                    font-size: 12px;
-                    color: #666;
-                    margin-bottom: 6px;
-                    text-transform: uppercase;
-                    font-weight: 600;
-                    letter-spacing: 0.5px;
-                }
-
-                .user-detail-value {
-                    font-size: 15px;
-                    color: #333;
-                    font-weight: 500;
-                    word-break: break-word;
-                }
-
-                /* Ikony statusów */
-                .stat-icon-danger {
-                    background: linear-gradient(135deg, #e74c3c, #c0392b);
-                }
-
-                @media (max-width: 768px) {
-                    .user-details-grid {
-                        grid-template-columns: 1fr;
-                    }
-                }
-            </style>
-
-            <!-- System Settings Tab -->
-            <div class="tab-content" id="system-settings">
-                <div class="dashboard-heading">
-                    <h1 class="dashboard-title">Ustawienia Systemu</h1>
+            <div class="card">
+                <div class="card-header card-header-secondary">
+                    <div class="card-header-title">Ustawienia ogólne</div>
                 </div>
-
-                <!-- Ta sekcja będzie zawierać ustawienia systemu -->
-                <div class="card">
-                    <div class="card-header card-header-secondary">
-                        <div class="card-header-title">Ustawienia ogólne</div>
-                    </div>
-                    <div class="card-body">
-                        <p>Ta sekcja zawiera ustawienia konfiguracyjne platformy BeeConnect.</p>
-                    </div>
+                <div class="card-body">
+                    <p>Ta sekcja zawiera ustawienia konfiguracyjne platformy BeeConnect.</p>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ==================== MODAL: SZCZEGÓŁY WERYFIKACJI PSZCZELARZA ==================== -->
-    <!-- DODAJ TEN KOD PO MODALACH (przed zamknięciem main-content lub przed końcem body) -->
-
-    <div class="modal-overlay" id="verification-details-modal" style="display: none;">
-        <div class="modal-container" style="max-width: 900px;">
-            <div class="modal-header">
-                <h2 class="modal-title">Szczegóły wniosku weryfikacyjnego</h2>
-                <button class="modal-close" onclick="closeModal('verification-details-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Podstawowe informacje -->
-                <div class="card" style="margin-bottom: 20px;">
-                    <div class="card-header card-header-primary">
-                        <div class="card-header-title">Informacje o wnioskodawcy</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Imię i nazwisko:</div>
-                            <div class="card-property-value" data-field="fullname">-</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Email:</div>
-                            <div class="card-property-value" data-field="email">-</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Telefon:</div>
-                            <div class="card-property-value" data-field="phone">-</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Data złożenia wniosku:</div>
-                            <div class="card-property-value" data-field="creationDate">-</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Informacje o pasiece -->
-                <div class="card" style="margin-bottom: 20px;">
-                    <div class="card-header card-header-secondary">
-                        <div class="card-header-title">Informacje o pasiece</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Nazwa pasieki:</div>
-                            <div class="card-property-value" data-field="beeGardenName">-</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Adres pasieki:</div>
-                            <div class="card-property-value" data-field="beeGardenAddress">-</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Liczba uli:</div>
-                            <div class="card-property-value" data-field="hiveCount">-</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Doświadczenie (lata):</div>
-                            <div class="card-property-value" data-field="yearsOfExperience">-</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dokumenty -->
-                <div class="card" style="margin-bottom: 20px;">
-                    <div class="card-header card-header-secondary">
-                        <div class="card-header-title">Dokumenty</div>
-                    </div>
-                    <div class="card-body" data-field="documents">
-                        <p>Ładowanie dokumentów...</p>
-                    </div>
-                </div>
-
-                <!-- Status weryfikacji -->
-                <div class="card" style="margin-bottom: 20px;">
-                    <div class="card-header card-header-secondary">
-                        <div class="card-header-title">Status weryfikacji</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Aktualny status:</div>
-                            <div class="card-property-value" data-field="status">-</div>
-                        </div>
-                        <div class="form-group" style="margin-top: 15px;">
-                            <label for="verification-notes">Notatki / Powód decyzji:</label>
-                            <textarea id="verification-notes" class="form-control" rows="4" placeholder="Dodaj komentarz..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ukryte pole z ID weryfikacji -->
-                <input type="hidden" id="current-verification-id" value="">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('verification-details-modal')">
-                    <i class="fas fa-times"></i> Anuluj
-                </button>
-                <button class="btn btn-danger reject-verification-btn" onclick="handleVerificationDecision('REJECTED')">
-                    <i class="fas fa-times-circle"></i> Odrzuć
-                </button>
-                <button class="btn btn-success approve-verification-btn" onclick="handleVerificationDecision('APPROVED')">
-                    <i class="fas fa-check-circle"></i> Zatwierdź
-                </button>
-            </div>
+<div class="modal-overlay" id="area-details-modal" style="display: none;">
+    <div class="modal-container" style="max-width: 800px;">
+        <div class="modal-header">
+            <h2 class="modal-title">Szczegóły obszaru</h2>
+            <button class="modal-close" onclick="closeModal('area-details-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="area-details-content">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('area-details-modal')">
+                <i class="fas fa-times"></i> Zamknij
+            </button>
         </div>
     </div>
+</div>
 
-    <style>
-        /* Style dla formularzy w modalu */
-        .form-group {
-            margin-bottom: 15px;
+<div class="modal-overlay" id="delete-area-admin-modal" style="display: none;">
+    <div class="modal-container" style="max-width: 500px;">
+        <div class="modal-header">
+            <h2 class="modal-title">Potwierdź usunięcie</h2>
+            <button class="modal-close" onclick="closeModal('delete-area-admin-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="delete-area-id">
+            <p style="font-size: 16px; margin-bottom: 20px;">
+                Czy na pewno chcesz usunąć obszar <strong id="delete-area-name-display">ten obszar</strong>?
+            </p>
+            <p style="color: #e74c3c; font-size: 14px;">
+                <i class="fas fa-exclamation-triangle"></i> Ta operacja jest nieodwracalna!
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('delete-area-admin-modal')">
+                Anuluj
+            </button>
+            <button class="btn btn-danger" onclick="confirmDeleteArea()">
+                <i class="fas fa-trash"></i> Usuń obszar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="verification-details-modal" style="display: none;">
+    <div class="modal-container" style="max-width: 900px;">
+        <div class="modal-header">
+            <h2 class="modal-title">Szczegóły wniosku weryfikacyjnego</h2>
+            <button class="modal-close" onclick="closeModal('verification-details-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header card-header-primary">
+                    <div class="card-header-title">Informacje o wnioskodawcy</div>
+                </div>
+                <div class="card-body">
+                    <div class="card-property">
+                        <div class="card-property-label">Imię i nazwisko:</div>
+                        <div class="card-property-value" data-field="fullname">-</div>
+                    </div>
+                    <div class="card-property">
+                        <div class="card-property-label">Email:</div>
+                        <div class="card-property-value" data-field="email">-</div>
+                    </div>
+                    <div class="card-property">
+                        <div class="card-property-label">Telefon:</div>
+                        <div class="card-property-value" data-field="phone">-</div>
+                    </div>
+                    <div class="card-property">
+                        <div class="card-property-label">Data złożenia wniosku:</div>
+                        <div class="card-property-value" data-field="creationDate">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header card-header-secondary">
+                    <div class="card-header-title">Informacje o pasiece</div>
+                </div>
+                <div class="card-body">
+                    <div class="card-property">
+                        <div class="card-property-label">Nazwa pasieki:</div>
+                        <div class="card-property-value" data-field="beeGardenName">-</div>
+                    </div>
+                    <div class="card-property">
+                        <div class="card-property-label">Adres pasieki:</div>
+                        <div class="card-property-value" data-field="beeGardenAddress">-</div>
+                    </div>
+                    <div class="card-property">
+                        <div class="card-property-label">Liczba uli:</div>
+                        <div class="card-property-value" data-field="hiveCount">-</div>
+                    </div>
+                    <div class="card-property">
+                        <div class="card-property-label">Doświadczenie (lata):</div>
+                        <div class="card-property-value" data-field="yearsOfExperience">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header card-header-secondary">
+                    <div class="card-header-title">Dokumenty</div>
+                </div>
+                <div class="card-body" data-field="documents">
+                    <p>Ładowanie dokumentów...</p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header card-header-secondary">
+                    <div class="card-header-title">Status weryfikacji</div>
+                </div>
+                <div class="card-body">
+                    <div class="card-property">
+                        <div class="card-property-label">Aktualny status:</div>
+                        <div class="card-property-value" data-field="status">-</div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label for="verification-notes">Notatki / Powód decyzji:</label>
+                        <textarea id="verification-notes" class="form-control" rows="4" placeholder="Dodaj komentarz..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="current-verification-id" value="">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('verification-details-modal')">
+                <i class="fas fa-times"></i> Anuluj
+            </button>
+            <button class="btn btn-danger reject-verification-btn" onclick="handleVerificationDecision('REJECTED')">
+                <i class="fas fa-times-circle"></i> Odrzuć
+            </button>
+            <button class="btn btn-success approve-verification-btn" onclick="handleVerificationDecision('APPROVED')">
+                <i class="fas fa-check-circle"></i> Zatwierdź
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
+    }
+
+    .modal-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-height: 90vh;
+        overflow-y: auto;
+        width: 100%;
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
         }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: var(--secondary);
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: inherit;
-            font-size: 14px;
-            transition: border-color 0.2s;
+    .modal-header {
+        padding: 24px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--secondary);
+        margin: 0;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+        background-color: #f5f5f5;
+        color: #333;
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #eee;
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .area-details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .area-detail-item {
+        padding: 12px;
+        background-color: #f9f9f9;
+        border-radius: 6px;
+    }
+
+    .area-detail-label {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .area-detail-value {
+        font-size: 16px;
+        color: #333;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .area-details-grid {
+            grid-template-columns: 1fr;
         }
+    }
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(143, 195, 31, 0.1);
-        }
+    /* Style dla formularzy w modalu */
+    .form-group {
+        margin-bottom: 15px;
+    }
 
-        .document-item {
-            padding: 12px;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: var(--secondary);
+    }
 
-        .document-item:hover {
-            background-color: #f0f0f0;
-        }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
 
-        .document-name {
-            font-weight: 500;
-            color: var(--secondary);
-        }
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(143, 195, 31, 0.1);
+    }
 
-        .document-link {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 14px;
-        }
+    .document-item {
+        padding: 12px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-        .document-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+    .document-item:hover {
+        background-color: #f0f0f0;
+    }
 
-    <script>
-        // Tab switching
-        document.querySelectorAll('.sidebar-nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
+    .document-name {
+        font-weight: 500;
+        color: var(--secondary);
+    }
 
-                // Remove active class from all items
-                document.querySelectorAll('.sidebar-nav-item').forEach(i => {
-                    i.classList.remove('active');
-                });
+    .document-link {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: 14px;
+    }
 
-                // Add active class to clicked item
-                this.classList.add('active');
+    .document-link:hover {
+        text-decoration: underline;
+    }
+</style>
 
-                // Hide all tab contents
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-
-                // Show the corresponding tab content
-                const tabId = this.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
-
-        // Modal functionality
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            document.body.style.overflow = 'auto'; // Allow scrolling
-        }
-
-        function closeAllModals() {
-            document.querySelectorAll('.modal-overlay').forEach(modal => {
-                modal.style.display = 'none';
-            });
-            document.body.style.overflow = 'auto';
-        }
-
-        // Close modal buttons
-        document.querySelectorAll('.modal-close, .close-modal-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                closeAllModals();
-            });
-        });
-
-        // Close modal when clicking outside
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeAllModals();
-                }
-            });
-        });
-
-        // View beekeeper verification details
-        document.querySelectorAll('.view-beekeeper-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const beekeeperId = this.getAttribute('data-id');
-                // W prawdziwej aplikacji tutaj pobralibyśmy dane pszczelarza
-                // na podstawie ID i wypełnili modal
-
-                openModal('beekeeper-verification-modal');
-            });
-        });
-
-        // Delete area button
-        document.querySelectorAll('.delete-area-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const areaId = this.getAttribute('data-id');
-                const areaName = this.closest('.card').querySelector('.card-header-title').textContent;
-
-                // Ustawienie nazwy obszaru w modalu
-                document.getElementById('area-name-to-delete').textContent = areaName;
-
-                openModal('delete-area-modal');
-            });
-        });
-
-        // Filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => {
-                    b.classList.remove('active');
-                });
-                this.classList.add('active');
-
-                // W prawdziwej aplikacji tutaj filtrowalibyśmy dane
-            });
-        });
-
-        // Approve verification button
-        document.querySelector('.approve-verification-btn').addEventListener('click', function() {
-            const notes = document.getElementById('verification-notes').value;
-
-            // W prawdziwej aplikacji tutaj wysłalibyśmy dane do serwera
-            alert('Wniosek o weryfikację został zatwierdzony!');
-            closeAllModals();
-
-            // Dla celów demonstracyjnych - zmiana statusu w tabeli
-            // W prawdziwej aplikacji ta zmiana byłaby w odpowiedzi z serwera
-            const tableRow = document.querySelector('tr td button[data-id="102"]').closest('tr');
-            const statusCell = tableRow.querySelector('td:nth-child(5)');
-            statusCell.innerHTML = '<span class="status-badge status-approved">Zatwierdzony</span>';
-        });
-
-        // Reject verification button
-        document.querySelector('.reject-verification-btn').addEventListener('click', function() {
-            const notes = document.getElementById('verification-notes').value;
-
-            if (!notes.trim()) {
-                alert('Proszę podać powód odrzucenia wniosku.');
-                return;
-            }
-
-            // W prawdziwej aplikacji tutaj wysłalibyśmy dane do serwera
-            alert('Wniosek o weryfikację został odrzucony!');
-            closeAllModals();
-
-            // Dla celów demonstracyjnych - zmiana statusu w tabeli
-            // W prawdziwej aplikacji ta zmiana byłaby w odpowiedzi z serwera
-            const tableRow = document.querySelector('tr td button[data-id="102"]').closest('tr');
-            const statusCell = tableRow.querySelector('td:nth-child(5)');
-            statusCell.innerHTML = '<span class="status-badge status-rejected">Odrzucony</span>';
-        });
-
-        // Delete area confirmation
-        document.querySelector('.confirm-delete-area-btn').addEventListener('click', function() {
-            const reason = document.getElementById('delete-reason').value;
-            const notifyUser = document.getElementById('notify-user').checked;
-
-            if (!reason.trim()) {
-                alert('Proszę podać powód usunięcia obszaru.');
-                return;
-            }
-
-            // W prawdziwej aplikacji tutaj wysłalibyśmy dane do serwera
-            alert('Obszar został usunięty' + (notifyUser ? ' i właściciel został powiadomiony.' : '.'));
-            closeAllModals();
-
-            // Dla celów demonstracyjnych - usunięcie karty obszaru
-            // W prawdziwej aplikacji ta zmiana byłaby w odpowiedzi z serwera
-            const deletedArea = document.querySelector('.delete-area-btn[data-id="1"]').closest('.card');
-            deletedArea.style.opacity = '0';
-            setTimeout(() => {
-                deletedArea.remove();
-            }, 300);
-        });
-
-        // Search functionality
-        document.querySelectorAll('.search-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const searchValue = this.previousElementSibling.value.toLowerCase();
-                // W prawdziwej aplikacji tutaj wysłalibyśmy zapytanie do serwera
-                if (searchValue) {
-                    alert(`Wyszukiwanie: ${searchValue}`);
-                }
-            });
-        });
-
-        // Enter key in search input
-        document.querySelectorAll('.search-input').forEach(input => {
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.nextElementSibling.click();
-                }
-            });
-        });
-    </script>
 <script src="scripts/admin-panel.js"></script>
+<script>
+    // Tab switching
+    document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Remove active class from all items
+            document.querySelectorAll('.sidebar-nav-item').forEach(i => {
+                i.classList.remove('active');
+            });
+
+            // Add active class to clicked item
+            this.classList.add('active');
+
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Show the corresponding tab content
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // Funkcja globalna do zmiany głównego zdjęcia obszaru
+    window.changeMainAreaImage = function(element, base64) {
+        document.getElementById('main-area-img').src = `data:image/jpeg;base64,${base64}`;
+        document.querySelectorAll('.area-thumbnail').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+    };
+
+    // Modal functionality
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        document.body.style.overflow = 'auto'; // Allow scrolling
+    }
+
+    function closeAllModals() {
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.style.display = 'none';
+        });
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal buttons
+    document.querySelectorAll('.modal-close, .close-modal-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            closeAllModals();
+        });
+    });
+
+    // Close modal when clicking outside
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAllModals();
+            }
+        });
+    });
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Determine which group this button belongs to
+            const isAreaFilter = this.hasAttribute('data-filter-areas');
+            const isUserFilter = this.hasAttribute('data-filter-users');
+
+            let selector = '.filter-btn';
+            if (isAreaFilter) selector = '[data-filter-areas]';
+            else if (isUserFilter) selector = '[data-filter-users]';
+            else selector = '.filter-btn:not([data-filter-areas]):not([data-filter-users])';
+
+            document.querySelectorAll(selector).forEach(b => {
+                b.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+    });
+
+    // Search functionality
+    document.querySelectorAll('.search-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const searchValue = this.previousElementSibling.value.toLowerCase();
+            if (searchValue) {
+                alert(`Wyszukiwanie: ${searchValue}`);
+            }
+        });
+    });
+
+    document.querySelectorAll('.search-input').forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.nextElementSibling.click();
+            }
+        });
+    });
+</script>
 </body>
+</html>

@@ -1,4 +1,4 @@
-// admin-panel.js - Kompletna logika panelu administracyjnego (NAPRAWIONA WERSJA)
+// admin-panel.js - Kompletna logika panelu administracyjnego
 const API_BASE = 'http://localhost:8080';
 
 // Stan aplikacji
@@ -182,10 +182,15 @@ function displayRecentAreas(areas) {
         const statusClass = area.status === 'AVAILABLE' ? 'status-approved' : 'status-rejected';
         const ownerName = `${area.ownerFirstName || ''} ${area.ownerLastName || ''}`.trim() || 'Nieznany';
 
+        // ZMIANA: Obsługa listy kwiatów
+        const flowerType = (area.flowers && area.flowers.length > 0)
+            ? area.flowers.map(f => f.name).join(', ')
+            : 'Nie określono';
+
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${area.name || 'Bez nazwy'}</td>
-            <td>${area.type || 'Nie określono'}</td>
+            <td>${flowerType}</td>
             <td>${ownerName}</td>
             <td>${area.area ? area.area.toFixed(2) + ' ha' : 'Brak danych'}</td>
             <td>${area.pricePerDay ? area.pricePerDay.toFixed(2) + ' PLN' : '0.00 PLN'}</td>
@@ -487,16 +492,36 @@ function createAreaCard(area) {
         ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
         : 'Brak lokalizacji';
 
+    // ZMIANA: Obsługa listy kwiatów
+    const flowerType = (area.flowers && area.flowers.length > 0)
+        ? area.flowers.map(f => f.name).join(', ')
+        : 'Nie określono';
+
+    // ZMIANA: Obsługa zdjęcia głównego
+    const imageUrl = (area.images && area.images.length > 0)
+        ? `data:image/jpeg;base64,${area.images[0]}`
+        : 'assets/default-area.jpg';
+
+    // Pobierz kolor pierwszego kwiata dla belki tytułowej lub domyślny
+    const firstFlowerColor = (area.flowers && area.flowers.length > 0)
+        ? area.flowers[0].color
+        : 'rgba(242, 169, 0, 0.15)'; // Domyślny kolor
+
+    // Jeśli kolor jest hex, dodaj przezroczystość dla tła
+    const headerColor = firstFlowerColor.startsWith('#')
+        ? hexToRgba(firstFlowerColor, 0.15)
+        : firstFlowerColor;
+
     card.innerHTML = `
-        <div class="card-header" style="background-color: ${getColorByType(area.type)};">
+        <div class="card-header" style="background-color: ${headerColor};">
             <div class="card-header-title">${area.name || 'Bez nazwy'}</div>
             <div class="card-header-status"><span class="status-badge ${statusClass}">${statusText}</span></div>
         </div>
         <div class="area-preview" style="position: relative; overflow: hidden;">
-            <img src="${area.imgBase64 ? `data:image/jpeg;base64,${area.imgBase64}` : 'assets/default-area.jpg'}" alt="Obszar" style="width: 100%; height: 200px; object-fit: cover;">
+            <img src="${imageUrl}" alt="Obszar" style="width: 100%; height: 200px; object-fit: cover;">
         </div>
         <div class="card-body">
-            <div class="card-property"><span class="property-label"><i class="fas fa-seedling"></i> Typ pożytku:</span><span class="property-value">${area.type || 'Nie określono'}</span></div>
+            <div class="card-property"><span class="property-label"><i class="fas fa-seedling"></i> Typ pożytku:</span><span class="property-value">${flowerType}</span></div>
             <div class="card-property"><span class="property-label"><i class="fas fa-user"></i> Właściciel:</span><span class="property-value">${ownerName}</span></div>
             <div class="card-property"><span class="property-label"><i class="fas fa-map-marker-alt"></i> Lokalizacja:</span><span class="property-value">${location}</span></div>
             <div class="card-property"><span class="property-label"><i class="fas fa-th"></i> Powierzchnia:</span><span class="property-value">${area.area ? area.area.toFixed(2) + ' ha' : 'Brak danych'}</span></div>
@@ -512,15 +537,12 @@ function createAreaCard(area) {
     return card;
 }
 
-function getColorByType(type) {
-    const colors = {
-        'Lipa': 'rgba(255, 0, 0, 0.15)',
-        'Wielokwiat': 'rgba(255, 165, 0, 0.15)',
-        'Gryka': 'rgba(255, 255, 0, 0.15)',
-        'Rzepak': 'rgba(255, 255, 153, 0.15)',
-        'Akacja': 'rgba(144, 238, 144, 0.15)'
-    };
-    return colors[type] || 'rgba(242, 169, 0, 0.15)';
+// Pomocnicza funkcja do konwersji HEX na RGBA
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 function viewAreaDetails(areaId) {
@@ -555,9 +577,54 @@ function showAreaDetailsModal(area) {
     const statusText = area.status === 'AVAILABLE' ? 'Dostępny' : 'Niedostępny';
     const statusClass = area.status === 'AVAILABLE' ? 'status-approved' : 'status-rejected';
 
+    // ZMIANA: Obsługa listy kwiatów
+    const flowerType = (area.flowers && area.flowers.length > 0)
+        ? area.flowers.map(f => f.name).join(', ')
+        : 'Nie określono';
+
+    // ZMIANA: Obsługa galerii zdjęć
+    let galleryHtml = '';
+    const images = (area.images && area.images.length > 0) ? area.images : null;
+
+    if (images) {
+        // Główne zdjęcie
+        galleryHtml += `
+            <div class="area-gallery-container">
+                <div class="area-image-main">
+                    <img id="main-area-img" src="data:image/jpeg;base64,${images[0]}" alt="${area.name}">
+                </div>
+        `;
+
+        // Miniatury (jeśli więcej niż jedno)
+        if (images.length > 1) {
+            galleryHtml += `
+                <div class="area-thumbnails">
+                    ${images.map((img, i) => `
+                        <div class="area-thumbnail ${i === 0 ? 'active' : ''}" 
+                             onclick="changeMainAreaImage(this, '${img}')">
+                            <img src="data:image/jpeg;base64,${img}" alt="Miniatura ${i + 1}">
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        galleryHtml += `</div>`; // Zamknięcie area-gallery-container
+    } else {
+        galleryHtml = `
+            <div class="area-gallery-container">
+                <div class="area-image-main">
+                    <div class="area-image-placeholder">
+                        <i class="fas fa-image"></i>
+                        <p>Brak zdjęć obszaru</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     const content = document.getElementById('area-details-content');
     content.innerHTML = `
-        ${area.imgBase64 ? `<img src="data:image/jpeg;base64,${area.imgBase64}" alt="Obszar" class="area-image-preview">` : ''}
+        ${galleryHtml}
         
         <h3 style="margin-bottom: 20px; color: var(--secondary);">
             ${area.name || 'Bez nazwy'}
@@ -566,7 +633,7 @@ function showAreaDetailsModal(area) {
 
         <div class="area-details-grid">
             <div class="area-detail-item"><div class="area-detail-label">ID Obszaru</div><div class="area-detail-value">#${area.id}</div></div>
-            <div class="area-detail-item"><div class="area-detail-label">Typ pożytku</div><div class="area-detail-value">${area.type || 'Nie określono'}</div></div>
+            <div class="area-detail-item"><div class="area-detail-label">Typ pożytku</div><div class="area-detail-value">${flowerType}</div></div>
             <div class="area-detail-item"><div class="area-detail-label">Właściciel</div><div class="area-detail-value">${ownerName}</div></div>
             <div class="area-detail-item"><div class="area-detail-label">Powierzchnia</div><div class="area-detail-value">${area.area ? area.area.toFixed(2) + ' ha' : 'Brak danych'}</div></div>
             <div class="area-detail-item"><div class="area-detail-label">Maksymalna liczba uli</div><div class="area-detail-value">${area.maxHives || 0}</div></div>

@@ -7,9 +7,75 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/styles.css">
+    <style>
+        /* Dodatkowe style dla galerii miniatur */
+        .image-preview-container {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .preview-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            min-height: 150px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px dashed #ddd;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            color: #dc3545;
+            transition: all 0.2s;
+        }
+
+        .preview-item .remove-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .empty-preview {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+        }
+    </style>
 </head>
 <body>
-<!-- Header -->
 <div class="header">
     <div class="logo-container">
         <div class="logo">
@@ -24,7 +90,6 @@
     </div>
 </div>
 
-<!-- Main Content -->
 <div class="dashboard-container">
     <div class="dashboard-sidebar">
         <div class="user-info">
@@ -36,19 +101,19 @@
             <div class="user-status" id="user-status">Użytkownik</div>
         </div>
         <div class="sidebar-nav">
-            <a href="dashboard.html" class="sidebar-nav-item" data-tab="areas">
+            <a href="profile.html?tab=areas" class="sidebar-nav-item">
                 <i class="fas fa-map-marked-alt"></i>
                 Twoje Obszary
             </a>
-            <a href="dashboard.html" class="sidebar-nav-item" data-tab="rented-areas">
+            <a href="profile.html?tab=rented-areas" class="sidebar-nav-item">
                 <i class="fas fa-hand-holding-heart"></i>
                 Wynajęte Obszary
             </a>
-            <a href="dashboard.html" class="sidebar-nav-item active" data-tab="products">
+            <a href="profile.html?tab=products" class="sidebar-nav-item active">
                 <i class="fas fa-box"></i>
                 Twoje Produkty
             </a>
-            <a href="dashboard.html" class="sidebar-nav-item" data-tab="bought-products">
+            <a href="profile.html?tab=bought-products" class="sidebar-nav-item">
                 <i class="fas fa-shopping-basket"></i>
                 Kupione Produkty
             </a>
@@ -75,27 +140,29 @@
         <div class="card">
             <div class="card-body">
                 <form id="add-product-form">
-                    <!-- Zdjęcie produktu -->
                     <div class="form-section">
-                        <h3 class="form-section-title">Zdjęcie produktu</h3>
+                        <h3 class="form-section-title">Zdjęcia produktu</h3>
                         <div class="form-group image-upload-top">
                             <div class="image-preview-container">
-                                <div class="image-preview">
-                                    <img id="product-image-preview" src="assets/default-product.jpg" alt="Podgląd zdjęcia produktu">
+                                <div class="preview-gallery" id="preview-gallery">
+                                    <div class="empty-preview">
+                                        <i class="fas fa-images" style="font-size: 32px; margin-bottom: 10px;"></i>
+                                        <span>Brak wybranych zdjęć</span>
+                                    </div>
                                 </div>
+
                                 <div class="image-upload-controls">
-                                    <label for="product-image" class="btn btn-outline image-upload-btn">
-                                        <i class="fas fa-upload"></i> Wybierz zdjęcie
+                                    <label for="product-images" class="btn btn-outline image-upload-btn">
+                                        <i class="fas fa-upload"></i> Wybierz zdjęcia
                                     </label>
-                                    <input type="file" id="product-image" name="image" accept="image/*" style="display: none;">
-                                    <span class="selected-file-name">Nie wybrano pliku</span>
+                                    <input type="file" id="product-images" name="images" accept="image/*" multiple style="display: none;">
+                                    <span class="selected-file-name" id="file-count">Nie wybrano plików</span>
                                 </div>
                             </div>
-                            <small class="field-info">Dodaj zdjęcie swojego produktu. Zalecany rozmiar: 800x600 pikseli.</small>
+                            <small class="field-info">Możesz dodać wiele zdjęć. Pierwsze zdjęcie będzie zdjęciem głównym.</small>
                         </div>
                     </div>
 
-                    <!-- Informacje podstawowe -->
                     <div class="form-section">
                         <h3 class="form-section-title">Informacje podstawowe</h3>
                         <div class="form-group">
@@ -122,7 +189,6 @@
                                 <label for="product-quantity">Ilość*</label>
                                 <input type="number" id="product-quantity" name="quantity" min="1" placeholder="Np. 15" required>
                             </div>
-
                         </div>
 
                         <div class="form-row">
@@ -130,11 +196,9 @@
                                 <label for="product-price">Cena (PLN)*</label>
                                 <input type="number" id="product-price" name="price" step="0.01" min="0" placeholder="Np. 35.00" required>
                             </div>
-
                         </div>
                     </div>
 
-                    <!-- Informacje szczegółowe -->
                     <div class="form-section">
                         <h3 class="form-section-title">Informacje szczegółowe</h3>
 
@@ -169,6 +233,9 @@
 <script>
     const API_URL = 'http://localhost:8080/api';
 
+    // Tablica przechowująca wybrane pliki (Files)
+    let selectedFiles = [];
+
     // Load user profile
     async function loadUserProfile() {
         try {
@@ -192,29 +259,80 @@
         }
     }
 
-    // Podgląd wybranego zdjęcia
-    document.getElementById('product-image').addEventListener('change', function() {
-        const fileName = this.files[0] ? this.files[0].name : 'Nie wybrano pliku';
-        this.closest('.image-upload-controls').querySelector('.selected-file-name').textContent = fileName;
+    // Obsługa wyboru plików
+    document.getElementById('product-images').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
 
-        // Podgląd wybranego zdjęcia
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('product-image-preview').src = e.target.result;
-            };
-            reader.readAsDataURL(this.files[0]);
-        }
+        // Dodaj nowe pliki do istniejącej tablicy
+        files.forEach(file => {
+            // Sprawdź czy plik już nie istnieje (po nazwie i rozmiarze)
+            const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+            if (!exists) {
+                selectedFiles.push(file);
+            }
+        });
+
+        updateImagePreview();
+
+        // Reset input value to allow selecting same files again if needed
+        this.value = '';
     });
 
-    // Convert file to Base64
-    function toBase64(file) {
-        return new Promise((resolve, reject) => {
+    function updateImagePreview() {
+        const gallery = document.getElementById('preview-gallery');
+        const countLabel = document.getElementById('file-count');
+
+        gallery.innerHTML = '';
+
+        if (selectedFiles.length === 0) {
+            gallery.innerHTML = `
+                <div class="empty-preview">
+                    <i class="fas fa-images" style="font-size: 32px; margin-bottom: 10px;"></i>
+                    <span>Brak wybranych zdjęć</span>
+                </div>
+            `;
+            countLabel.textContent = 'Nie wybrano plików';
+            return;
+        }
+
+        countLabel.textContent = `Wybrano plików: ${selectedFiles.length}`;
+
+        selectedFiles.forEach((file, index) => {
             const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = error => reject(error);
+            reader.onload = function(e) {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                item.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <div class="remove-btn" onclick="removeFile(${index})" title="Usuń zdjęcie">
+                        <i class="fas fa-times"></i>
+                    </div>
+                `;
+                gallery.appendChild(item);
+            };
             reader.readAsDataURL(file);
         });
+    }
+
+    // Funkcja globalna, aby była dostępna z onclick w HTML
+    window.removeFile = function(index) {
+        selectedFiles.splice(index, 1);
+        updateImagePreview();
+    };
+
+    // Helper: Konwersja wielu plików na Base64
+    function filesToBase64List(files) {
+        return Promise.all(files.map(file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                // Usuwamy prefix "data:image/jpeg;base64," aby wysłać czysty string,
+                // tak jak backend tego oczekuje w CreateProductDTO -> List<String> images
+                const base64String = reader.result.split(',')[1];
+                resolve(base64String);
+            };
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        })));
     }
 
     // Obsługa formularza
@@ -226,15 +344,11 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Zapisywanie...';
 
         try {
-            let imageBase64 = null;
-            const imageFile = document.getElementById('product-image').files[0];
-
-            if (imageFile) {
-                imageBase64 = await toBase64(imageFile);
+            // Konwersja wszystkich wybranych zdjęć
+            let imagesBase64List = [];
+            if (selectedFiles.length > 0) {
+                imagesBase64List = await filesToBase64List(selectedFiles);
             }
-
-
-            console.log(imageBase64);
 
             const productData = {
                 name: document.getElementById('product-name').value,
@@ -242,14 +356,15 @@
                 stock: parseInt(document.getElementById('product-quantity').value),
                 price: parseFloat(document.getElementById('product-price').value),
                 description: document.getElementById('product-description').value,
-                imageBase64: imageBase64
+                images: imagesBase64List // Wysyłamy listę
             };
 
-            // Dodaj flowerOrigin tylko dla miodu
+            // Dodaj flowerOrigin tylko dla miodu (opcjonalnie, jeśli backend to obsługuje w opisie)
             if (productData.category === 'HONEY') {
                 const flowers = document.getElementById('product-flowers').value;
                 if (flowers) {
-                    productData.flowerOrigin = flowers;
+                    // Jeśli w DTO nie ma pola flowerOrigin, dodajemy do opisu
+                    productData.description = `Pochodzenie kwiatowe: ${flowers}\n\n${productData.description}`;
                 }
             }
 
@@ -273,7 +388,7 @@
             console.log('Produkt dodany:', result);
 
             alert('✓ Produkt został pomyślnie dodany!');
-            window.location.href = 'dashboard.html';
+            window.location.href = 'profile.html?tab=products';
 
         } catch (error) {
             console.error('Błąd podczas dodawania produktu:', error);
@@ -287,7 +402,7 @@
     // Obsługa przycisku anuluj
     document.getElementById('cancel-btn').addEventListener('click', function() {
         if (confirm('Czy na pewno chcesz anulować dodawanie produktu? Wprowadzone dane zostaną utracone.')) {
-            window.location.href = 'dashboard.html';
+            window.location.href = 'profile.html?tab=products';
         }
     });
 

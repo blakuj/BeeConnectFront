@@ -4,6 +4,7 @@ const API_BASE = 'http://localhost:8080/api';
 let currentProduct = null;
 let currentUser = null;
 let productReviews = [];
+
 // ==================== INICJALIZACJA ====================
 document.addEventListener('DOMContentLoaded', async function() {
     await checkAuth();
@@ -45,9 +46,8 @@ async function loadProductDetails() {
     } finally {
         showLoading(false);
     }
-
-
 }
+
 function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -57,34 +57,56 @@ function formatDate(dateString) {
         day: 'numeric'
     });
 }
+
 // ==================== WYŚWIETLANIE SZCZEGÓŁÓW ====================
 function displayProductDetails() {
     const container = document.querySelector('.product-details-container');
     if (!container) return;
 
-    const imageUrl = currentProduct.imageBase64
-        ? `data:image/jpeg;base64,${currentProduct.imageBase64}`
+    // Obsługa zdjęć
+    const images = (currentProduct.images && currentProduct.images.length > 0)
+        ? currentProduct.images
+        : null;
+
+    // Główne zdjęcie (pierwsze z listy lub default)
+    const mainImageUrl = images
+        ? `data:image/jpeg;base64,${images[0]}`
         : 'assets/default-product.jpg';
 
     const categoryName = getCategoryName(currentProduct.category);
     const isOwner = currentUser && currentUser.id === currentProduct.sellerId;
     const canBuy = currentUser && !isOwner && currentProduct.available && currentProduct.stock > 0;
 
+    // HTML dla miniatur
+    let thumbnailsHtml = '';
+    if (images && images.length > 1) {
+        thumbnailsHtml = `
+            <div class="product-thumbnails">
+                ${images.map((img, index) => `
+                    <div class="product-thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${img}')">
+                        <img src="data:image/jpeg;base64,${img}" alt="Miniatura ${index + 1}">
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
     container.innerHTML = `
         <div class="product-details-wrapper">
             <div class="product-details-left">
                 <div class="product-image-main">
-                    <img src="${imageUrl}" alt="${currentProduct.name}">
+                    <img id="main-product-image" src="${mainImageUrl}" alt="${currentProduct.name}">
                     ${!currentProduct.available ? '<div class="product-badge unavailable">Niedostępny</div>' : ''}
                     ${currentProduct.stock === 0 ? '<div class="product-badge out-of-stock">Brak w magazynie</div>' : ''}
                 </div>
+                ${thumbnailsHtml}
             </div>
 
             <div class="product-details-right">
                 <div class="product-category-badge">${categoryName}</div>
                 <h1 class="product-name">${currentProduct.name}</h1>
                 
- <div class="product-rating-section">
+                <div class="product-rating-section">
                     ${currentProduct.reviewCount > 0 ? `
                         <div class="rating-stars">
                             ${renderStars(currentProduct.rating)}
@@ -130,10 +152,8 @@ function displayProductDetails() {
                     <div class="seller-info-content">
                         <div class="seller-name">${currentProduct.sellerFirstname} ${currentProduct.sellerLastname}</div>
                         
-                        <!-- SEKCJA ODZNAK -->
                         <div class="seller-badges" id="seller-badges-container">
-                            <!-- Odznaki będą załadowane dynamicznie przez JavaScript -->
-                        </div>
+                            </div>
                         
                         <div class="seller-email">
                             <i class="fas fa-envelope"></i>
@@ -164,10 +184,10 @@ function displayProductDetails() {
                             <label for="buyer-notes">Uwagi dla sprzedawcy (opcjonalnie):</label>
                             <textarea id="buyer-notes" class="form-control" rows="3" placeholder="Np. proszę o kontakt przed dostawą"></textarea>
                         </div>
-<button class="btn btn-outline btn-block" onclick="contactSeller()" style="margin-bottom: 15px;">
-    <i class="fas fa-comments"></i>
-    Skontaktuj się ze sprzedawcą
-</button>
+                        <button class="btn btn-outline btn-block" onclick="contactSeller()" style="margin-bottom: 15px;">
+                            <i class="fas fa-comments"></i>
+                            Skontaktuj się ze sprzedawcą
+                        </button>
                         <button class="btn btn-primary btn-large btn-buy" onclick="buyProduct()">
                             <i class="fas fa-shopping-cart"></i> Kup teraz
                         </button>
@@ -198,8 +218,7 @@ function displayProductDetails() {
             <h2>Opis produktu</h2>
             <p>${currentProduct.description || 'Brak opisu produktu.'}</p>
         </div>
-             <!-- Zakładki: Opinie -->
-        ${currentProduct.reviewCount > 0 ? `
+             ${currentProduct.reviewCount > 0 ? `
             <div class="product-tabs">
                 <div class="tabs-header">
                     <button class="tab-button active" data-tab="reviews">
@@ -209,8 +228,7 @@ function displayProductDetails() {
                 <div class="tabs-content">
                     <div class="tab-pane active" id="reviews-tab">
                         <div id="reviews-container">
-                            <!-- Opinie będą załadowane tutaj -->
-                        </div>
+                            </div>
                     </div>
                 </div>
             </div>
@@ -223,6 +241,16 @@ function displayProductDetails() {
         quantityInput.addEventListener('input', updateTotalPrice);
     }
 }
+
+// Funkcja globalna do zmiany zdjęcia głównego po kliknięciu w miniaturę
+window.changeMainImage = function(element, base64) {
+    // Podmień źródło głównego zdjęcia
+    document.getElementById('main-product-image').src = `data:image/jpeg;base64,${base64}`;
+
+    // Zaktualizuj klasę active dla miniatur
+    document.querySelectorAll('.product-thumbnail').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+};
 
 async function loadSellerBadges() {
     if (!currentProduct || !currentProduct.sellerId) return;
@@ -365,8 +393,9 @@ function displaySimilarProducts(products) {
     if (!container || products.length === 0) return;
 
     container.innerHTML = products.map(product => {
-        const imageUrl = product.imageBase64
-            ? `data:image/jpeg;base64,${product.imageBase64}`
+        // Obsługa pierwszego zdjęcia dla podobnych produktów
+        const imageUrl = (product.images && product.images.length > 0)
+            ? `data:image/jpeg;base64,${product.images[0]}`
             : 'assets/default-product.jpg';
 
         return `
@@ -394,6 +423,7 @@ function changeQuantity(delta) {
     input.value = value;
     updateTotalPrice();
 }
+
 // ==================== KONTAKT ZE SPRZEDAWCĄ ====================
 async function contactSeller() {
     if (!currentProduct) {
@@ -618,7 +648,7 @@ function setupEventListeners() {
     // Event listeners są dodawane dynamicznie w displayProductDetails
 }
 
-// CSS dla product details
+// CSS dla product details - dodano style dla miniatur
 const style = document.createElement('style');
 style.textContent = `
     .spinner {
@@ -922,6 +952,42 @@ style.textContent = `
     .review-content {
         color: #666;
         line-height: 1.6;
+    }
+
+    /* ==================== MINIATURY PRODUKTU ==================== */
+    .product-thumbnails {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+
+    .product-thumbnail {
+        width: 70px;
+        height: 70px;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        overflow: hidden;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    .product-thumbnail.active {
+        border-color: #F2A900;
+        opacity: 1;
+    }
+
+    .product-thumbnail:hover {
+        opacity: 1;
+    }
+
+    .product-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 `;
 document.head.appendChild(style);
