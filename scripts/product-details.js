@@ -439,16 +439,17 @@ async function contactSeller() {
         return;
     }
 
-    // Sprawdź czy to nie własny produkt
     if (currentProduct.sellerId === currentUser.id) {
         showNotification('To jest Twój własny produkt', 'info');
         return;
     }
 
     try {
-        showNotification('Przekierowuję do czatu...', 'info');
+        const btn = document.querySelector('.btn-outline');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Łączenie...';
+        btn.disabled = true;
 
-        // Rozpocznij konwersację ze sprzedawcą
         const response = await fetch(`${API_BASE}/chat/conversations`, {
             method: 'POST',
             headers: {
@@ -456,30 +457,29 @@ async function contactSeller() {
             },
             credentials: 'include',
             body: JSON.stringify({
-                otherUserId: currentProduct.sellerId,
-                initialMessage: `Witam! Interesuje mnie Twój produkt: ${currentProduct.name}`
+                productId: currentProduct.id,
+                initialMessage: `Dzień dobry, jestem zainteresowany produktem: ${currentProduct.name}`
             })
         });
 
         if (!response.ok) {
-            // Jeśli konwersacja już istnieje, sprawdź czy otrzymujemy jej ID
             const error = await response.json();
-            if (response.status === 400 && error.id) {
-                // Konwersacja już istnieje, przekieruj do niej
-                window.location.href = `chat.html?conversation=${error.id}`;
-                return;
-            }
-            throw new Error(error.error || 'Nie udało się rozpocząć konwersacji');
+            throw new Error(error.error || error.message || 'Nie udało się rozpocząć konwersacji');
         }
 
         const conversation = await response.json();
 
-        // Przekieruj do czatu z tą konwersacją
         window.location.href = `chat.html?conversation=${conversation.id}`;
 
     } catch (error) {
         console.error('Błąd kontaktu ze sprzedawcą:', error);
         showNotification(error.message, 'error');
+
+        const btn = document.querySelector('.btn-outline');
+        if(btn) {
+            btn.innerHTML = '<i class="fas fa-comments"></i> Skontaktuj się ze sprzedawcą';
+            btn.disabled = false;
+        }
     }
 }
 
