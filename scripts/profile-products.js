@@ -551,15 +551,19 @@ function setupEventListeners() {
             const tabElement = document.getElementById(tabId);
             if (tabElement) tabElement.classList.add('active');
 
-            // Logika ładowania danych dla zakładek
+
             if (tabId === 'products') {
                 await fetchMyProducts();
+            } else if (tabId === 'sold-products') {
+                await fetchSoldProducts();
             } else if (tabId === 'bought-products') {
                 await loadMyPurchases();
             } else if (tabId === 'areas') {
                 await fetchMyAreas();
             } else if (tabId === 'rented-areas') {
                 await fetchRentedAreas();
+            } else if (tabId === 'sold-areas') {
+                await fetchSoldAreas();
             } else if (tabId === 'badges') {
                 await loadMyBadges();
             }
@@ -1033,7 +1037,160 @@ function openModal(modalId) {
         document.body.style.overflow = 'hidden';
     }
 }
+// ==================== SPRZEDANE PRODUKTY ====================
+async function fetchSoldProducts() {
+    try {
+        const response = await fetch(`${API_URL}/orders/my-sales`, {
+            method: "GET",
+            credentials: "include"
+        });
 
+        if (!response.ok) throw new Error('Błąd pobierania sprzedaży');
+
+        const orders = await response.json();
+        const container = document.getElementById('sold-products-container');
+        container.innerHTML = '';
+
+        if (orders.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>Nie masz jeszcze żadnych sprzedanych produktów.</p></div>';
+            return;
+        }
+
+        orders.forEach(order => {
+            const thumbnail = order.productImage
+                ? `data:image/jpeg;base64,${order.productImage}`
+                : 'assets/default-product.jpg';
+
+            // Status płatności (w tym systemie zakładamy, że Completed = Opłacone)
+            const statusClass = 'card-status-active'; // Zielony
+
+            const card = `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">Zamówienie #${order.id}</div>
+                        <div class="card-header-status ${statusClass}">Opłacone</div>
+                    </div>
+                    <div class="area-preview">
+                        <img src="${thumbnail}" alt="${order.productName}">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-property">
+                            <div class="card-property-label">Produkt:</div>
+                            <div class="card-property-value">${order.productName}</div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Kupujący:</div>
+                            <div class="card-property-value">${order.buyerFirstname} ${order.buyerLastname}</div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Ilość:</div>
+                            <div class="card-property-value">${order.quantity} szt.</div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Suma:</div>
+                            <div class="card-property-value"><strong>${order.totalPrice.toFixed(2)} PLN</strong></div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Data:</div>
+                            <div class="card-property-value">${formatDate(order.orderedAt)}</div>
+                        </div>
+                        ${order.deliveryAddress ? `
+                        <div class="card-property" style="display:block; margin-top:10px; border-top:1px solid #eee; padding-top:5px;">
+                            <div class="card-property-label" style="margin-bottom:3px;">Adres dostawy:</div>
+                            <div class="card-property-value" style="font-size:13px;">${order.deliveryAddress}</div>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', card);
+        });
+
+    } catch (error) {
+        console.error('Error fetching sales:', error);
+        document.getElementById('sold-products-container').innerHTML =
+            '<p style="text-align: center; color: #e74c3c;">Błąd ładowania historii sprzedaży.</p>';
+    }
+}
+
+// ==================== SPRZEDANE OBSZARY (REZERWACJE UŻYTKOWNIKA) ====================
+async function fetchSoldAreas() {
+    try {
+        const response = await fetch(`${API_URL}/reservations/areas`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (!response.ok) throw new Error('Błąd pobierania rezerwacji');
+
+        const reservations = await response.json();
+        const container = document.getElementById('sold-areas-container');
+        container.innerHTML = '';
+
+        if (reservations.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Nikt jeszcze nie zarezerwował Twoich obszarów.</p></div>';
+            return;
+        }
+
+        reservations.forEach(res => {
+            // Tłumaczenie statusu
+            let statusText = res.status;
+            let statusClass = 'card-status-inactive';
+
+            if (res.status === 'CONFIRMED' || res.status === 'ACTIVE') {
+                statusText = 'Potwierdzona';
+                statusClass = 'card-status-active';
+            } else if (res.status === 'COMPLETED') {
+                statusText = 'Zakończona';
+            } else if (res.status === 'CANCELLED') {
+                statusText = 'Anulowana';
+            }
+
+            const card = `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">${res.areaName}</div>
+                        <div class="card-header-status ${statusClass}">${statusText}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-property">
+                            <div class="card-property-label">Najemca:</div>
+                            <div class="card-property-value">${res.tenantFirstname} ${res.tenantLastname}</div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Kontakt:</div>
+                            <div class="card-property-value" style="font-size:13px;">${res.tenantEmail}</div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Okres:</div>
+                            <div class="card-property-value">
+                                ${formatDate(res.startDate)} - ${formatDate(res.endDate)}
+                            </div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Liczba uli:</div>
+                            <div class="card-property-value">${res.numberOfHives}</div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Zysk:</div>
+                            <div class="card-property-value" style="color: #27ae60; font-weight:bold;">+${res.totalPrice.toFixed(2)} PLN</div>
+                        </div>
+                        ${res.notes ? `
+                        <div class="card-property" style="display:block; margin-top:10px; background:#f9f9f9; padding:8px; border-radius:4px;">
+                            <div class="card-property-label" style="font-size:11px;">Uwagi od najemcy:</div>
+                            <div class="card-property-value" style="font-size:13px; font-style:italic;">"${res.notes}"</div>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', card);
+        });
+
+    } catch (error) {
+        console.error('Error fetching area reservations:', error);
+        document.getElementById('sold-areas-container').innerHTML =
+            '<p style="text-align: center; color: #e74c3c;">Błąd ładowania rezerwacji.</p>';
+    }
+}
 function closeAllModals() {
     document.querySelectorAll('.modal-overlay').forEach(modal => {
         modal.style.display = 'none';
@@ -1129,4 +1286,5 @@ async function refreshBadges() {
         container.innerHTML = originalContent;
         alert('❌ Nie udało się odświeżyć odznak.');
     }
+
 }
