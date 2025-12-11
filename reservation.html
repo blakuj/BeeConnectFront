@@ -6,6 +6,10 @@
     <title>Rezerwacja Obszaru - BeeConnect</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+
     <link rel="stylesheet" href="styles/styles.css">
     <style>
         body {
@@ -60,7 +64,7 @@
             color: white;
         }
 
-        /* --- NOWE STYLE GALERII (Spójne z Product Details) --- */
+        /* --- STYLES GALERII --- */
         .area-gallery-container {
             width: 100%;
             background-color: #fff;
@@ -133,7 +137,6 @@
             height: 100%;
             object-fit: cover;
         }
-        /* ---------------------------------------------------- */
 
         .area-rating-section {
             padding: 15px 20px;
@@ -215,6 +218,12 @@
             border-radius: var(--radius);
             font-size: 14px;
             transition: var(--transition);
+        }
+
+        /* Specyficzne dla Flatpickr */
+        .form-group input.flatpickr-input {
+            background-color: white;
+            cursor: pointer;
         }
 
         .form-group textarea {
@@ -602,7 +611,7 @@
             color: var(--secondary);
         }
 
-        /* ==================== GWIAZDKI I OPINIE ==================== */
+        /* GWIAZDKI I OPINIE */
         .star-filled {
             color: #FFD700;
         }
@@ -788,6 +797,25 @@
         .review-content p {
             margin: 0;
         }
+
+        /* ========================================= */
+        /* === NOWY STYL DLA ZAJĘTYCH DAT === */
+        /* ========================================= */
+        .flatpickr-day.flatpickr-disabled,
+        .flatpickr-day.flatpickr-disabled:hover {
+            background-color: #ffebee !important; /* Jasnoczerwone tło */
+            color: #d32f2f !important;            /* Czerwony tekst */
+            border-color: #ffcdd2 !important;     /* Czerwona ramka */
+            text-decoration: line-through;        /* Przekreślenie */
+            font-weight: bold;
+            opacity: 0.9;                         /* Wyraźniejsza widoczność */
+            cursor: not-allowed;
+        }
+
+        .flatpickr-day.today.flatpickr-disabled {
+            background-color: #ffcdd2 !important;
+            border-color: #e57373 !important;
+        }
     </style>
 </head>
 <body>
@@ -852,7 +880,8 @@
     <div class="reservation-form" id="reservation-form-container" style="display: none;">
         <h2 class="reservation-form-title">Rezerwacja obszaru</h2>
         <p class="reservation-form-description">
-            Uzupełnij poniższe informacje, aby zarezerwować obszar. Po kliknięciu "Zarezerwuj obszar" środki zostaną natychmiast pobrane z Twojego konta.
+            <i class="fas fa-info-circle" style="color: var(--primary);"></i> Wybierz dostępne daty z kalendarza.
+            <span style="color: #d32f2f; font-weight: 600;">Czerwone, przekreślone dni</span> są już zajęte przez innych pszczelarzy.
         </p>
 
         <div class="user-balance">
@@ -864,13 +893,13 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="start-date">Data od: *</label>
-                    <input type="date" id="start-date" name="start-date" required>
+                    <input type="text" id="start-date" name="start-date" placeholder="Wybierz datę" required readonly>
                     <small>Wybierz datę rozpoczęcia wynajmu</small>
                 </div>
 
                 <div class="form-group">
                     <label for="end-date">Data do: *</label>
-                    <input type="date" id="end-date" name="end-date" required>
+                    <input type="text" id="end-date" name="end-date" placeholder="Wybierz datę" required readonly>
                     <small>Wybierz datę zakończenia wynajmu</small>
                 </div>
             </div>
@@ -924,7 +953,7 @@
                     <i class="fas fa-arrow-left"></i> Anuluj
                 </button>
 
-                <button type="submit" class="btn btn-primary submit-reservation-btn" id="submit-btn">
+                <button type="submit" class="btn btn-primary submit-reservation-btn" id="submit-btn" disabled>
                     <i class="fas fa-calendar-check"></i> Zarezerwuj obszar
                 </button>
             </div>
@@ -1054,12 +1083,16 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/pl.js"></script>
+
 <script>
     const API_BASE_URL = 'http://localhost:8080/api';
     let currentArea = null;
     let userBalance = 0;
     let areaId = null;
     let areaReviews = [];
+    let occupiedDates = []; // Zmienna na zajęte daty
 
     const urlParams = new URLSearchParams(window.location.search);
     areaId = urlParams.get('areaId');
@@ -1076,130 +1109,13 @@
                 </div>
             `;
     }
-    // ==================== ŁADOWANIE I WYŚWIETLANIE OPINII ====================
-    async function loadAreaReviews() {
-        if (!currentArea || !currentArea.reviewCount || currentArea.reviewCount === 0) {
-            return;
-        }
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/reviews/areas/area/${currentArea.id}`, {
-                method: 'GET',
-                credentials: 'include'
-            });
-
-            if (!response.ok) return;
-
-            areaReviews = await response.json();
-            displayAreaRating();
-            displayAreaReviews();
-
-        } catch (error) {
-            console.error('Błąd ładowania opinii:', error);
-        }
-    }
-
-    function displayAreaRating() {
-        const ratingSection = document.getElementById('area-rating-section');
-        if (!ratingSection || !currentArea.reviewCount || currentArea.reviewCount === 0) return;
-
-        ratingSection.style.display = 'block';
-        ratingSection.innerHTML = `
-            <div class="rating-stars">
-                ${renderStars(currentArea.averageRating)}
-                <span class="rating-text">${currentArea.averageRating.toFixed(1)}/5</span>
-                <span class="review-count">(${currentArea.reviewCount} ${currentArea.reviewCount === 1 ? 'opinia' : 'opinii'})</span>
-            </div>
-        `;
-    }
-
-    function displayAreaReviews() {
-        const tabsSection = document.getElementById('area-tabs-section');
-        const container = document.getElementById('reviews-container');
-
-        if (!container || !areaReviews || areaReviews.length === 0) return;
-
-        // Pokaż zakładkę
-        tabsSection.style.display = 'block';
-        document.getElementById('reviews-count-tab').textContent = currentArea.reviewCount;
-
-        container.innerHTML = `
-            <div class="reviews-summary">
-                <div class="rating-overview">
-                    <div class="rating-big">${currentArea.averageRating.toFixed(1)}</div>
-                    <div class="rating-stars-big">${renderStars(currentArea.averageRating)}</div>
-                    <div class="rating-count">Na podstawie ${currentArea.reviewCount} ${currentArea.reviewCount === 1 ? 'opinii' : 'opinii'}</div>
-                </div>
-            </div>
-            <div class="reviews-list">
-                ${areaReviews.map(review => `
-                    <div class="review-item">
-                        <div class="review-header">
-                            <div class="reviewer-info">
-                                <div class="reviewer-avatar">
-                                    <i class="fas fa-user-circle"></i>
-                                </div>
-                                <div>
-                                    <div class="reviewer-name">${review.reviewerFirstname} ${review.reviewerLastname}</div>
-                                    <div class="review-date">${formatDate(review.createdAt)}</div>
-                                </div>
-                            </div>
-                            <div class="review-rating">
-                                ${renderStars(review.rating)}
-                            </div>
-                        </div>
-                        <div class="review-content">
-                            <p>${review.comment}</p>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-
-    loadData();
-
-    function goBack() {
-        window.history.back();
-    }
-    function renderStars(rating) {
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating % 1 >= 0.5;
-        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
-        let starsHTML = '';
-
-        // Pełne gwiazdki
-        for (let i = 0; i < fullStars; i++) {
-            starsHTML += '<i class="fas fa-star star-filled"></i>';
-        }
-
-        // Półgwiazdka
-        if (hasHalfStar) {
-            starsHTML += '<i class="fas fa-star-half-alt star-filled"></i>';
-        }
-
-        // Puste gwiazdki
-        for (let i = 0; i < emptyStars; i++) {
-            starsHTML += '<i class="far fa-star star-empty"></i>';
-        }
-
-        return starsHTML;
-    }
-    function formatDate(dateString) {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('pl-PL', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    }
-
+    // ==================== ŁADOWANIE DANYCH ====================
     async function loadData() {
         document.getElementById('loading').style.display = 'block';
 
         try {
+            // 1. Sprawdź użytkownika
             const userResponse = await fetch(`${API_BASE_URL}/auth/user`, {
                 credentials: 'include'
             });
@@ -1212,6 +1128,7 @@
             userBalance = userData.balance || 0;
             document.getElementById('user-balance').textContent = userBalance.toFixed(2) + ' PLN';
 
+            // 2. Pobierz obszar
             const areaResponse = await fetch(`${API_BASE_URL}/areas`, {
                 credentials: 'include'
             });
@@ -1227,13 +1144,24 @@
                 throw new Error('Nie znaleziono obszaru');
             }
 
+            // UWAGA: Logika backendu się zmieniła - obszar dostępny jeśli nie wyłączony przez właściciela
             if (currentArea.status !== 'AVAILABLE') {
-                throw new Error('Ten obszar nie jest już dostępny do rezerwacji');
+                throw new Error('Ten obszar został wyłączony przez właściciela');
+            }
+
+            // 3. Pobierz zajęte daty dla kalendarza
+            const occupiedResponse = await fetch(`${API_BASE_URL}/reservations/area/${areaId}/occupied`, {
+                credentials: 'include'
+            });
+            if (occupiedResponse.ok) {
+                occupiedDates = await occupiedResponse.json();
             }
 
             displayAreaDetails(currentArea);
             await loadAreaReviews();
-            initializeForm();
+
+            // Inicjalizacja kalendarza po pobraniu zajętych dat
+            initializeCalendars();
 
             document.getElementById('loading').style.display = 'none';
             document.getElementById('area-details').style.display = 'block';
@@ -1245,151 +1173,145 @@
         }
     }
 
-    // --- ZAKTUALIZOWANA FUNKCJA WYŚWIETLANIA GALERII OBSZARU ---
+    // ==================== INICJALIZACJA KALENDARZA (Flatpickr) ====================
+    function initializeCalendars() {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+
+        const config = {
+            locale: "pl",
+            dateFormat: "Y-m-d",
+            minDate: tomorrow,
+            disable: occupiedDates, // Blokuje zajęte daty
+            onChange: function(selectedDates, dateStr, instance) {
+                updateSummary();
+
+                // Jeśli zmieniono datę początkową, zaktualizuj minimalną datę końcową
+                if (instance.element.id === 'start-date') {
+                    const endDatePicker = document.getElementById('end-date')._flatpickr;
+                    endDatePicker.set('minDate', dateStr);
+
+                    // Jeśli data końcowa jest teraz wcześniejsza niż początkowa, wyczyść ją
+                    if (endDatePicker.selectedDates[0] && endDatePicker.selectedDates[0] < selectedDates[0]) {
+                        endDatePicker.clear();
+                    }
+                }
+            }
+        };
+
+        flatpickr("#start-date", config);
+        flatpickr("#end-date", config);
+
+        if (currentArea && currentArea.maxHives) {
+            document.getElementById('hives-count').max = currentArea.maxHives;
+            document.getElementById('max-hives-hint').textContent = currentArea.maxHives;
+        }
+    }
+
+    // ==================== GALERIA I OPINIE ====================
     function displayAreaDetails(area) {
-        // Header
         document.getElementById('area-name').textContent = area.name || 'Obszar pszczelarski';
 
-        // Obsługa listy kwiatów
         let flowersText = '-';
         if (area.flowers && area.flowers.length > 0) {
             flowersText = area.flowers.map(f => f.name).join(', ');
         }
 
-        // Quick info
         document.getElementById('area-type-quick').textContent = flowersText;
         document.getElementById('area-size-quick').textContent = area.area ? area.area.toFixed(2) + ' ha' : '-';
         document.getElementById('area-hives-quick').textContent = area.maxHives || '-';
         document.getElementById('area-price-quick').textContent = area.pricePerDay ? area.pricePerDay.toFixed(2) + ' PLN' : '-';
 
-        // Details modal data
         document.getElementById('detail-name').textContent = area.name || '-';
         document.getElementById('detail-type').textContent = flowersText;
         document.getElementById('detail-size').textContent = area.area ? area.area.toFixed(2) + ' ha' : '-';
         document.getElementById('detail-hives').textContent = area.maxHives || '-';
         document.getElementById('detail-price').textContent = area.pricePerDay ? area.pricePerDay.toFixed(2) + ' PLN' : '-';
-        document.getElementById('detail-owner').textContent =
-            (area.ownerFirstName && area.ownerLastName) ?
-                `${area.ownerFirstName} ${area.ownerLastName}` : '-';
+        document.getElementById('detail-owner').textContent = (area.ownerFirstName && area.ownerLastName) ? `${area.ownerFirstName} ${area.ownerLastName}` : '-';
         document.getElementById('detail-available').textContent = area.availableFrom || '-';
         document.getElementById('detail-description').textContent = area.description || 'Brak opisu';
 
-        // GALERIA ZDJĘĆ
         const galleryContainer = document.getElementById('area-gallery-container');
         const images = (area.images && area.images.length > 0) ? area.images : null;
 
         if (images) {
-            // Główne zdjęcie (pierwsze)
-            const mainImgHtml = `
-                <div class="area-image-main">
-                    <img id="main-area-img" src="data:image/jpeg;base64,${images[0]}" alt="${area.name}">
-                </div>
-            `;
-
-            // Miniatury (jeśli więcej niż jedno)
+            const mainImgHtml = `<div class="area-image-main"><img id="main-area-img" src="data:image/jpeg;base64,${images[0]}" alt="${area.name}"></div>`;
             let thumbsHtml = '';
             if (images.length > 1) {
-                thumbsHtml = `
-                    <div class="area-thumbnails">
-                        ${images.map((img, i) => `
-                            <div class="area-thumbnail ${i === 0 ? 'active' : ''}" 
-                                 onclick="changeMainAreaImage(this, '${img}')">
-                                <img src="data:image/jpeg;base64,${img}" alt="Miniatura ${i + 1}">
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                thumbsHtml = `<div class="area-thumbnails">${images.map((img, i) => `<div class="area-thumbnail ${i === 0 ? 'active' : ''}" onclick="changeMainAreaImage(this, '${img}')"><img src="data:image/jpeg;base64,${img}" alt="Miniatura ${i + 1}"></div>`).join('')}</div>`;
             }
-
             galleryContainer.innerHTML = mainImgHtml + thumbsHtml;
-
         } else {
-            // Placeholder, gdy brak zdjęć
-            galleryContainer.innerHTML = `
-                <div class="area-image-main">
-                    <div class="area-image-placeholder">
-                        <i class="fas fa-image"></i>
-                        <p>Brak zdjęć obszaru</p>
-                    </div>
-                </div>
-            `;
+            galleryContainer.innerHTML = `<div class="area-image-main"><div class="area-image-placeholder"><i class="fas fa-image"></i><p>Brak zdjęć obszaru</p></div></div>`;
         }
     }
 
-    // Funkcja globalna do zmiany głównego zdjęcia obszaru
     window.changeMainAreaImage = function(element, base64) {
         document.getElementById('main-area-img').src = `data:image/jpeg;base64,${base64}`;
         document.querySelectorAll('.area-thumbnail').forEach(el => el.classList.remove('active'));
         element.classList.add('active');
     };
 
-    function showDetailsModal() {
-        document.getElementById('details-modal').classList.add('show');
+    async function loadAreaReviews() {
+        if (!currentArea || !currentArea.reviewCount || currentArea.reviewCount === 0) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/reviews/areas/area/${currentArea.id}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (!response.ok) return;
+            areaReviews = await response.json();
+            displayAreaRating();
+        } catch (error) { console.error('Błąd ładowania opinii:', error); }
     }
 
-    function closeDetailsModal() {
-        document.getElementById('details-modal').classList.remove('show');
+    function displayAreaRating() {
+        const ratingSection = document.getElementById('area-rating-section');
+        if (!ratingSection) return;
+        ratingSection.style.display = 'block';
+        ratingSection.innerHTML = `<div class="rating-stars">${renderStars(currentArea.averageRating)}<span class="rating-text">${currentArea.averageRating.toFixed(1)}/5</span><span class="review-count">(${currentArea.reviewCount} ${currentArea.reviewCount === 1 ? 'opinia' : 'opinii'})</span></div>`;
     }
 
-    function initializeForm() {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-
-        const formatDate = (date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        };
-
-        document.getElementById('start-date').value = formatDate(tomorrow);
-        document.getElementById('start-date').min = formatDate(tomorrow);
-
-        const nextMonth = new Date(tomorrow);
-        nextMonth.setDate(tomorrow.getDate() + 30);
-        document.getElementById('end-date').value = formatDate(nextMonth);
-
-        const dayAfterTomorrow = new Date(tomorrow);
-        dayAfterTomorrow.setDate(tomorrow.getDate() + 1);
-        document.getElementById('end-date').min = formatDate(dayAfterTomorrow);
-
-        if (currentArea && currentArea.maxHives) {
-            document.getElementById('hives-count').max = currentArea.maxHives;
-            document.getElementById('max-hives-hint').textContent = currentArea.maxHives;
-        }
-
-        updateSummary();
+    function renderStars(rating) {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+        let starsHTML = '';
+        for (let i = 0; i < fullStars; i++) starsHTML += '<i class="fas fa-star star-filled"></i>';
+        if (hasHalfStar) starsHTML += '<i class="fas fa-star-half-alt star-filled"></i>';
+        for (let i = 0; i < emptyStars; i++) starsHTML += '<i class="far fa-star star-empty"></i>';
+        return starsHTML;
     }
 
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pl-PL', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    // ==================== OBSŁUGA FORMULARZA I ZAPISU ====================
     function updateSummary() {
-        const startDate = new Date(document.getElementById('start-date').value);
-        const endDate = new Date(document.getElementById('end-date').value);
+        const startDateStr = document.getElementById('start-date').value;
+        const endDateStr = document.getElementById('end-date').value;
         const hivesCount = parseInt(document.getElementById('hives-count').value) || 0;
 
-        if (!currentArea || !startDate || !endDate || startDate >= endDate) {
-            return;
-        }
+        if (!currentArea || !startDateStr || !endDateStr) return;
 
-        // Poprawne liczenie dni
+        const startDate = new Date(startDateStr);
+        const endDate = new Date(endDateStr);
+
+        if (startDate > endDate) return;
+
+        // Oblicz dni (minimum 1)
         const diffTime = endDate.getTime() - startDate.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
-        // Poprawne liczenie kosztu: cena_za_ul_za_dzień * liczba_uli * liczba_dni
         const pricePerHivePerDay = currentArea.pricePerDay || 0;
         const dailyTotalPrice = pricePerHivePerDay * hivesCount;
         const totalCost = dailyTotalPrice * diffDays;
 
-        const formatDisplayDate = (date) => {
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
-        };
-
-        const dateRange = `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
-
-        document.getElementById('summary-date-range').textContent = dateRange;
+        document.getElementById('summary-date-range').textContent = `${formatDate(startDateStr)} - ${formatDate(endDateStr)}`;
         document.getElementById('summary-days').textContent = diffDays;
         document.getElementById('summary-hives').textContent = hivesCount;
         document.getElementById('summary-daily').textContent = dailyTotalPrice.toFixed(2);
@@ -1408,8 +1330,7 @@
             submitBtn.disabled = false;
         }
     }
-    document.getElementById('start-date').addEventListener('change', updateSummary);
-    document.getElementById('end-date').addEventListener('change', updateSummary);
+
     document.getElementById('hives-count').addEventListener('input', updateSummary);
 
     document.getElementById('reservation-form').addEventListener('submit', function(e) {
@@ -1418,31 +1339,19 @@
     });
 
     function openConfirmationModal() {
-        const startDate = new Date(document.getElementById('start-date').value);
-        const endDate = new Date(document.getElementById('end-date').value);
+        const startDateStr = document.getElementById('start-date').value;
+        const endDateStr = document.getElementById('end-date').value;
         const hivesCount = parseInt(document.getElementById('hives-count').value);
-
-        const diffTime = endDate.getTime() - startDate.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        const pricePerHivePerDay = currentArea.pricePerDay || 0;
-        const dailyTotalPrice = pricePerHivePerDay * hivesCount;
-        const totalCost = dailyTotalPrice * diffDays;
-
-        const formatDisplayDate = (date) => {
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
-        };
+        const totalCost = document.getElementById('summary-total').textContent;
+        const dailyPrice = document.getElementById('summary-daily').textContent;
+        const days = document.getElementById('summary-days').textContent;
 
         document.getElementById('modal-area-name').textContent = currentArea.name;
-        document.getElementById('modal-date-range').textContent =
-            `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
-        document.getElementById('modal-days').textContent = diffDays + ' dni';
+        document.getElementById('modal-date-range').textContent = `${formatDate(startDateStr)} - ${formatDate(endDateStr)}`;
+        document.getElementById('modal-days').textContent = days + ' dni';
         document.getElementById('modal-hives').textContent = hivesCount + ' uli';
-        document.getElementById('modal-daily-price').textContent = dailyTotalPrice.toFixed(2) + ' PLN';
-        document.getElementById('modal-total-price').textContent = totalCost.toFixed(2);
+        document.getElementById('modal-daily-price').textContent = dailyPrice + ' PLN';
+        document.getElementById('modal-total-price').textContent = totalCost;
 
         document.getElementById('confirmation-modal').classList.add('show');
     }
@@ -1451,6 +1360,7 @@
         document.getElementById('confirmation-modal').classList.remove('show');
     }
 
+    // ==================== ZATWIERDZANIE REZERWACJI ====================
     async function confirmReservation() {
         closeConfirmationModal();
 
@@ -1492,7 +1402,7 @@
         }
     }
 
-    // Zamknięcie modali po kliknięciu poza nimi
+    // Obsługa zamykania modali
     document.getElementById('details-modal').addEventListener('click', function(e) {
         if (e.target === this) closeDetailsModal();
     });
@@ -1501,6 +1411,10 @@
         if (e.target === this) closeConfirmationModal();
     });
 
+    function showDetailsModal() { document.getElementById('details-modal').classList.add('show'); }
+    function closeDetailsModal() { document.getElementById('details-modal').classList.remove('show'); }
+
+    // Start
     loadData();
 </script>
 </body>
