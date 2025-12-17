@@ -322,7 +322,7 @@
     document.getElementById('confirmation-modal').addEventListener('click', function(e) {
     if (e.target === this) closeConfirmationModal();
 });
-
+    function goBack() {window.history.back(); }
     function showDetailsModal() { document.getElementById('details-modal').classList.add('show'); }
     function closeDetailsModal() { document.getElementById('details-modal').classList.remove('show'); }
 

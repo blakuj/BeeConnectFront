@@ -170,7 +170,8 @@ async function fetchRentedAreas() {
             return;
         }
 
-        areas.forEach(area => {
+        // ZMIANA: Używamy pętli for...of, aby móc używać await w środku
+        for (const area of areas) {
             const status = area.status === 'AVAILABLE' ? 'Aktywny' : 'Zakończony';
             const statusClass = area.status === 'AVAILABLE' ? 'card-status-active' : 'card-status-inactive';
 
@@ -181,6 +182,37 @@ async function fetchRentedAreas() {
             const thumbnail = (area.images && area.images.length > 0)
                 ? `data:image/jpeg;base64,${area.images[0]}`
                 : 'assets/default-area.jpg';
+
+            // NOWA LOGIKA: Sprawdzamy czy można wystawić opinię
+            let canReview = false;
+            if (area.reservationId) {
+                try {
+                    const reviewCheckResponse = await fetch(`${API_URL}/reviews/areas/can-review/${area.reservationId}`, {
+                        method: "GET",
+                        credentials: "include"
+                    });
+                    if (reviewCheckResponse.ok) {
+                        const reviewData = await reviewCheckResponse.json();
+                        canReview = reviewData.canReview;
+                    }
+                } catch (e) {
+                    console.error('Błąd sprawdzania statusu opinii:', e);
+                }
+            }
+
+            // Budowanie przycisku w zależności od canReview
+            const reviewButtonHtml = canReview
+                ? `<button class="btn btn-accent card-btn review-area-btn" data-reservation-id="${area.reservationId}">
+                       <i class="fas fa-star"></i> Wystaw opinię
+                   </button>`
+                : `<div class="status-badge reviewed" style="color: #27ae60; font-weight: 600; display: flex; align-items: center; gap: 5px; font-size: 0.9rem;">
+                       <i class="fas fa-check-circle"></i> Oceniono
+                   </div>`;
+
+            // Jeśli nie ma ID rezerwacji (błąd danych), wyświetl info
+            const footerContent = area.reservationId
+                ? reviewButtonHtml
+                : `<span style="color: #999; font-size: 0.9rem;">Brak rezerwacji</span>`;
 
             const card = `
                 <div class="card" data-area-id="${area.id || ''}">
@@ -202,18 +234,12 @@ async function fetchRentedAreas() {
                         </div>
                     </div>
                     <div class="card-footer">
-                        ${area.reservationId ? `
-                            <button class="btn btn-accent card-btn review-area-btn" data-reservation-id="${area.reservationId}">
-                                <i class="fas fa-star"></i> Wystaw opinię
-                            </button>
-                        ` : `
-                            <span style="color: #999; font-size: 0.9rem;">Brak rezerwacji</span>
-                        `}
+                        ${footerContent}
                     </div>
                 </div>
             `;
             container.insertAdjacentHTML('beforeend', card);
-        });
+        }
 
         setupAreaReviewButtons();
     } catch (error) {
@@ -540,6 +566,12 @@ function filesToBase64List(files) {
 function setupEventListeners() {
     document.querySelectorAll('.sidebar-nav-item').forEach(item => {
         item.addEventListener('click', async function(e) {
+            const tabId = this.getAttribute('data-tab');
+
+            if (!tabId) {
+                return;
+            }
+
             e.preventDefault();
 
             document.querySelectorAll('.sidebar-nav-item').forEach(i => i.classList.remove('active'));
@@ -547,10 +579,8 @@ function setupEventListeners() {
 
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-            const tabId = this.getAttribute('data-tab');
             const tabElement = document.getElementById(tabId);
             if (tabElement) tabElement.classList.add('active');
-
 
             if (tabId === 'products') {
                 await fetchMyProducts();
@@ -691,7 +721,7 @@ function setupAreaButtons() {
                 });
             }
 
-            document.getElementById('edit-area-date-to').value = area.endDate || area.availableFrom || '';
+            document.getElementById('edit-area-date-to').value = area.endDate || '';
             document.getElementById('edit-area-max-hives').value = area.maxHives || '';
             document.getElementById('edit-area-price').value = area.pricePerDay || '';
             document.getElementById('edit-area-description').value = area.description || '';

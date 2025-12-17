@@ -188,15 +188,28 @@ function applyFilters() {
     updateProductCount();
 }
 
+
 function filterByCategory(category) {
+    const allCheckbox = document.getElementById('category-all');
+
     if (category === 'ALL') {
         selectedCategories = [];
+        document.querySelectorAll('.filter-checkbox[id^="category-"]').forEach(cb => {
+            if (cb.id !== 'category-all') cb.checked = false;
+        });
+        if (allCheckbox) allCheckbox.checked = true;
     } else {
         const index = selectedCategories.indexOf(category);
         if (index > -1) {
             selectedCategories.splice(index, 1);
         } else {
             selectedCategories.push(category);
+        }
+
+        if (selectedCategories.length > 0) {
+            if (allCheckbox) allCheckbox.checked = false;
+        } else {
+            if (allCheckbox) allCheckbox.checked = true;
         }
     }
     applyFilters();

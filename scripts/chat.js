@@ -54,7 +54,6 @@ function updateWelcomeMessage() {
 // ==================== ŁADOWANIE KONWERSACJI ====================
 async function loadConversations() {
     try {
-        // Tylko przy pierwszym ładowaniu pokazuj spinner
         if (isInitialLoad) {
             showConversationsLoading(true);
         }
@@ -71,7 +70,7 @@ async function loadConversations() {
         const newConversations = await response.json();
 
         // Sprawdź czy są jakieś zmiany
-        if (JSON.stringify(conversations) !== JSON.stringify(newConversations)) {
+        if (isInitialLoad || JSON.stringify(conversations) !== JSON.stringify(newConversations)) {
             conversations = newConversations;
             displayConversations();
         }
