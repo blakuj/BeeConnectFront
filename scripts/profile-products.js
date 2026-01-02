@@ -1,42 +1,30 @@
-// profile-products.js - Zarządzanie produktami, zakupami i ocenami użytkownika
+import { createUserProductCard, renderProductCards } from '../components/cards/ProductCard.js';
+import { createAreaCard, renderAreaCards } from '../components/cards/AreaCard.js';
+import { renderBadgeCards } from '../components/cards/BadgeCard.js';
 
 const API_URL = 'http://localhost:8080/api';
 
-const PREDEFINED_FLOWERS = [
-    { name: "Lipa", color: "#FF0000" },
-    { name: "Wielokwiat", color: "#FFA500" },
-    { name: "Gryka", color: "#FFFF00" },
-    { name: "Rzepak", color: "#FFFF99" },
-    { name: "Spadź", color: "#800000" },
-    { name: "Akacja", color: "#7878FF" },
-    { name: "Wrzos", color: "#800080" },
-    { name: "Malina", color: "#FF69B4" }
-];
-
-// --- Stan plików dla EDYCJI OBSZARU ---
-let editAreaFiles = []; // Nowe pliki (File objects)
-let editAreaExistingImages = []; // Istniejące zdjęcia (Base64 strings)
-
-// --- Stan plików dla EDYCJI PRODUKTU ---
-let editProductFiles = []; // Nowe pliki (File objects)
-let editProductExistingImages = []; // Istniejące zdjęcia (Base64 strings)
-
-// --- Stan Filtra Sprzedaży ---
-let salesFilter = 'ACTIVE'; // 'ACTIVE' (w trakcie) lub 'HISTORY' (zakończone)
-
+let editAreaFiles = [];
+let editAreaExistingImages = [];
+let editProductFiles = [];
+let editProductExistingImages = [];
 
 // ==================== INICJALIZACJA ====================
 document.addEventListener('DOMContentLoaded', async function() {
     await loadUserProfile();
-    await fetchMyAreas();
-    await fetchRentedAreas();
-    await fetchMyProducts();
-    await loadMyBadges();
-
     setupEventListeners();
+    await fetchMyAreas();
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab) {
+        document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+            if (item.getAttribute('data-tab') === tab) {
+                item.click();
+            }
+        });
+    }
 });
 
-// ==================== ŁADOWANIE PROFILU ====================
 async function loadUserProfile() {
     try {
         const response = await fetch(`${API_URL}/auth/user`, {
@@ -46,111 +34,46 @@ async function loadUserProfile() {
 
         if (response.ok) {
             const user = await response.json();
-
-            const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Gość';
-            const welcomeName = document.getElementById('welcome-name');
-            if (welcomeName) welcomeName.textContent = fullName;
-
-            const userNameEl = document.getElementById('user-name');
-            if (userNameEl) userNameEl.textContent = fullName;
-
-            const userEmailEl = document.getElementById('user-email');
-            if (userEmailEl) userEmailEl.textContent = user.email || '';
-
-            const userStatusEl = document.getElementById('user-status');
-            if (userStatusEl) userStatusEl.textContent = user.role === 'BEEKEEPER' ? 'Zweryfikowany Pszczelarz' : 'Użytkownik';
+            document.getElementById('user-name').textContent = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Użytkownik';
+            document.getElementById('welcome-name').textContent = user.firstname || 'Użytkowniku';
+            document.getElementById('user-email').textContent = user.email || 'nieznany@email.com';
+            document.getElementById('user-status').textContent = user.role === 'BEEKEEPER' ? 'Zweryfikowany Pszczelarz' : 'Użytkownik';
         } else if (response.status === 401) {
+            alert('Sesja wygasła. Zaloguj się ponownie.');
             window.location.href = 'login.html';
         }
     } catch (error) {
-        console.error('Error loading profile:', error);
+        console.error('Błąd podczas ładowania profilu:', error);
     }
 }
 
-// ==================== OBSZARY ====================
+// ==================== MOJE OBSZARY ====================
 async function fetchMyAreas() {
     try {
-        const response = await fetch(`${API_URL}/ownedAreas`, {
+        const response = await fetch(`${API_URL}/areas/my-areas`, {
             method: "GET",
             credentials: "include"
         });
-        const areas = await response.json();
-        const container = document.getElementById('my-areas-container');
-        container.innerHTML = '';
 
-        if (areas.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych obszarów. Dodaj pierwszy obszar!</p>';
-            return;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        areas.forEach(area => {
-            const status = area.status === 'AVAILABLE' ? 'Aktywny' : 'Nieaktywny';
-            const statusClass = area.status === 'AVAILABLE' ? 'card-status-active' : 'card-status-inactive';
-            const availability = area.status === 'AVAILABLE'
-                ? `Dostępny od ${formatDate(area.availableFrom)}`
-                : `Nieaktywny od ${formatDate(area.availableFrom)}`;
+        const areas = await response.json();
 
-            const location = area.coordinates && area.coordinates.length > 0
-                ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
-                : 'Brak lokalizacji';
-
-            let flowersText = 'Brak danych';
-            if (area.flowers && area.flowers.length > 0) {
-                flowersText = area.flowers.map(f => f.name).join(', ');
+        renderAreaCards('#my-areas-container', areas, {
+            showButtons: true,
+            onClick: (a) => window.location.href = `area-details.html?id=${a.id}`,
+            actions: {
+                onEdit: (a) => openEditAreaModal(a),
+                onDelete: (a) => {
+                    if (confirm(`Czy na pewno chcesz usunąć obszar "${a.name}"?`)) {
+                        deleteArea(a.id);
+                    }
+                }
             }
-
-            // Używamy pierwszego zdjęcia jako miniatury lub default
-            const thumbnail = (area.images && area.images.length > 0)
-                ? `data:image/jpeg;base64,${area.images[0]}`
-                : 'assets/default-area.jpg';
-
-            const card = `
-                <div class="card" data-area-id="${area.id || ''}">
-                    <div class="card-header">
-                        <div class="card-header-title">${area.name || 'Brak nazwy'}</div>
-                        <div class="card-header-status ${statusClass}">${status}</div>
-                    </div>
-                    <div class="area-preview">
-                        <img src="${thumbnail}" alt="Podgląd obszaru">
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Powierzchnia:</div>
-                            <div class="card-property-value">${area.area.toFixed(2)} ha</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Lokalizacja: </div>
-                            <div class="card-property-value">${location}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Kwiaty: </div>
-                            <div class="card-property-value">${flowersText}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Status: </div>
-                            <div class="card-property-value">${availability}</div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <button class="btn btn-outline card-btn edit-area-btn" data-area='${JSON.stringify(area).replace(/'/g, "&apos;")}'>
-                            <i class="fas fa-edit"></i> Edytuj
-                        </button>
-                        ${area.status === 'AVAILABLE' ? `
-                            <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
-                                <i class="fas fa-trash-alt"></i> Usuń
-                            </button>
-                        ` : `
-                            <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
-                                <i class="fas fa-trash-alt"></i> Usuń
-                            </button>
-                        `}
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', card);
         });
 
-        setupAreaButtons();
     } catch (error) {
         console.error('Error fetching areas:', error);
         document.getElementById('my-areas-container').innerHTML =
@@ -158,93 +81,82 @@ async function fetchMyAreas() {
     }
 }
 
+// ==================== WYNAJĘTE OBSZARY ====================
 async function fetchRentedAreas() {
     try {
-        const response = await fetch(`${API_URL}/rentedAreas`, {
+        const response = await fetch(`${API_URL}/reservations/my-reservations`, {
             method: "GET",
             credentials: "include"
         });
-        const areas = await response.json();
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const reservations = await response.json();
         const container = document.getElementById('rented-areas-container');
         container.innerHTML = '';
 
-        if (areas.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych wynajętych obszarów.</p>';
+        if (reservations.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie wynajmujesz jeszcze żadnych obszarów.</p>';
             return;
         }
 
-        // ZMIANA: Używamy pętli for...of, aby móc używać await w środku
-        for (const area of areas) {
-            const status = area.status === 'AVAILABLE' ? 'Aktywny' : 'Zakończony';
-            const statusClass = area.status === 'AVAILABLE' ? 'card-status-active' : 'card-status-inactive';
-
-            const location = area.coordinates && area.coordinates.length > 0
-                ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
-                : 'Brak lokalizacji';
-
-            const thumbnail = (area.images && area.images.length > 0)
-                ? `data:image/jpeg;base64,${area.images[0]}`
-                : 'assets/default-area.jpg';
-
-            // NOWA LOGIKA: Sprawdzamy czy można wystawić opinię
+        for (const res of reservations) {
             let canReview = false;
-            if (area.reservationId) {
-                try {
-                    const reviewCheckResponse = await fetch(`${API_URL}/reviews/areas/can-review/${area.reservationId}`, {
-                        method: "GET",
-                        credentials: "include"
-                    });
-                    if (reviewCheckResponse.ok) {
-                        const reviewData = await reviewCheckResponse.json();
-                        canReview = reviewData.canReview;
-                    }
-                } catch (e) {
-                    console.error('Błąd sprawdzania statusu opinii:', e);
+            try {
+                const reviewCheckResponse = await fetch(`${API_URL}/reviews/areas/can-review/${res.id}`, {
+                    method: "GET",
+                    credentials: "include"
+                });
+                if (reviewCheckResponse.ok) {
+                    const reviewData = await reviewCheckResponse.json();
+                    canReview = reviewData.canReview;
                 }
+            } catch (e) {
+                console.error('Error checking review status:', e);
             }
 
-            // Budowanie przycisku w zależności od canReview
-            const reviewButtonHtml = canReview
-                ? `<button class="btn btn-accent card-btn review-area-btn" data-reservation-id="${area.reservationId}">
-                       <i class="fas fa-star"></i> Wystaw opinię
-                   </button>`
-                : `<div class="status-badge reviewed" style="color: #27ae60; font-weight: 600; display: flex; align-items: center; gap: 5px; font-size: 0.9rem;">
-                       <i class="fas fa-check-circle"></i> Oceniono
-                   </div>`;
+            const card = createAreaCard(res.area, {
+                showButtons: false,
+                onClick: (a) => window.location.href = `area-details.html?id=${a.id}`
+            });
 
-            // Jeśli nie ma ID rezerwacji (błąd danych), wyświetl info
-            const footerContent = area.reservationId
-                ? reviewButtonHtml
-                : `<span style="color: #999; font-size: 0.9rem;">Brak rezerwacji</span>`;
-
-            const card = `
-                <div class="card" data-area-id="${area.id || ''}">
-                    <div class="card-header">
-                        <div class="card-header-title">${area.name || 'Brak nazwy'}</div>
-                        <div class="card-header-status ${statusClass}">${status}</div>
-                    </div>
-                    <div class="area-preview">
-                        <img src="${thumbnail}" alt="Podgląd obszaru">
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Powierzchnia:</div>
-                            <div class="card-property-value">${area.area.toFixed(2)} ha</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Lokalizacja: </div>
-                            <div class="card-property-value">${location}</div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        ${footerContent}
-                    </div>
+            const info = card.querySelector('.card-info');
+            const reservationInfo = document.createElement('div');
+            reservationInfo.style.cssText = 'margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;';
+            reservationInfo.innerHTML = `
+                <div style="font-size: 13px; color: #666;">
+                    <div><strong>Od:</strong> ${formatDate(res.startDate)}</div>
+                    <div><strong>Do:</strong> ${formatDate(res.endDate)}</div>
+                    <div><strong>Status:</strong> <span class="status-badge status-${res.status.toLowerCase()}">${translateStatus(res.status)}</span></div>
                 </div>
             `;
-            container.insertAdjacentHTML('beforeend', card);
+            info.appendChild(reservationInfo);
+
+            if (canReview) {
+                const reviewBtn = document.createElement('button');
+                reviewBtn.className = 'btn btn-accent card-btn review-area-btn';
+                reviewBtn.dataset.reservationId = res.id;
+                reviewBtn.dataset.areaId = res.area.id;
+                reviewBtn.dataset.areaName = res.area.name;
+                reviewBtn.innerHTML = '<i class="fas fa-star"></i> Wystaw opinię';
+                reviewBtn.style.cssText = 'margin-top: 10px; width: 100%;';
+                info.appendChild(reviewBtn);
+            }
+
+            container.appendChild(card);
         }
 
-        setupAreaReviewButtons();
+        document.querySelectorAll('.review-area-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const reservationId = this.dataset.reservationId;
+                const areaId = this.dataset.areaId;
+                const areaName = this.dataset.areaName;
+                openAreaReviewModal(reservationId, areaId, areaName);
+            });
+        });
+
     } catch (error) {
         console.error('Error fetching rented areas:', error);
         document.getElementById('rented-areas-container').innerHTML =
@@ -252,23 +164,60 @@ async function fetchRentedAreas() {
     }
 }
 
-// ==================== PRODUKTY ====================
-function translateProductCategory(category) {
-    const translations = {
-        'HONEY': 'Miód',
-        'POLLEN': 'Pyłek pszczeli',
-        'WAX': 'Wosk pszczeli',
-        'PROPOLIS': 'Propolis',
-        'BEE_BREAD': 'Pierzga',
-        'ROYAL_JELLY': 'Mleczko pszczele',
-        'OTHER': 'Inny'
-    };
-    return translations[category] || category;
+// ==================== REZERWACJE NA MOICH OBSZARACH ====================
+async function fetchSoldAreas() {
+    try {
+        const response = await fetch(`${API_URL}/reservations/my-areas-reservations`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const reservations = await response.json();
+        const container = document.getElementById('sold-areas-container');
+        container.innerHTML = '';
+
+        if (reservations.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych rezerwacji na swoich obszarach.</p>';
+            return;
+        }
+
+        reservations.forEach(res => {
+            const card = createAreaCard(res.area, {
+                showButtons: false,
+                onClick: null
+            });
+
+            const info = card.querySelector('.card-info');
+            const reservationInfo = document.createElement('div');
+            reservationInfo.style.cssText = 'margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;';
+            reservationInfo.innerHTML = `
+                <div style="font-size: 13px; color: #666;">
+                    <div><strong>Pszczelarz:</strong> ${res.beekeeperFirstname} ${res.beekeeperLastname}</div>
+                    <div><strong>Od:</strong> ${formatDate(res.startDate)}</div>
+                    <div><strong>Do:</strong> ${formatDate(res.endDate)}</div>
+                    <div><strong>Status:</strong> <span class="status-badge status-${res.status.toLowerCase()}">${translateStatus(res.status)}</span></div>
+                </div>
+            `;
+            info.appendChild(reservationInfo);
+
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error('Error fetching sold areas:', error);
+        document.getElementById('sold-areas-container').innerHTML =
+            '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania rezerwacji.</p>';
+    }
 }
 
+// ==================== MOJE PRODUKTY ====================
 async function fetchMyProducts() {
     try {
-        const response = await fetch(`${API_URL}/products/my`, {
+        const response = await fetch(`${API_URL}/products/my-products`, {
             method: "GET",
             credentials: "include"
         });
@@ -278,64 +227,79 @@ async function fetchMyProducts() {
         }
 
         const products = await response.json();
-        const container = document.getElementById('my-products-container');
-        container.innerHTML = '';
 
-        if (products.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych produktów. Dodaj pierwszy produkt!</p>';
-            return;
-        }
-
-        products.forEach(product => {
-            const status = product.available ? 'Dostępny' : 'Wyprzedany';
-            const statusClass = product.available ? 'card-status-active' : 'card-status-inactive';
-            const categoryName = translateProductCategory(product.category);
-
-            const thumbnail = (product.images && product.images.length > 0)
-                ? `data:image/jpeg;base64,${product.images[0]}`
-                : 'assets/default-product.jpg';
-
-            const card = `
-                <div class="card" data-product-id="${product.id || ''}">
-                    <div class="card-header">
-                        <div class="card-header-title">${product.name || 'Brak nazwy'}</div>
-                        <div class="card-header-status ${statusClass}">${status}</div>
-                    </div>
-                    <div class="area-preview">
-                        <img src="${thumbnail}" alt="Zdjęcie produktu">
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Typ:</div>
-                            <div class="card-property-value">${categoryName}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Ilość:</div>
-                            <div class="card-property-value">${product.stock || 0} szt.</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Cena:</div>
-                            <div class="card-property-value">${(product.price || 0).toFixed(2)} PLN</div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <button class="btn btn-outline card-btn edit-product-btn" data-product='${JSON.stringify(product).replace(/'/g, "&apos;")}'>
-                            <i class="fas fa-edit"></i> Edytuj
-                        </button>
-                        <button class="btn btn-danger card-btn delete-product-btn" data-id="${product.id || ''}">
-                            <i class="fas fa-trash-alt"></i> Usuń
-                        </button>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', card);
+        renderProductCards('#my-products-container', products, {
+            showButtons: false,
+            showRating: false,
+            actions: {
+                onEdit: (prod) => openEditProductModal(prod),
+                onDelete: (prod) => {
+                    if (confirm(`Czy na pewno chcesz usunąć produkt "${prod.name}"?`)) {
+                        deleteProduct(prod.id);
+                    }
+                }
+            }
         });
 
-        setupProductButtons();
     } catch (error) {
         console.error('Error fetching products:', error);
         document.getElementById('my-products-container').innerHTML =
             '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania produktów.</p>';
+    }
+}
+
+// ==================== SPRZEDANE PRODUKTY ====================
+async function fetchSoldProducts() {
+    try {
+        const response = await fetch(`${API_URL}/orders/my-sales`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const orders = await response.json();
+        const container = document.getElementById('sold-products-container');
+        container.innerHTML = '';
+
+        if (orders.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie sprzedałeś jeszcze żadnych produktów.</p>';
+            return;
+        }
+
+        orders.forEach(order => {
+            const productData = {
+                id: order.productId,
+                name: order.productName,
+                price: order.price,
+                images: order.productImage ? [order.productImage] : [],
+                category: order.category || 'HONEY'
+            };
+
+            const card = createUserProductCard(productData, {});
+
+            const info = card.querySelector('.card-info');
+            const orderInfo = document.createElement('div');
+            orderInfo.style.cssText = 'margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;';
+            orderInfo.innerHTML = `
+                <div style="font-size: 13px; color: #666;">
+                    <div><strong>Ilość:</strong> ${order.quantity} szt.</div>
+                    <div><strong>Suma:</strong> ${(order.price * order.quantity).toFixed(2)} PLN</div>
+                    <div><strong>Data sprzedaży:</strong> ${formatDate(order.orderedAt)}</div>
+                    <div><strong>Kupujący:</strong> ${order.buyerFirstname} ${order.buyerLastname}</div>
+                </div>
+            `;
+            info.appendChild(orderInfo);
+
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error('Error fetching sold products:', error);
+        document.getElementById('sold-products-container').innerHTML =
+            '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania sprzedanych produktów.</p>';
     }
 }
 
@@ -375,67 +339,58 @@ async function loadMyPurchases() {
                 console.error('Error checking review status:', e);
             }
 
-            const reviewButton = canReview
-                ? `<button class="btn btn-accent card-btn review-product-btn" data-order-id="${order.id}" data-product-id="${order.productId}" data-product-name="${order.productName}">
-                    <i class="fas fa-star"></i> Wystaw opinię
-                   </button>`
-                : `<div class="status-badge reviewed">
-                    <i class="fas fa-check-circle"></i> Oceniono
-                   </div>`;
+            const productData = {
+                id: order.productId,
+                name: order.productName,
+                price: order.price,
+                images: order.productImage ? [order.productImage] : [],
+                category: order.category || 'HONEY'
+            };
 
-            const thumbnail = order.productImage
-                ? `data:image/jpeg;base64,${order.productImage}`
-                : 'assets/default-product.jpg';
+            const card = createUserProductCard(productData, {});
 
-            // Tłumaczenie statusu
-            let statusLabel = 'W trakcie';
-            if (order.status === 'COMPLETED' || order.status === 'DELIVERED') statusLabel = 'Zakończone';
-            else if (order.status === 'SHIPPED') statusLabel = 'Wysłane';
-
-            const card = `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-header-title">${order.productName}</div>
-                        <div class="card-header-status card-status-active">${statusLabel}</div>
-                    </div>
-                    <div class="area-preview">
-                        <img src="${thumbnail}" alt="${order.productName}">
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Kategoria:</div>
-                            <div class="card-property-value">${translateProductCategory(order.productCategory)}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Ilość:</div>
-                            <div class="card-property-value">${order.quantity} szt.</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Cena za sztukę:</div>
-                            <div class="card-property-value">${order.pricePerUnit.toFixed(2)} PLN</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Suma:</div>
-                            <div class="card-property-value"><strong>${order.totalPrice.toFixed(2)} PLN</strong></div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Data zakupu:</div>
-                            <div class="card-property-value">${formatDate(order.orderedAt)}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Sprzedawca:</div>
-                            <div class="card-property-value">${order.sellerFirstname} ${order.sellerLastname}</div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        ${reviewButton}
-                    </div>
+            const info = card.querySelector('.card-info');
+            const orderInfo = document.createElement('div');
+            orderInfo.style.cssText = 'margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;';
+            orderInfo.innerHTML = `
+                <div style="font-size: 13px; color: #666;">
+                    <div><strong>Ilość:</strong> ${order.quantity} szt.</div>
+                    <div><strong>Suma:</strong> ${(order.price * order.quantity).toFixed(2)} PLN</div>
+                    <div><strong>Data zakupu:</strong> ${formatDate(order.orderedAt)}</div>
+                    <div><strong>Sprzedawca:</strong> ${order.sellerFirstname} ${order.sellerLastname}</div>
                 </div>
             `;
-            container.insertAdjacentHTML('beforeend', card);
+            info.appendChild(orderInfo);
+
+            if (canReview) {
+                const reviewBtn = document.createElement('button');
+                reviewBtn.className = 'btn btn-accent card-btn review-product-btn';
+                reviewBtn.dataset.orderId = order.id;
+                reviewBtn.dataset.productId = order.productId;
+                reviewBtn.dataset.productName = order.productName;
+                reviewBtn.innerHTML = '<i class="fas fa-star"></i> Wystaw opinię';
+                reviewBtn.style.cssText = 'margin-top: 10px; width: 100%;';
+                info.appendChild(reviewBtn);
+            } else {
+                const reviewedBadge = document.createElement('div');
+                reviewedBadge.className = 'status-badge reviewed';
+                reviewedBadge.innerHTML = '<i class="fas fa-check-circle"></i> Oceniono';
+                reviewedBadge.style.cssText = 'margin-top: 10px; display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; background-color: rgba(76, 175, 80, 0.1); color: #4CAF50;';
+                info.appendChild(reviewedBadge);
+            }
+
+            container.appendChild(card);
         }
 
-        setupProductReviewButtons();
+        document.querySelectorAll('.review-product-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const orderId = this.dataset.orderId;
+                const productId = this.dataset.productId;
+                const productName = this.dataset.productName;
+                openProductReviewModal(orderId, productId, productName);
+            });
+        });
+
     } catch (error) {
         console.error('Error fetching purchases:', error);
         document.getElementById('bought-products-container').innerHTML =
@@ -443,9 +398,33 @@ async function loadMyPurchases() {
     }
 }
 
+// ==================== ODZNAKI ====================
+async function loadMyBadges() {
+    try {
+        const response = await fetch(`${API_URL}/badges/my-badges`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const badges = await response.json();
+
+        renderBadgeCards('#badges-container', badges, {
+            earned: true,
+            showProgress: false
+        });
+
+    } catch (error) {
+        console.error('Error fetching badges:', error);
+        document.getElementById('badges-container').innerHTML =
+            '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania odznak.</p>';
+    }
+}
+
 // ==================== ZARZĄDZANIE GALERIĄ ZDJĘĆ ====================
-// ... (Bez zmian: removeEditAreaFile, removeEditProductFile, updateEditAreaPreview, updateEditProductPreview, filesToBase64List) ...
-// Funkcja globalna do usuwania zdjęcia z edycji obszaru
 window.removeEditAreaFile = function(index, isExisting) {
     if (isExisting) {
         editAreaExistingImages.splice(index, 1);
@@ -468,13 +447,13 @@ function updateEditAreaPreview() {
     const gallery = document.getElementById('edit-area-gallery');
     gallery.innerHTML = '';
     if (editAreaExistingImages.length === 0 && editAreaFiles.length === 0) {
-        gallery.innerHTML = `<div class="empty-preview"><i class="fas fa-images" style="font-size: 24px; margin-bottom: 5px;"></i><span>Brak zdjęć</span></div>`;
+        gallery.innerHTML = `<div class="empty-preview"><i class="fas fa-images" style="font-size: 32px; margin-bottom: 10px;"></i><span>Brak wybranych zdjęć</span></div>`;
         return;
     }
-    editAreaExistingImages.forEach((imgBase64, index) => {
+    editAreaExistingImages.forEach((img, index) => {
         const item = document.createElement('div');
         item.className = 'preview-item existing';
-        item.innerHTML = `<img src="data:image/jpeg;base64,${imgBase64}" alt="Existing"><div class="remove-btn" onclick="removeEditAreaFile(${index}, true)"><i class="fas fa-times"></i></div>`;
+        item.innerHTML = `<img src="data:image/jpeg;base64,${img}" alt="Existing"><div class="remove-btn" onclick="removeEditAreaFile(${index}, true)"><i class="fas fa-times"></i></div>`;
         gallery.appendChild(item);
     });
     editAreaFiles.forEach((file, index) => {
@@ -493,13 +472,13 @@ function updateEditProductPreview() {
     const gallery = document.getElementById('edit-product-gallery');
     gallery.innerHTML = '';
     if (editProductExistingImages.length === 0 && editProductFiles.length === 0) {
-        gallery.innerHTML = `<div class="empty-preview"><i class="fas fa-images" style="font-size: 24px; margin-bottom: 5px;"></i><span>Brak zdjęć</span></div>`;
+        gallery.innerHTML = `<div class="empty-preview"><i class="fas fa-images" style="font-size: 32px; margin-bottom: 10px;"></i><span>Brak wybranych zdjęć</span></div>`;
         return;
     }
-    editProductExistingImages.forEach((imgBase64, index) => {
+    editProductExistingImages.forEach((img, index) => {
         const item = document.createElement('div');
         item.className = 'preview-item existing';
-        item.innerHTML = `<img src="data:image/jpeg;base64,${imgBase64}" alt="Existing"><div class="remove-btn" onclick="removeEditProductFile(${index}, true)"><i class="fas fa-times"></i></div>`;
+        item.innerHTML = `<img src="data:image/jpeg;base64,${img}" alt="Existing"><div class="remove-btn" onclick="removeEditProductFile(${index}, true)"><i class="fas fa-times"></i></div>`;
         gallery.appendChild(item);
     });
     editProductFiles.forEach((file, index) => {
@@ -551,56 +530,72 @@ function setupEventListeners() {
         });
     });
 
-    // ... (Reszta event listeners bez zmian: gwiazdki, modale, submitAreaReview, submitProductReview, handleDelete, etc.)
-    document.querySelectorAll('.star').forEach(star => {
-        star.addEventListener('click', function() {
-            const value = parseInt(this.getAttribute('data-value'));
-            const stars = this.parentElement.querySelectorAll('.star');
-            const ratingInput = this.closest('form').querySelector('input[name="rating"]');
-            if (ratingInput) ratingInput.value = value;
-            stars.forEach(s => {
-                s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= value);
+    const reviewStars = document.querySelectorAll('.review-star');
+    reviewStars.forEach((star, index) => {
+        star.addEventListener('mouseenter', () => {
+            reviewStars.forEach((s, i) => {
+                if (i <= index) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
             });
         });
-    });
 
-    document.querySelectorAll('.modal-close, .close-modal-btn').forEach(btn => {
-        btn.addEventListener('click', closeAllModals);
-    });
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === this) closeAllModals();
+        star.addEventListener('click', () => {
+            const rating = index + 1;
+            reviewStars.forEach((s, i) => {
+                if (i < rating) {
+                    s.classList.add('selected');
+                } else {
+                    s.classList.remove('selected');
+                }
+            });
+            const ratingInput = document.getElementById('review-rating-value');
+            if (ratingInput) {
+                ratingInput.value = rating;
+            }
         });
     });
 
-    const submitProductReviewBtn = document.querySelector('.submit-product-review-btn');
-    if (submitProductReviewBtn) submitProductReviewBtn.addEventListener('click', submitProductReview);
-    const submitAreaReviewBtn = document.querySelector('.submit-area-review-btn');
-    if (submitAreaReviewBtn) submitAreaReviewBtn.addEventListener('click', submitAreaReview);
-    const confirmDeleteBtn = document.querySelector('.confirm-delete-btn');
-    if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', handleDelete);
-    const submitEditAreaBtn = document.querySelector('.submit-edit-area-btn');
-    if (submitEditAreaBtn) submitEditAreaBtn.onclick = handleEditAreaSubmit;
-    const submitEditProductBtn = document.querySelector('.submit-edit-product-btn');
-    if (submitEditProductBtn) submitEditProductBtn.onclick = handleEditProductSubmit;
+    const reviewStarsContainer = document.querySelector('.stars-container');
+    if (reviewStarsContainer) {
+        reviewStarsContainer.addEventListener('mouseleave', () => {
+            const selectedRating = parseInt(document.getElementById('review-rating-value')?.value || 0);
+            reviewStars.forEach((s, i) => {
+                if (i < selectedRating) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        });
+    }
 
-    const editAreaImageInput = document.getElementById('edit-area-image');
+    const editAreaImageInput = document.getElementById('edit-area-images');
     if (editAreaImageInput) {
         editAreaImageInput.addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             files.forEach(file => {
-                if (!editAreaFiles.some(f => f.name === file.name && f.size === file.size)) editAreaFiles.push(file);
+                const exists = editAreaFiles.some(f => f.name === file.name && f.size === file.size);
+                if (!exists) {
+                    editAreaFiles.push(file);
+                }
             });
             updateEditAreaPreview();
             this.value = '';
         });
     }
-    const editProductImageInput = document.getElementById('edit-product-image');
+
+    const editProductImageInput = document.getElementById('edit-product-images');
     if (editProductImageInput) {
         editProductImageInput.addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             files.forEach(file => {
-                if (!editProductFiles.some(f => f.name === file.name && f.size === file.size)) editProductFiles.push(file);
+                const exists = editProductFiles.some(f => f.name === file.name && f.size === file.size);
+                if (!exists) {
+                    editProductFiles.push(file);
+                }
             });
             updateEditProductPreview();
             this.value = '';
@@ -608,484 +603,370 @@ function setupEventListeners() {
     }
 }
 
-// ... (setupAreaButtons, setupAreaReviewButtons, setupProductButtons, setupProductReviewButtons, handleEditAreaSubmit, handleEditProductSubmit, submitProductReview, submitAreaReview, handleDelete, formatDate, closeAllModals, openModal - WSZYSTKO BEZ ZMIAN) ...
-function setupAreaButtons() {
-    document.querySelectorAll('.edit-area-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const area = JSON.parse(this.getAttribute('data-area'));
-            document.getElementById('edit-area-id').value = area.id || '';
-            document.getElementById('edit-area-title').value = area.name || '';
-            const statusSwitch = document.getElementById('edit-area-status-switch');
-            if (statusSwitch) statusSwitch.checked = area.status === 'AVAILABLE';
-            document.getElementById('edit-area-size-display').textContent = `${(area.area || 0).toFixed(2)} ha`;
-            const location = area.coordinates && area.coordinates.length > 0 ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}` : 'Brak lokalizacji';
-            document.getElementById('edit-area-location-display').textContent = location;
-            document.getElementById('edit-area-size').value = area.area || '';
-            document.getElementById('edit-area-location').value = location;
-            const flowersContainer = document.getElementById('edit-area-flowers-container');
-            if (flowersContainer) {
-                flowersContainer.innerHTML = '';
-                PREDEFINED_FLOWERS.forEach(pf => {
-                    const isChecked = area.flowers && area.flowers.some(f => f.name === pf.name);
-                    flowersContainer.insertAdjacentHTML('beforeend', `
-                        <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
-                            <input type="checkbox" name="flowers" value="${pf.name}" ${isChecked ? 'checked' : ''} style="width: auto; margin-right: 8px;">
-                            <span style="display: inline-block; width: 12px; height: 12px; background-color: ${pf.color}; margin-right: 6px; border-radius: 2px;"></span>
-                            ${pf.name}
-                        </label>`);
-                });
-            }
-            document.getElementById('edit-area-date-to').value = area.endDate || '';
-            document.getElementById('edit-area-max-hives').value = area.maxHives || '';
-            document.getElementById('edit-area-price').value = area.pricePerDay || '';
-            document.getElementById('edit-area-description').value = area.description || '';
-            editAreaFiles = []; editAreaExistingImages = area.images ? [...area.images] : [];
-            updateEditAreaPreview();
-            openModal('edit-area-modal');
-        });
-    });
-    document.querySelectorAll('.delete-area-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('delete-item-id').value = this.getAttribute('data-id');
-            document.getElementById('delete-item-type').value = 'area';
-            openModal('delete-confirm-modal');
-        });
-    });
-}
-function setupAreaReviewButtons() {
-    document.querySelectorAll('.review-area-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('area-review-reservation-id').value = this.getAttribute('data-reservation-id');
-            document.getElementById('area-review-content').value = '';
-            document.getElementById('area-review-rating').value = '5';
-            document.querySelectorAll('#area-review-modal .star').forEach((s, idx) => s.classList.toggle('active', idx < 5));
-            openModal('area-review-modal');
-        });
-    });
-}
-function setupProductButtons() {
-    document.querySelectorAll('.edit-product-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const product = JSON.parse(this.getAttribute('data-product'));
-            document.getElementById('edit-product-id').value = product.id || '';
-            document.getElementById('edit-product-title').value = product.name || '';
-            const statusSwitch = document.getElementById('edit-product-status-switch');
-            if(statusSwitch) statusSwitch.checked = product.available;
-            document.getElementById('edit-product-type').value = product.category || 'OTHER';
-            document.getElementById('edit-product-quantity').value = product.stock || 0;
-            document.getElementById('edit-product-price').value = product.price || 0;
-            document.getElementById('edit-product-description').value = product.description || '';
-            editProductFiles = []; editProductExistingImages = product.images ? [...product.images] : [];
-            updateEditProductPreview();
-            openModal('edit-product-modal');
-        });
-    });
-    document.querySelectorAll('.delete-product-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('delete-item-id').value = this.getAttribute('data-id');
-            document.getElementById('delete-item-type').value = 'product';
-            openModal('delete-confirm-modal');
-        });
-    });
-}
-function setupProductReviewButtons() {
-    document.querySelectorAll('.review-product-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('product-review-order-id').value = this.getAttribute('data-order-id');
-            document.getElementById('product-review-id').value = this.getAttribute('data-product-id');
-            document.getElementById('product-review-content').value = '';
-            document.getElementById('product-review-rating').value = '5';
-            document.querySelectorAll('#product-review-modal .star').forEach((s, idx) => s.classList.toggle('active', idx < 5));
-            const modalTitle = document.querySelector('#product-review-modal .modal-title');
-            if(modalTitle) modalTitle.textContent = `Wystaw opinię: ${this.getAttribute('data-product-name')}`;
-            openModal('product-review-modal');
-        });
-    });
+// ==================== MODALS - EDIT AREA ====================
+function openEditAreaModal(area) {
+    const modal = document.getElementById('edit-area-modal');
+    if (!modal) return;
+
+    document.getElementById('edit-area-id').value = area.id;
+    document.getElementById('edit-area-name').value = area.name;
+    document.getElementById('edit-area-description').value = area.description || '';
+    document.getElementById('edit-area-flower-type').value = area.flowerType;
+    document.getElementById('edit-area-price').value = area.pricePerDay;
+
+    editAreaExistingImages = area.images ? [...area.images] : [];
+    editAreaFiles = [];
+    updateEditAreaPreview();
+
+    modal.style.display = 'block';
 }
 
-async function handleEditAreaSubmit(e) {
-    e.preventDefault();
-    const form = document.getElementById('edit-area-form');
-    const formData = new FormData(form);
-    const finalImagesList = [...editAreaExistingImages];
-    if (editAreaFiles.length > 0) {
-        try { finalImagesList.push(...await filesToBase64List(editAreaFiles)); } catch (e) { alert('Błąd zdjęć'); return; }
+function closeEditAreaModal() {
+    const modal = document.getElementById('edit-area-modal');
+    if (modal) {
+        modal.style.display = 'none';
     }
-    const selectedFlowers = [];
-    document.querySelectorAll('#edit-area-flowers-container input[type="checkbox"]:checked').forEach(cb => {
-        const flowerDef = PREDEFINED_FLOWERS.find(pf => pf.name === cb.value);
-        if (flowerDef) selectedFlowers.push({ name: flowerDef.name, color: flowerDef.color });
-    });
-    const editAreaDTO = {
-        id: parseInt(document.getElementById('edit-area-id').value),
-        name: document.getElementById('edit-area-title').value,
-        images: finalImagesList,
-        flowers: selectedFlowers,
-        maxHives: parseInt(formData.get('maxHives')) || 0,
-        pricePerDay: parseFloat(formData.get('price')) || 0,
-        description: formData.get('description'),
-        endDate: formData.get('dateTo'),
-        availabilityStatus: formData.get('status') === 'on' ? 'AVAILABLE' : 'UNAVAILABLE'
-    };
-    try {
-        const response = await fetch(`${API_URL}/editArea`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(editAreaDTO)
-        });
-        if (!response.ok) throw new Error('Błąd HTTP');
-        alert('✅ Obszar zaktualizowany!'); closeAllModals(); await fetchMyAreas();
-    } catch (error) { alert('❌ Błąd aktualizacji.'); }
+    editAreaFiles = [];
+    editAreaExistingImages = [];
 }
 
-async function handleEditProductSubmit(e) {
-    e.preventDefault();
-    const finalImagesList = [...editProductExistingImages];
-    if (editProductFiles.length > 0) {
-        try { finalImagesList.push(...await filesToBase64List(editProductFiles)); } catch (e) { alert('Błąd zdjęć'); return; }
+async function submitAreaEdit() {
+    const areaId = document.getElementById('edit-area-id').value;
+    const name = document.getElementById('edit-area-name').value;
+    const description = document.getElementById('edit-area-description').value;
+    const flowerType = document.getElementById('edit-area-flower-type').value;
+    const pricePerDay = parseFloat(document.getElementById('edit-area-price').value);
+
+    if (!name || !flowerType || !pricePerDay) {
+        alert('Proszę wypełnić wszystkie wymagane pola.');
+        return;
     }
-    const statusSwitch = document.getElementById('edit-product-status-switch');
-    const updateProductDTO = {
-        id: parseInt(document.getElementById('edit-product-id').value),
-        name: document.getElementById('edit-product-title').value,
-        category: document.getElementById('edit-product-type').value,
-        stock: parseInt(document.getElementById('edit-product-quantity').value) || 0,
-        price: parseFloat(document.getElementById('edit-product-price').value) || 0,
-        description: document.getElementById('edit-product-description').value,
-        images: finalImagesList,
-        available: statusSwitch ? statusSwitch.checked : true
-    };
-    try {
-        const response = await fetch(`${API_URL}/products`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(updateProductDTO)
-        });
-        if (!response.ok) throw new Error('Błąd HTTP');
-        alert('✅ Produkt zaktualizowany!'); closeAllModals(); await fetchMyProducts();
-    } catch (error) { alert('❌ Błąd aktualizacji.'); }
-}
-
-async function submitProductReview() { /* ... (bez zmian) ... */
-    // Skrót: ta funkcja jest identyczna jak w poprzednim pliku
-    const orderId = parseInt(document.getElementById('product-review-order-id').value);
-    const rating = parseInt(document.getElementById('product-review-rating').value);
-    const comment = document.getElementById('product-review-content').value.trim();
-    if (!comment || comment.length < 10) { alert('⚠️ Opinia min. 10 znaków.'); return; }
-    try {
-        const response = await fetch(`${API_URL}/reviews/products`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ orderId, rating, comment })
-        });
-        if (response.ok) { alert('✅ Opinia dodana!'); closeAllModals(); await loadMyPurchases(); } else { alert('❌ Błąd.'); }
-    } catch (e) { alert('❌ Błąd.'); }
-}
-
-async function submitAreaReview() { /* ... (bez zmian) ... */
-    const reservationId = parseInt(document.getElementById('area-review-reservation-id').value);
-    const rating = parseInt(document.getElementById('area-review-rating').value);
-    const comment = document.getElementById('area-review-content').value.trim();
-    if (!comment || comment.length < 10) { alert('⚠️ Opinia min. 10 znaków.'); return; }
-    try {
-        const response = await fetch(`${API_URL}/reviews/areas`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ reservationId, rating, comment })
-        });
-        if (response.ok) { alert('✅ Opinia dodana!'); closeAllModals(); await fetchRentedAreas(); } else { alert('❌ Błąd.'); }
-    } catch (e) { alert('❌ Błąd.'); }
-}
-
-async function handleDelete() { /* ... (bez zmian) ... */
-    const itemId = document.getElementById('delete-item-id').value;
-    const itemType = document.getElementById('delete-item-type').value;
-    try {
-        if (itemType === 'area') {
-            await fetch(`${API_URL}/deleteArea/${itemId}`, { method: 'POST', credentials: 'include' });
-            alert('✅ Obszar usunięty!'); await fetchMyAreas();
-        } else if (itemType === 'product') {
-            await fetch(`${API_URL}/products/${itemId}`, { method: 'DELETE', credentials: 'include' });
-            alert('✅ Produkt usunięty!'); await fetchMyProducts();
-        }
-    } catch (e) { alert('❌ Błąd usuwania.'); }
-    closeAllModals();
-}
-
-function formatDate(dateString) {
-    if (!dateString) return 'Brak daty';
-    return new Date(dateString).toLocaleDateString('pl-PL', { year: 'numeric', month: '2-digit', day: '2-digit' });
-}
-function openModal(modalId) { const m = document.getElementById(modalId); if(m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; } }
-function closeAllModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); document.body.style.overflow = 'auto'; }
-
-// ==================== NOWA FUNKCJONALNOŚĆ: FILTROWANIE SPRZEDAŻY I ZMIANA STATUSU ====================
-
-// Ustawianie filtra
-window.setSalesFilter = function(filter) {
-    salesFilter = filter;
-
-    // UI Updates
-    document.getElementById('filter-active').classList.toggle('active-filter', filter === 'ACTIVE');
-    document.getElementById('filter-history').classList.toggle('active-filter', filter === 'HISTORY');
-
-    // Przeładuj listę
-    fetchSoldProducts();
-};
-
-async function fetchSoldProducts() {
-    try {
-        const response = await fetch(`${API_URL}/orders/my-sales`, {
-            method: "GET",
-            credentials: "include"
-        });
-
-        if (!response.ok) throw new Error('Błąd pobierania sprzedaży');
-
-        const allOrders = await response.json();
-        const container = document.getElementById('sold-products-container');
-        container.innerHTML = '';
-
-        // FILTROWANIE
-        const filteredOrders = allOrders.filter(order => {
-            if (salesFilter === 'ACTIVE') {
-                return ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED'].includes(order.status);
-            } else {
-                return ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(order.status);
-            }
-        });
-
-        if (filteredOrders.length === 0) {
-            container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><p>${salesFilter === 'ACTIVE' ? 'Brak aktywnych zamówień.' : 'Brak historii sprzedaży.'}</p></div>`;
-            return;
-        }
-
-        filteredOrders.forEach(order => {
-            const thumbnail = order.productImage
-                ? `data:image/jpeg;base64,${order.productImage}`
-                : 'assets/default-product.jpg';
-
-            // Logika wyświetlania statusu i przycisków
-            let statusText = 'Nieznany';
-            let statusClass = 'card-status-inactive';
-            let actionButton = '';
-
-            switch (order.status) {
-                case 'CONFIRMED':
-                    statusText = 'Opłacone (Do wysyłki)';
-                    statusClass = 'card-status-active'; // np. zielony lub pomarańczowy
-                    actionButton = `
-                        <button class="btn btn-primary card-btn" onclick="updateOrderStatus(${order.id}, 'SHIPPED')">
-                            <i class="fas fa-shipping-fast"></i> Oznacz jako wysłane
-                        </button>
-                    `;
-                    break;
-                case 'SHIPPED':
-                    statusText = 'Wysłane (W drodze)';
-                    statusClass = 'card-status-active';
-                    actionButton = `
-                        <button class="btn btn-outline card-btn" onclick="updateOrderStatus(${order.id}, 'COMPLETED')">
-                            <i class="fas fa-check"></i> Zakończ zamówienie
-                        </button>
-                    `;
-                    break;
-                case 'COMPLETED':
-                    statusText = 'Zakończone';
-                    statusClass = 'card-status-inactive'; // Szary
-                    break;
-                case 'CANCELLED':
-                    statusText = 'Anulowane';
-                    statusClass = 'card-status-inactive';
-                    break;
-                default:
-                    statusText = order.status;
-            }
-
-            const card = `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-header-title">Zamówienie #${order.id}</div>
-                        <div class="card-header-status ${statusClass}">${statusText}</div>
-                    </div>
-                    <div class="area-preview">
-                        <img src="${thumbnail}" alt="${order.productName}">
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Produkt:</div>
-                            <div class="card-property-value">${order.productName}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Kupujący:</div>
-                            <div class="card-property-value">${order.buyerFirstname} ${order.buyerLastname}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Ilość:</div>
-                            <div class="card-property-value">${order.quantity} szt.</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Suma:</div>
-                            <div class="card-property-value"><strong>${order.totalPrice.toFixed(2)} PLN</strong></div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Data:</div>
-                            <div class="card-property-value">${formatDate(order.orderedAt)}</div>
-                        </div>
-                        ${order.deliveryAddress ? `
-                        <div class="card-property" style="display:block; margin-top:10px; border-top:1px solid #eee; padding-top:5px;">
-                            <div class="card-property-label" style="margin-bottom:3px;">Adres dostawy:</div>
-                            <div class="card-property-value" style="font-size:13px;">${order.deliveryAddress}</div>
-                        </div>` : ''}
-                    </div>
-                    <div class="card-footer">
-                        ${actionButton}
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', card);
-        });
-
-    } catch (error) {
-        console.error('Error fetching sales:', error);
-        document.getElementById('sold-products-container').innerHTML =
-            '<p style="text-align: center; color: #e74c3c;">Błąd ładowania historii sprzedaży.</p>';
-    }
-}
-
-// Funkcja zmiany statusu (globalna)
-window.updateOrderStatus = async function(orderId, newStatus) {
-    if (!confirm(`Czy na pewno chcesz zmienić status zamówienia na: ${newStatus}?`)) return;
 
     try {
-        const response = await fetch(`${API_URL}/orders/${orderId}/status?status=${newStatus}`, {
+        const newImagesBase64 = await filesToBase64List(editAreaFiles);
+        const allImages = [...editAreaExistingImages, ...newImagesBase64];
+
+        const updatedArea = {
+            name: name,
+            description: description,
+            flowerType: flowerType,
+            pricePerDay: pricePerDay,
+            images: allImages
+        };
+
+        const response = await fetch(`${API_URL}/areas/${areaId}`, {
             method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(updatedArea)
+        });
+
+        if (response.ok) {
+            alert('Obszar został zaktualizowany pomyślnie!');
+            closeEditAreaModal();
+            await fetchMyAreas();
+        } else {
+            const errorData = await response.json();
+            alert('Błąd podczas aktualizacji obszaru: ' + (errorData.message || 'Nieznany błąd'));
+        }
+    } catch (error) {
+        console.error('Error updating area:', error);
+        alert('Wystąpił błąd podczas aktualizacji obszaru.');
+    }
+}
+
+async function deleteArea(areaId) {
+    try {
+        const response = await fetch(`${API_URL}/areas/${areaId}`, {
+            method: 'DELETE',
             credentials: 'include'
         });
 
         if (response.ok) {
-            alert('✅ Status zaktualizowany!');
-            fetchSoldProducts(); // Odśwież listę
+            alert('Obszar został usunięty.');
+            await fetchMyAreas();
         } else {
-            const err = await response.json();
-            alert('❌ Błąd: ' + (err.error || 'Nie udało się zmienić statusu'));
+            alert('Nie udało się usunąć obszaru.');
         }
-    } catch (e) {
-        console.error('Error updating status:', e);
-        alert('❌ Błąd połączenia.');
-    }
-};
-
-// ==================== SPRZEDANE OBSZARY ====================
-async function fetchSoldAreas() {
-    // ... (bez zmian: fetchSoldAreas logic) ...
-    try {
-        const response = await fetch(`${API_URL}/reservations/areas`, {
-            method: "GET",
-            credentials: "include"
-        });
-
-        if (!response.ok) throw new Error('Błąd pobierania rezerwacji');
-
-        const reservations = await response.json();
-        const container = document.getElementById('sold-areas-container');
-        container.innerHTML = '';
-
-        if (reservations.length === 0) {
-            container.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Nikt jeszcze nie zarezerwował Twoich obszarów.</p></div>';
-            return;
-        }
-
-        reservations.forEach(res => {
-            // Tłumaczenie statusu
-            let statusText = res.status;
-            let statusClass = 'card-status-inactive';
-
-            if (res.status === 'CONFIRMED' || res.status === 'ACTIVE') {
-                statusText = 'Potwierdzona';
-                statusClass = 'card-status-active';
-            } else if (res.status === 'COMPLETED') {
-                statusText = 'Zakończona';
-            } else if (res.status === 'CANCELLED') {
-                statusText = 'Anulowana';
-            }
-
-            const card = `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-header-title">${res.areaName}</div>
-                        <div class="card-header-status ${statusClass}">${statusText}</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Najemca:</div>
-                            <div class="card-property-value">${res.tenantFirstname} ${res.tenantLastname}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Kontakt:</div>
-                            <div class="card-property-value" style="font-size:13px;">${res.tenantEmail}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Okres:</div>
-                            <div class="card-property-value">
-                                ${formatDate(res.startDate)} - ${formatDate(res.endDate)}
-                            </div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Liczba uli:</div>
-                            <div class="card-property-value">${res.numberOfHives}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Zysk:</div>
-                            <div class="card-property-value" style="color: #27ae60; font-weight:bold;">+${res.totalPrice.toFixed(2)} PLN</div>
-                        </div>
-                        ${res.notes ? `
-                        <div class="card-property" style="display:block; margin-top:10px; background:#f9f9f9; padding:8px; border-radius:4px;">
-                            <div class="card-property-label" style="font-size:11px;">Uwagi od najemcy:</div>
-                            <div class="card-property-value" style="font-size:13px; font-style:italic;">"${res.notes}"</div>
-                        </div>` : ''}
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', card);
-        });
-
     } catch (error) {
-        console.error('Error fetching area reservations:', error);
-        document.getElementById('sold-areas-container').innerHTML =
-            '<p style="text-align: center; color: #e74c3c;">Błąd ładowania rezerwacji.</p>';
+        console.error('Error deleting area:', error);
+        alert('Wystąpił błąd podczas usuwania obszaru.');
     }
 }
 
-// ... (Odznaki - loadMyBadges, displayMyBadges, refreshBadges - bez zmian) ...
-async function loadMyBadges() {
-    try {
-        const response = await fetch(`${API_URL}/badges/my`, { method: 'GET', credentials: 'include' });
-        if (!response.ok) throw new Error('Błąd pobierania odznak');
-        displayMyBadges(await response.json());
-    } catch (error) { document.getElementById('my-badges-container').innerHTML = '<p style="text-align: center; padding: 2rem; color: #999;">Nie udało się załadować odznak.</p>'; }
+// ==================== MODALS - EDIT PRODUCT ====================
+function openEditProductModal(product) {
+    const modal = document.getElementById('edit-product-modal');
+    if (!modal) return;
+
+    document.getElementById('edit-product-id').value = product.id;
+    document.getElementById('edit-product-name').value = product.name;
+    document.getElementById('edit-product-description').value = product.description || '';
+    document.getElementById('edit-product-category').value = product.category;
+    document.getElementById('edit-product-price').value = product.price;
+    document.getElementById('edit-product-stock').value = product.stock;
+    document.getElementById('edit-product-weight').value = product.weight || '';
+    document.getElementById('edit-product-weight-unit').value = product.weightUnit || 'kg';
+
+    editProductExistingImages = product.images ? [...product.images] : [];
+    editProductFiles = [];
+    updateEditProductPreview();
+
+    modal.style.display = 'block';
 }
 
-function displayMyBadges(badges) {
-    const container = document.getElementById('my-badges-container');
-    if (!container) return;
-    if (!badges || badges.length === 0) {
-        container.innerHTML = `<div class="no-badges-message"><i class="fas fa-award" style="font-size: 64px; color: #ddd; margin-bottom: 20px;"></i><h3 style="color: #999; margin-bottom: 10px;">Nie masz jeszcze żadnych odznak</h3><p style="color: #999;">Bądź aktywny na platformie, aby zdobywać odznaki!</p></div>`;
+function closeEditProductModal() {
+    const modal = document.getElementById('edit-product-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    editProductFiles = [];
+    editProductExistingImages = [];
+}
+
+async function submitProductEdit() {
+    const productId = document.getElementById('edit-product-id').value;
+    const name = document.getElementById('edit-product-name').value;
+    const description = document.getElementById('edit-product-description').value;
+    const category = document.getElementById('edit-product-category').value;
+    const price = parseFloat(document.getElementById('edit-product-price').value);
+    const stock = parseInt(document.getElementById('edit-product-stock').value);
+    const weight = parseFloat(document.getElementById('edit-product-weight').value) || null;
+    const weightUnit = document.getElementById('edit-product-weight-unit').value;
+
+    if (!name || !category || !price || !stock) {
+        alert('Proszę wypełnić wszystkie wymagane pola.');
         return;
     }
-    container.innerHTML = badges.map(badge => `
-        <div class="badge-card">
-            <div class="badge-card-icon" style="background-color: ${badge.color}15; border-color: ${badge.color};"><i class="${badge.icon}" style="color: ${badge.color};"></i></div>
-            <div class="badge-card-content"><h3 class="badge-card-name">${badge.name}</h3><p class="badge-card-description">${badge.description}</p></div>
-            <div class="badge-card-earned"><i class="fas fa-check-circle" style="color: ${badge.color};"></i><span>Zdobyte!</span></div>
-        </div>`).join('');
-}
 
-async function refreshBadges() {
-    const container = document.getElementById('my-badges-container');
-    if (!container) return;
-    const originalContent = container.innerHTML;
-    container.innerHTML = `<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #F2A900;"></i><p style="color: #999; margin-top: 15px;">Sprawdzanie nowych odznak...</p></div>`;
     try {
-        const response = await fetch(`${API_URL}/badges/check`, { method: 'POST', credentials: 'include' });
-        if (!response.ok) throw new Error('Błąd odświeżania');
-        const badges = await response.json();
-        container.innerHTML = `<div style="text-align: center; padding: 2rem;"><i class="fas fa-check-circle" style="font-size: 48px; color: #51CF66;"></i><p style="color: #51CF66; margin-top: 15px; font-weight: 600;">Odznaki zaktualizowane!</p></div>`;
-        setTimeout(() => displayMyBadges(badges), 1000);
+        const newImagesBase64 = await filesToBase64List(editProductFiles);
+        const allImages = [...editProductExistingImages, ...newImagesBase64];
+
+        const updatedProduct = {
+            name: name,
+            description: description,
+            category: category,
+            price: price,
+            stock: stock,
+            weight: weight,
+            weightUnit: weightUnit,
+            images: allImages
+        };
+
+        const response = await fetch(`${API_URL}/products/${productId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(updatedProduct)
+        });
+
+        if (response.ok) {
+            alert('Produkt został zaktualizowany pomyślnie!');
+            closeEditProductModal();
+            await fetchMyProducts();
+        } else {
+            const errorData = await response.json();
+            alert('Błąd podczas aktualizacji produktu: ' + (errorData.message || 'Nieznany błąd'));
+        }
     } catch (error) {
-        console.error('Error refreshing badges:', error);
-        container.innerHTML = originalContent;
-        alert('❌ Nie udało się odświeżyć odznak.');
+        console.error('Error updating product:', error);
+        alert('Wystąpił błąd podczas aktualizacji produktu.');
     }
 }
+
+async function deleteProduct(productId) {
+    try {
+        const response = await fetch(`${API_URL}/products/${productId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            alert('Produkt został usunięty.');
+            await fetchMyProducts();
+        } else {
+            alert('Nie udało się usunąć produktu.');
+        }
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Wystąpił błąd podczas usuwania produktu.');
+    }
+}
+
+// ==================== MODALS - REVIEWS ====================
+function openAreaReviewModal(reservationId, areaId, areaName) {
+    const modal = document.getElementById('area-review-modal');
+    if (!modal) return;
+
+    document.getElementById('area-review-reservation-id').value = reservationId;
+    document.getElementById('area-review-area-id').value = areaId;
+    document.getElementById('area-review-area-name').textContent = areaName;
+    document.getElementById('area-review-rating-value').value = '0';
+    document.getElementById('area-review-comment').value = '';
+
+    const stars = modal.querySelectorAll('.review-star');
+    stars.forEach(s => {
+        s.classList.remove('selected');
+        s.classList.remove('active');
+    });
+
+    modal.style.display = 'block';
+}
+
+function closeAreaReviewModal() {
+    const modal = document.getElementById('area-review-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+async function submitAreaReview() {
+    const reservationId = document.getElementById('area-review-reservation-id').value;
+    const areaId = document.getElementById('area-review-area-id').value;
+    const rating = parseInt(document.getElementById('area-review-rating-value').value);
+    const comment = document.getElementById('area-review-comment').value;
+
+    if (!rating || rating < 1 || rating > 5) {
+        alert('Proszę wybrać ocenę od 1 do 5 gwiazdek.');
+        return;
+    }
+
+    if (!comment.trim()) {
+        alert('Proszę napisać komentarz.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/reviews/areas`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                reservationId: parseInt(reservationId),
+                areaId: parseInt(areaId),
+                rating: rating,
+                comment: comment
+            })
+        });
+
+        if (response.ok) {
+            alert('Dziękujemy za wystawienie opinii!');
+            closeAreaReviewModal();
+            await fetchRentedAreas();
+        } else {
+            const errorData = await response.json();
+            alert('Błąd: ' + (errorData.message || 'Nie udało się dodać opinii'));
+        }
+    } catch (error) {
+        console.error('Error submitting area review:', error);
+        alert('Wystąpił błąd podczas dodawania opinii.');
+    }
+}
+
+function openProductReviewModal(orderId, productId, productName) {
+    const modal = document.getElementById('product-review-modal');
+    if (!modal) return;
+
+    document.getElementById('product-review-order-id').value = orderId;
+    document.getElementById('product-review-product-id').value = productId;
+    document.getElementById('product-review-product-name').textContent = productName;
+    document.getElementById('product-review-rating-value').value = '0';
+    document.getElementById('product-review-comment').value = '';
+
+    const stars = modal.querySelectorAll('.review-star');
+    stars.forEach(s => {
+        s.classList.remove('selected');
+        s.classList.remove('active');
+    });
+
+    modal.style.display = 'block';
+}
+
+function closeProductReviewModal() {
+    const modal = document.getElementById('product-review-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+async function submitProductReview() {
+    const orderId = document.getElementById('product-review-order-id').value;
+    const productId = document.getElementById('product-review-product-id').value;
+    const rating = parseInt(document.getElementById('product-review-rating-value').value);
+    const comment = document.getElementById('product-review-comment').value;
+
+    if (!rating || rating < 1 || rating > 5) {
+        alert('Proszę wybrać ocenę od 1 do 5 gwiazdek.');
+        return;
+    }
+
+    if (!comment.trim()) {
+        alert('Proszę napisać komentarz.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/reviews/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                orderId: parseInt(orderId),
+                productId: parseInt(productId),
+                rating: rating,
+                comment: comment
+            })
+        });
+
+        if (response.ok) {
+            alert('Dziękujemy za wystawienie opinii!');
+            closeProductReviewModal();
+            await loadMyPurchases();
+        } else {
+            const errorData = await response.json();
+            alert('Błąd: ' + (errorData.message || 'Nie udało się dodać opinii'));
+        }
+    } catch (error) {
+        console.error('Error submitting product review:', error);
+        alert('Wystąpił błąd podczas dodawania opinii.');
+    }
+}
+
+// ==================== FUNKCJE POMOCNICZE ====================
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pl-PL');
+}
+
+function translateStatus(status) {
+    const statusMap = {
+        'PENDING': 'Oczekująca',
+        'CONFIRMED': 'Potwierdzona',
+        'CANCELLED': 'Anulowana',
+        'COMPLETED': 'Zakończona'
+    };
+    return statusMap[status] || status;
+}
+
+window.openEditAreaModal = openEditAreaModal;
+window.closeEditAreaModal = closeEditAreaModal;
+window.submitAreaEdit = submitAreaEdit;
+window.openEditProductModal = openEditProductModal;
+window.closeEditProductModal = closeEditProductModal;
+window.submitProductEdit = submitProductEdit;
+window.openAreaReviewModal = openAreaReviewModal;
+window.closeAreaReviewModal = closeAreaReviewModal;
+window.submitAreaReview = submitAreaReview;
+window.openProductReviewModal = openProductReviewModal;
+window.closeProductReviewModal = closeProductReviewModal;
+window.submitProductReview = submitProductReview;
