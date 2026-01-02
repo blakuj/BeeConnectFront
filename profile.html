@@ -134,12 +134,23 @@
             <div class="dashboard-heading">
                 <h1 class="dashboard-title">Historia sprzedaży produktów</h1>
             </div>
+
+            <div class="sales-filters" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <button class="btn btn-outline active-filter" id="filter-active" onclick="setSalesFilter('ACTIVE')">
+                    <i class="fas fa-truck-loading"></i> W trakcie
+                </button>
+                <button class="btn btn-outline" id="filter-history" onclick="setSalesFilter('HISTORY')">
+                    <i class="fas fa-history"></i> Zakończone
+                </button>
+            </div>
+
             <div class="card-container" id="sold-products-container">
                 <div style="text-align: center; padding: 2rem; color: #666;">
                     <i class="fas fa-spinner fa-spin"></i> Ładowanie...
                 </div>
             </div>
         </div>
+
         <div class="tab-content" id="badges">
             <div class="dashboard-heading">
                 <h1 class="dashboard-title">Twoje Odznaki</h1>

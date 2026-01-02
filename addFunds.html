@@ -7,8 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/styles.css">
-    <script src="scripts/auth.js"></script>
-    <script src="scripts/add-funds.js"></script>
+    <link rel="stylesheet" href="styles/add-funds.css">
 </head>
 <body>
 <div class="header">
@@ -53,8 +52,12 @@
                     <small class="form-info">Wprowadź 6-cyfrowy kod BLIK z aplikacji bankowej.</small>
                 </div>
                 <button type="submit" class="btn btn-accent topup-btn"><i class="fas fa-wallet"></i> Doładuj konto</button>
-                <div class="error-message" id="error-message"></div>
-                <div class="success-message" id="success-message"></div>
+
+                <div class="error-message" id="error-message" style="display: none;"></div>
+                <div class="success-message" id="success-message" style="display: none;">
+                    <i class="fas fa-check-circle"></i> Środki zostały pomyślnie dodane!
+                </div>
+
                 <div class="topup-info">
                     Doładowanie jest realizowane za pomocą bezpiecznego systemu BLIK. Po zatwierdzeniu środki pojawią się na Twoim koncie w ciągu kilku minut.
                 </div>
@@ -63,6 +66,6 @@
     </div>
 </div>
 
-
+<script src="scripts/add-funds.js"></script>
 </body>
 </html>
