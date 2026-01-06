@@ -8,10 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/chat.css">
-
+    <link rel="stylesheet" href="styles/error.css">
 </head>
 <body>
-<!-- Header -->
 <div class="header">
     <div class="logo-container">
         <div class="logo">
@@ -30,9 +29,7 @@
     </div>
 </div>
 
-<!-- Chat Container -->
 <div class="chat-container">
-    <!-- Conversations List -->
     <div class="conversations" id="conversations-list">
         <div class="conversations-header">
             <h2 class="conversations-title">Wiadomości</h2>
@@ -42,12 +39,13 @@
             <input type="text" class="search-input" placeholder="Szukaj w rozmowach...">
         </div>
         <div class="conversation-list">
-            <!-- Konwersacje będą załadowane przez JavaScript -->
+            <div style="text-align: center; padding: 20px; color: #999;">
+                <i class="fas fa-spinner fa-spin"></i> Ładowanie...
+            </div>
         </div>
     </div>
 
-    <!-- Chat Main Area -->
-    <div class="chat-main" id="chat-main">
+    <div class="chat-main hidden" id="chat-main">
         <div class="chat-header">
             <button class="back-to-conversations" id="back-to-conversations">
                 <i class="fas fa-arrow-left"></i>
@@ -62,7 +60,6 @@
         </div>
 
         <div class="chat-messages" id="chat-messages">
-            <!-- Wiadomości będą załadowane przez JavaScript -->
             <div class="empty-state">
                 <i class="fas fa-comments"></i>
                 <h3>Wybierz konwersację</h3>
@@ -72,16 +69,16 @@
 
         <div class="chat-input-container">
             <div class="chat-input-wrapper">
-                <input type="text" class="chat-input" id="chat-input" placeholder="Napisz wiadomość...">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Napisz wiadomość..." maxlength="500">
                 <button class="send-btn" id="send-message">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
+            <div id="char-counter" style="text-align: right; font-size: 11px; color: #999; margin-top: 4px; margin-right: 15px;">0 / 500</div>
         </div>
     </div>
 </div>
 
-<!-- JavaScript -->
 <script src="scripts/chat.js"></script>
 </body>
 </html>

@@ -392,7 +392,7 @@ function getCategoryName(category) {
         'POLLEN': 'Pyłek',
         'PROPOLIS': 'Propolis',
         'ROYAL_JELLY': 'Mleczko pszczele',
-        'HONEYCOMB': 'Plaster miodu',
+        'BEE_BREAD': 'Pierzga',
         'EQUIPMENT': 'Sprzęt',
         'OTHER': 'Inne'
     };

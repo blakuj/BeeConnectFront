@@ -2,7 +2,43 @@
 
 const API_BASE = 'http://localhost:8080';
 
-// Funkcja ładowania danych użytkownika
+
+function showError(inputId, message) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    input.classList.add('input-error');
+
+
+    let errorSpan = input.parentNode.querySelector('.error-message');
+    if (!errorSpan) {
+        errorSpan = document.createElement('span');
+        errorSpan.className = 'error-message';
+        input.parentNode.appendChild(errorSpan);
+    }
+    errorSpan.textContent = message;
+}
+
+function clearErrors(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    const inputs = form.querySelectorAll('.input-error');
+    inputs.forEach(input => input.classList.remove('input-error'));
+
+    const messages = form.querySelectorAll('.error-message');
+    messages.forEach(msg => msg.remove());
+}
+
+function validateEmail(email) {
+    return String(email)
+        .toLowerCase()
+        .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+}
+
+
 async function loadUserProfile() {
     try {
         const response = await fetch(`${API_BASE}/api/auth/user`, {
@@ -13,19 +49,16 @@ async function loadUserProfile() {
         if (response.ok) {
             const user = await response.json();
 
-            // Ustaw wartości w polach (readonly i edytowalnych)
             if(document.getElementById('firstname')) document.getElementById('firstname').value = user.firstname || '';
             if(document.getElementById('lastname')) document.getElementById('lastname').value = user.lastname || '';
             if(document.getElementById('email')) document.getElementById('email').value = user.email || '';
             if(document.getElementById('phone')) document.getElementById('phone').value = user.phone || '';
 
-            // Aktualizacja sidebara
             const userName = document.querySelector('.user-name');
             if (userName) {
                 userName.textContent = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Użytkownik';
             }
 
-            // Aktualizacja roli w sidebarze (opcjonalnie)
             const userRole = document.querySelector('.user-role');
             if (userRole && user.role === 'BEEKEEPER') {
                 userRole.textContent = 'Pszczelarz';
@@ -44,29 +77,22 @@ async function loadUserProfile() {
     }
 }
 
-// Główna inicjalizacja po załadowaniu DOM
 window.addEventListener('DOMContentLoaded', function() {
 
-    // 1. Załaduj dane profilu
     loadUserProfile();
 
-    // 2. Obsługa zakładek (Sidebar)
     const sidebarItems = document.querySelectorAll('.sidebar-item');
     const tabContents = document.querySelectorAll('.tab-content');
 
     sidebarItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
-
-            // Pobierz cel zakładki z atrybutu data-target
             const targetId = this.getAttribute('data-target');
             if (!targetId) return;
 
-            // Zaktualizuj klasy active w menu
             sidebarItems.forEach(i => i.classList.remove('active'));
             this.classList.add('active');
 
-            // Zaktualizuj widoczność sekcji
             tabContents.forEach(content => {
                 content.classList.remove('active');
                 if (content.id === targetId) {
@@ -76,14 +102,37 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 3. Obsługa formularza edycji profilu (Dane kontaktowe)
     const profileForm = document.getElementById('profile-form');
     if (profileForm) {
         profileForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            clearErrors('profile-form');
 
-            const phone = document.getElementById('phone').value.trim();
-            const email = document.getElementById('email').value.trim();
+            const phoneInput = document.getElementById('phone');
+            const emailInput = document.getElementById('email');
+
+            const phone = phoneInput.value.trim();
+            const email = emailInput.value.trim();
+
+            let isValid = true;
+
+            if (!phone) {
+                showError('phone', 'Telefon jest wymagany');
+                isValid = false;
+            } else if (!/^\d{9,11}$/.test(phone)) {
+                showError('phone', 'Telefon musi składać się z 9 do 11 cyfr');
+                isValid = false;
+            }
+
+            if (!email) {
+                showError('email', 'Email jest wymagany');
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                showError('email', 'Nieprawidłowy format adresu email');
+                isValid = false;
+            }
+
+            if (!isValid) return;
 
             const data = { phone, email };
 
@@ -101,7 +150,6 @@ window.addEventListener('DOMContentLoaded', function() {
 
                     alert('✅ Profil zaktualizowany pomyślnie!');
 
-                    // Aktualizacja localStorage jeśli istnieje
                     if (localStorage.getItem('currentUser')) {
                         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
                         if (updatedUser.phone) currentUser.phone = updatedUser.phone;
@@ -119,25 +167,37 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 4. Obsługa zmiany hasła
     const passwordForm = document.getElementById('password-form');
     if (passwordForm) {
         passwordForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            clearErrors('password-form');
 
             const oldPassword = document.getElementById('current-password').value.trim();
             const newPassword = document.getElementById('new-password').value.trim();
             const confirmPassword = document.getElementById('confirm-new-password').value.trim();
 
-            if (!oldPassword || !newPassword || !confirmPassword) {
-                alert('Uzupełnij wszystkie pola!');
-                return;
+            let isValid = true;
+
+            if (!oldPassword) {
+                showError('current-password', 'Obecne hasło jest wymagane');
+                isValid = false;
+            }
+
+            if (!newPassword) {
+                showError('new-password', 'Nowe hasło jest wymagane');
+                isValid = false;
+            } else if (newPassword.length < 6) {
+                showError('new-password', 'Hasło musi mieć co najmniej 6 znaków');
+                isValid = false;
             }
 
             if (newPassword !== confirmPassword) {
-                alert('Hasła nie są identyczne!');
-                return;
+                showError('confirm-new-password', 'Hasła nie są identyczne');
+                isValid = false;
             }
+
+            if (!isValid) return;
 
             const data = {
                 oldPassword: oldPassword,
@@ -167,7 +227,6 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 5. Obsługa formularza weryfikacji (Dynamiczne pola)
     const docTypeSelect = document.getElementById('document-type');
     if (docTypeSelect) {
         docTypeSelect.addEventListener('change', function() {
@@ -184,7 +243,6 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Obsługa input file (Upload pliku)
     const docUpload = document.getElementById('document-upload');
     if (docUpload) {
         docUpload.addEventListener('change', function(e) {
@@ -206,37 +264,74 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 6. Wysyłanie wniosku weryfikacyjnego
     const verificationForm = document.getElementById('verification-form');
     if (verificationForm) {
         verificationForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            clearErrors('verification-form');
 
-            const termsCheckbox = document.querySelector('input[name="terms"]');
-            if (termsCheckbox && !termsCheckbox.checked) {
-                alert('Proszę zaakceptować warunki weryfikacji.');
-                return;
+            const apiaryName = document.getElementById('apiary-name').value.trim();
+            const apiarySize = document.getElementById('apiary-size').value;
+            const experience = document.getElementById('experience').value;
+            const address = document.getElementById('apiary-address').value.trim();
+            const honeyType = document.getElementById('honey-types').value.trim();
+            const docType = document.getElementById('document-type').value;
+
+            let isValid = true;
+
+            // Walidacja pól
+            if (!apiaryName) {
+                showError('apiary-name', 'Nazwa pasieki jest wymagana');
+                isValid = false;
             }
 
-            const verificationDTO = {
-                beeGardenName: document.getElementById('apiary-name').value.trim(),
-                countHives: parseInt(document.getElementById('apiary-size').value) || 0,
-                yearsOfExperience: parseInt(document.getElementById('experience').value) || 0,
-                adress: document.getElementById('apiary-address').value.trim(),
-                honeyType: document.getElementById('honey-types').value.trim(),
-                docType: document.getElementById('document-type').value
-            };
+            if (!apiarySize || parseInt(apiarySize) <= 0) {
+                showError('apiary-size', 'Liczba uli musi być większa od 0');
+                isValid = false;
+            }
 
-            if (!verificationDTO.beeGardenName || !verificationDTO.docType || verificationDTO.countHives <= 0) {
-                alert('Wypełnij wymagane pola: Nazwa pasieki, Rodzaj dokumentu i Liczba uli.');
-                return;
+            if (experience === '' || parseInt(experience) < 0) {
+                showError('experience', 'Lata doświadczenia nie mogą być ujemne');
+                isValid = false;
+            }
+
+            if (!docType) {
+                showError('document-type', 'Wybierz rodzaj dokumentu');
+                isValid = false;
             }
 
             const fileInput = document.getElementById('document-upload');
             if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Proszę wybrać plik do przesłania.');
-                return;
+                const uploadContainer = document.querySelector('.file-upload-label');
+                if (uploadContainer) {
+                    let err = document.createElement('div');
+                    err.className = 'error-message';
+                    err.style.color = '#e74c3c';
+                    err.style.marginTop = '5px';
+                    err.textContent = 'Proszę wybrać plik do przesłania.';
+                    // Dodaj tymczasowo
+                    uploadContainer.parentNode.appendChild(err);
+                    setTimeout(() => err.remove(), 3000);
+                }
+                isValid = false;
             }
+
+            const termsCheckbox = document.querySelector('input[name="terms"]');
+            if (termsCheckbox && !termsCheckbox.checked) {
+                alert('Proszę zaakceptować warunki weryfikacji.');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            const verificationDTO = {
+                beeGardenName: apiaryName,
+                countHives: parseInt(apiarySize),
+                yearsOfExperience: parseInt(experience) || 0,
+                adress: address,
+                honeyType: honeyType,
+                docType: docType
+            };
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);

@@ -9,11 +9,7 @@
     <link rel="stylesheet" href="styles/marketplace.css">
 
 </head>
-<!-- MARKETPLACE.HTML - BODY -->
-<!-- Skopiuj cały ten kod i zastąp nim <body> w marketplace.html -->
-
 <body>
-<!-- Header -->
 <div class="header">
     <div class="logo-container">
         <div class="logo">
@@ -35,17 +31,13 @@
 </div>
 
 
-<!-- Main Container -->
 <div class="marketplace-container">
-    <!-- Sidebar - Filtry -->
     <aside class="marketplace-sidebar">
-        <!-- Wyszukiwarka -->
         <div class="search-container">
             <i class="fas fa-search search-icon"></i>
             <input type="text" class="search-input" placeholder="Szukaj produktów...">
         </div>
 
-        <!-- Kategorie -->
         <div class="sidebar-section">
             <div class="sidebar-title">
                 <i class="fas fa-tag"></i>
@@ -77,17 +69,16 @@
                     <span class="filter-label">Mleczko pszczele</span>
                 </label>
                 <label class="filter-option">
-                    <input type="checkbox" class="filter-checkbox" id="category-honeycomb">
-                    <span class="filter-label">Plaster miodu</span>
+                    <input type="checkbox" class="filter-checkbox" id="category-bee_bread">
+                    <span class="filter-label">Pierzga</span>
                 </label>
                 <label class="filter-option">
-                    <input type="checkbox" class="filter-checkbox" id="category-equipment">
-                    <span class="filter-label">Sprzęt</span>
+                    <input type="checkbox" class="filter-checkbox" id="category-other">
+                    <span class="filter-label">Inne</span>
                 </label>
             </div>
         </div>
 
-        <!-- Zakres cenowy -->
         <div class="sidebar-section">
             <div class="sidebar-title">
                 <i class="fas fa-dollar-sign"></i>
@@ -122,24 +113,18 @@
             </div>
         </div>
 
-        <!-- Grid produktów -->
         <div class="product-grid">
-            <!-- Produkty będą załadowane przez JavaScript -->
         </div>
 
-        <!-- Paginacja -->
         <div class="pagination">
-            <!-- Paginacja będzie załadowana przez JavaScript -->
         </div>
     </main>
 </div>
 
-<!-- Filter toggle button for mobile -->
 <button class="filter-toggle-btn" id="filter-toggle">
     <i class="fas fa-filter"></i>
 </button>
 
-<!-- JavaScript -->
 <script src="scripts/marketplace.js"></script>
 </body>
 </html>

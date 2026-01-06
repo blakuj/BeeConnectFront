@@ -24,6 +24,33 @@ let editProductExistingImages = []; // Istniejące zdjęcia (Base64 strings)
 // --- Stan Filtra Sprzedaży ---
 let salesFilter = 'ACTIVE'; // 'ACTIVE' (w trakcie) lub 'HISTORY' (zakończone)
 
+// --- Funkcje walidacji (standardowe) ---
+function showError(inputId, message) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    input.classList.add('input-error');
+
+    let errorSpan = input.parentNode.querySelector('.error-message');
+    if (!errorSpan) {
+        errorSpan = document.createElement('span');
+        errorSpan.className = 'error-message';
+        input.parentNode.appendChild(errorSpan);
+    }
+    errorSpan.textContent = message;
+}
+
+function clearErrors(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    const inputs = form.querySelectorAll('.input-error');
+    inputs.forEach(input => input.classList.remove('input-error'));
+
+    const messages = form.querySelectorAll('.error-message');
+    messages.forEach(msg => msg.remove());
+}
+
 
 // ==================== INICJALIZACJA ====================
 document.addEventListener('DOMContentLoaded', async function() {
@@ -135,15 +162,9 @@ async function fetchMyAreas() {
                         <button class="btn btn-outline card-btn edit-area-btn" data-area='${JSON.stringify(area).replace(/'/g, "&apos;")}'>
                             <i class="fas fa-edit"></i> Edytuj
                         </button>
-                        ${area.status === 'AVAILABLE' ? `
-                            <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
-                                <i class="fas fa-trash-alt"></i> Usuń
-                            </button>
-                        ` : `
-                            <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
-                                <i class="fas fa-trash-alt"></i> Usuń
-                            </button>
-                        `}
+                        <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
+                            <i class="fas fa-trash-alt"></i> Usuń
+                        </button>
                     </div>
                 </div>
             `;
@@ -173,7 +194,6 @@ async function fetchRentedAreas() {
             return;
         }
 
-        // ZMIANA: Używamy pętli for...of, aby móc używać await w środku
         for (const area of areas) {
             const status = area.status === 'AVAILABLE' ? 'Aktywny' : 'Zakończony';
             const statusClass = area.status === 'AVAILABLE' ? 'card-status-active' : 'card-status-inactive';
@@ -186,7 +206,6 @@ async function fetchRentedAreas() {
                 ? `data:image/jpeg;base64,${area.images[0]}`
                 : 'assets/default-area.jpg';
 
-            // NOWA LOGIKA: Sprawdzamy czy można wystawić opinię
             let canReview = false;
             if (area.reservationId) {
                 try {
@@ -203,7 +222,6 @@ async function fetchRentedAreas() {
                 }
             }
 
-            // Budowanie przycisku w zależności od canReview
             const reviewButtonHtml = canReview
                 ? `<button class="btn btn-accent card-btn review-area-btn" data-reservation-id="${area.reservationId}">
                        <i class="fas fa-star"></i> Wystaw opinię
@@ -212,7 +230,6 @@ async function fetchRentedAreas() {
                        <i class="fas fa-check-circle"></i> Oceniono
                    </div>`;
 
-            // Jeśli nie ma ID rezerwacji (błąd danych), wyświetl info
             const footerContent = area.reservationId
                 ? reviewButtonHtml
                 : `<span style="color: #999; font-size: 0.9rem;">Brak rezerwacji</span>`;
@@ -387,7 +404,6 @@ async function loadMyPurchases() {
                 ? `data:image/jpeg;base64,${order.productImage}`
                 : 'assets/default-product.jpg';
 
-            // Tłumaczenie statusu
             let statusLabel = 'W trakcie';
             if (order.status === 'COMPLETED' || order.status === 'DELIVERED') statusLabel = 'Zakończone';
             else if (order.status === 'SHIPPED') statusLabel = 'Wysłane';
@@ -444,8 +460,6 @@ async function loadMyPurchases() {
 }
 
 // ==================== ZARZĄDZANIE GALERIĄ ZDJĘĆ ====================
-// ... (Bez zmian: removeEditAreaFile, removeEditProductFile, updateEditAreaPreview, updateEditProductPreview, filesToBase64List) ...
-// Funkcja globalna do usuwania zdjęcia z edycji obszaru
 window.removeEditAreaFile = function(index, isExisting) {
     if (isExisting) {
         editAreaExistingImages.splice(index, 1);
@@ -551,7 +565,6 @@ function setupEventListeners() {
         });
     });
 
-    // ... (Reszta event listeners bez zmian: gwiazdki, modale, submitAreaReview, submitProductReview, handleDelete, etc.)
     document.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', function() {
             const value = parseInt(this.getAttribute('data-value'));
@@ -579,6 +592,7 @@ function setupEventListeners() {
     if (submitAreaReviewBtn) submitAreaReviewBtn.addEventListener('click', submitAreaReview);
     const confirmDeleteBtn = document.querySelector('.confirm-delete-btn');
     if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', handleDelete);
+
     const submitEditAreaBtn = document.querySelector('.submit-edit-area-btn');
     if (submitEditAreaBtn) submitEditAreaBtn.onclick = handleEditAreaSubmit;
     const submitEditProductBtn = document.querySelector('.submit-edit-product-btn');
@@ -608,10 +622,10 @@ function setupEventListeners() {
     }
 }
 
-// ... (setupAreaButtons, setupAreaReviewButtons, setupProductButtons, setupProductReviewButtons, handleEditAreaSubmit, handleEditProductSubmit, submitProductReview, submitAreaReview, handleDelete, formatDate, closeAllModals, openModal - WSZYSTKO BEZ ZMIAN) ...
 function setupAreaButtons() {
     document.querySelectorAll('.edit-area-btn').forEach(btn => {
         btn.addEventListener('click', function() {
+            clearErrors('edit-area-form'); // Wyczyść błędy przy otwieraniu
             const area = JSON.parse(this.getAttribute('data-area'));
             document.getElementById('edit-area-id').value = area.id || '';
             document.getElementById('edit-area-title').value = area.name || '';
@@ -652,6 +666,7 @@ function setupAreaButtons() {
         });
     });
 }
+
 function setupAreaReviewButtons() {
     document.querySelectorAll('.review-area-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -663,9 +678,11 @@ function setupAreaReviewButtons() {
         });
     });
 }
+
 function setupProductButtons() {
     document.querySelectorAll('.edit-product-btn').forEach(btn => {
         btn.addEventListener('click', function() {
+            clearErrors('edit-product-form'); // Wyczyść błędy przy otwieraniu
             const product = JSON.parse(this.getAttribute('data-product'));
             document.getElementById('edit-product-id').value = product.id || '';
             document.getElementById('edit-product-title').value = product.name || '';
@@ -688,6 +705,7 @@ function setupProductButtons() {
         });
     });
 }
+
 function setupProductReviewButtons() {
     document.querySelectorAll('.review-product-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -703,27 +721,84 @@ function setupProductReviewButtons() {
     });
 }
 
+
 async function handleEditAreaSubmit(e) {
     e.preventDefault();
-    const form = document.getElementById('edit-area-form');
-    const formData = new FormData(form);
-    const finalImagesList = [...editAreaExistingImages];
-    if (editAreaFiles.length > 0) {
-        try { finalImagesList.push(...await filesToBase64List(editAreaFiles)); } catch (e) { alert('Błąd zdjęć'); return; }
-    }
+    clearErrors('edit-area-form');
+
+    const nameInput = document.getElementById('edit-area-title');
+    const maxHivesInput = document.getElementById('edit-area-max-hives');
+    const priceInput = document.getElementById('edit-area-price');
+    const dateToInput = document.getElementById('edit-area-date-to');
+    const descInput = document.getElementById('edit-area-description');
+
+    const name = nameInput.value.trim();
+    const maxHives = parseInt(maxHivesInput.value);
+    const price = parseFloat(priceInput.value);
+    const description = descInput.value;
+
+    // Zbieramy kwiaty wcześniej, aby móc je zwalidować
     const selectedFlowers = [];
     document.querySelectorAll('#edit-area-flowers-container input[type="checkbox"]:checked').forEach(cb => {
         const flowerDef = PREDEFINED_FLOWERS.find(pf => pf.name === cb.value);
         if (flowerDef) selectedFlowers.push({ name: flowerDef.name, color: flowerDef.color });
     });
+
+    let isValid = true;
+
+    // @NotBlank
+    if (!name) {
+        showError('edit-area-title', 'Nazwa obszaru jest wymagana');
+        isValid = false;
+    }
+
+    // @Min(1)
+    if (isNaN(maxHives) || maxHives < 1) {
+        showError('edit-area-max-hives', 'Maksymalna liczba uli musi wynosić co najmniej 1');
+        isValid = false;
+    }
+
+    // @PositiveOrZero
+    if (isNaN(price) || price < 0) {
+        showError('edit-area-price', 'Cena nie może być ujemna');
+        isValid = false;
+    }
+
+    // Walidacja Kwiatów: Przynajmniej jeden
+    if (selectedFlowers.length === 0) {
+        showError('edit-area-flowers-container', 'Wybierz przynajmniej jeden rodzaj pożytku');
+        isValid = false;
+    }
+
+    // @Future - endDate
+    if (dateToInput.value) {
+        const selectedDate = new Date(dateToInput.value);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        if (selectedDate <= today) {
+            showError('edit-area-date-to', 'Data zakończenia musi być w przyszłości');
+            isValid = false;
+        }
+    }
+
+    if (!isValid) return;
+
+    const form = document.getElementById('edit-area-form');
+    const formData = new FormData(form);
+    const finalImagesList = [...editAreaExistingImages];
+    if (editAreaFiles.length > 0) {
+        try { finalImagesList.push(...await filesToBase64List(editAreaFiles)); } catch (e) { alert('Błąd przetwarzania zdjęć'); return; }
+    }
+
     const editAreaDTO = {
         id: parseInt(document.getElementById('edit-area-id').value),
-        name: document.getElementById('edit-area-title').value,
+        name: name,
         images: finalImagesList,
         flowers: selectedFlowers,
-        maxHives: parseInt(formData.get('maxHives')) || 0,
-        pricePerDay: parseFloat(formData.get('price')) || 0,
-        description: formData.get('description'),
+        maxHives: maxHives,
+        pricePerDay: price,
+        description: description,
         endDate: formData.get('dateTo'),
         availabilityStatus: formData.get('status') === 'on' ? 'AVAILABLE' : 'UNAVAILABLE'
     };
@@ -738,18 +813,62 @@ async function handleEditAreaSubmit(e) {
 
 async function handleEditProductSubmit(e) {
     e.preventDefault();
+    clearErrors('edit-product-form');
+
+    const nameInput = document.getElementById('edit-product-title');
+    const stockInput = document.getElementById('edit-product-quantity');
+    const priceInput = document.getElementById('edit-product-price');
+    const descInput = document.getElementById('edit-product-description');
+
+    const name = nameInput.value.trim();
+    const stock = parseInt(stockInput.value);
+    const price = parseFloat(priceInput.value);
+    const description = descInput.value.trim();
+
+    let isValid = true;
+
+    // Walidacja UpdateProductDTO
+    // @Size(min = 3, max = 100)
+    if (!name) {
+        showError('edit-product-title', 'Nazwa produktu jest wymagana');
+        isValid = false;
+    } else if (name.length < 3 || name.length > 100) {
+        showError('edit-product-title', 'Nazwa produktu musi mieć od 3 do 100 znaków');
+        isValid = false;
+    }
+
+    // @Min(0) - Stock
+    if (isNaN(stock) || stock < 0) {
+        showError('edit-product-quantity', 'Ilość nie może być ujemna');
+        isValid = false;
+    }
+
+    // @Positive - Price
+    if (isNaN(price) || price <= 0) {
+        showError('edit-product-price', 'Cena musi być większa od 0');
+        isValid = false;
+    }
+
+    // @Size(min = 10) - Description
+    if (description.length < 10) {
+        showError('edit-product-description', 'Opis produktu musi mieć co najmniej 10 znaków');
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
     const finalImagesList = [...editProductExistingImages];
     if (editProductFiles.length > 0) {
-        try { finalImagesList.push(...await filesToBase64List(editProductFiles)); } catch (e) { alert('Błąd zdjęć'); return; }
+        try { finalImagesList.push(...await filesToBase64List(editProductFiles)); } catch (e) { alert('Błąd przetwarzania zdjęć'); return; }
     }
     const statusSwitch = document.getElementById('edit-product-status-switch');
     const updateProductDTO = {
         id: parseInt(document.getElementById('edit-product-id').value),
-        name: document.getElementById('edit-product-title').value,
+        name: name,
         category: document.getElementById('edit-product-type').value,
-        stock: parseInt(document.getElementById('edit-product-quantity').value) || 0,
-        price: parseFloat(document.getElementById('edit-product-price').value) || 0,
-        description: document.getElementById('edit-product-description').value,
+        stock: stock,
+        price: price,
+        description: description,
         images: finalImagesList,
         available: statusSwitch ? statusSwitch.checked : true
     };
@@ -762,8 +881,7 @@ async function handleEditProductSubmit(e) {
     } catch (error) { alert('❌ Błąd aktualizacji.'); }
 }
 
-async function submitProductReview() { /* ... (bez zmian) ... */
-    // Skrót: ta funkcja jest identyczna jak w poprzednim pliku
+async function submitProductReview() {
     const orderId = parseInt(document.getElementById('product-review-order-id').value);
     const rating = parseInt(document.getElementById('product-review-rating').value);
     const comment = document.getElementById('product-review-content').value.trim();
@@ -776,7 +894,7 @@ async function submitProductReview() { /* ... (bez zmian) ... */
     } catch (e) { alert('❌ Błąd.'); }
 }
 
-async function submitAreaReview() { /* ... (bez zmian) ... */
+async function submitAreaReview() {
     const reservationId = parseInt(document.getElementById('area-review-reservation-id').value);
     const rating = parseInt(document.getElementById('area-review-rating').value);
     const comment = document.getElementById('area-review-content').value.trim();
@@ -789,7 +907,7 @@ async function submitAreaReview() { /* ... (bez zmian) ... */
     } catch (e) { alert('❌ Błąd.'); }
 }
 
-async function handleDelete() { /* ... (bez zmian) ... */
+async function handleDelete() {
     const itemId = document.getElementById('delete-item-id').value;
     const itemType = document.getElementById('delete-item-type').value;
     try {
@@ -811,17 +929,12 @@ function formatDate(dateString) {
 function openModal(modalId) { const m = document.getElementById(modalId); if(m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; } }
 function closeAllModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); document.body.style.overflow = 'auto'; }
 
-// ==================== NOWA FUNKCJONALNOŚĆ: FILTROWANIE SPRZEDAŻY I ZMIANA STATUSU ====================
+// ==================== FILTROWANIE SPRZEDAŻY I ZMIANA STATUSU ====================
 
-// Ustawianie filtra
 window.setSalesFilter = function(filter) {
     salesFilter = filter;
-
-    // UI Updates
     document.getElementById('filter-active').classList.toggle('active-filter', filter === 'ACTIVE');
     document.getElementById('filter-history').classList.toggle('active-filter', filter === 'HISTORY');
-
-    // Przeładuj listę
     fetchSoldProducts();
 };
 
@@ -838,7 +951,6 @@ async function fetchSoldProducts() {
         const container = document.getElementById('sold-products-container');
         container.innerHTML = '';
 
-        // FILTROWANIE
         const filteredOrders = allOrders.filter(order => {
             if (salesFilter === 'ACTIVE') {
                 return ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED'].includes(order.status);
@@ -857,7 +969,6 @@ async function fetchSoldProducts() {
                 ? `data:image/jpeg;base64,${order.productImage}`
                 : 'assets/default-product.jpg';
 
-            // Logika wyświetlania statusu i przycisków
             let statusText = 'Nieznany';
             let statusClass = 'card-status-inactive';
             let actionButton = '';
@@ -865,7 +976,7 @@ async function fetchSoldProducts() {
             switch (order.status) {
                 case 'CONFIRMED':
                     statusText = 'Opłacone (Do wysyłki)';
-                    statusClass = 'card-status-active'; // np. zielony lub pomarańczowy
+                    statusClass = 'card-status-active';
                     actionButton = `
                         <button class="btn btn-primary card-btn" onclick="updateOrderStatus(${order.id}, 'SHIPPED')">
                             <i class="fas fa-shipping-fast"></i> Oznacz jako wysłane
@@ -883,7 +994,7 @@ async function fetchSoldProducts() {
                     break;
                 case 'COMPLETED':
                     statusText = 'Zakończone';
-                    statusClass = 'card-status-inactive'; // Szary
+                    statusClass = 'card-status-inactive';
                     break;
                 case 'CANCELLED':
                     statusText = 'Anulowane';
@@ -944,7 +1055,6 @@ async function fetchSoldProducts() {
     }
 }
 
-// Funkcja zmiany statusu (globalna)
 window.updateOrderStatus = async function(orderId, newStatus) {
     if (!confirm(`Czy na pewno chcesz zmienić status zamówienia na: ${newStatus}?`)) return;
 
@@ -956,7 +1066,7 @@ window.updateOrderStatus = async function(orderId, newStatus) {
 
         if (response.ok) {
             alert('✅ Status zaktualizowany!');
-            fetchSoldProducts(); // Odśwież listę
+            fetchSoldProducts();
         } else {
             const err = await response.json();
             alert('❌ Błąd: ' + (err.error || 'Nie udało się zmienić statusu'));
@@ -967,9 +1077,7 @@ window.updateOrderStatus = async function(orderId, newStatus) {
     }
 };
 
-// ==================== SPRZEDANE OBSZARY ====================
 async function fetchSoldAreas() {
-    // ... (bez zmian: fetchSoldAreas logic) ...
     try {
         const response = await fetch(`${API_URL}/reservations/areas`, {
             method: "GET",
@@ -988,7 +1096,6 @@ async function fetchSoldAreas() {
         }
 
         reservations.forEach(res => {
-            // Tłumaczenie statusu
             let statusText = res.status;
             let statusClass = 'card-status-inactive';
 
@@ -1048,7 +1155,6 @@ async function fetchSoldAreas() {
     }
 }
 
-// ... (Odznaki - loadMyBadges, displayMyBadges, refreshBadges - bez zmian) ...
 async function loadMyBadges() {
     try {
         const response = await fetch(`${API_URL}/badges/my`, { method: 'GET', credentials: 'include' });

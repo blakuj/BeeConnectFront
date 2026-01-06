@@ -1,193 +1,296 @@
+// scripts/add-product.js
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Skrypt add-product.js załadowany poprawnie.');
 
     const API_URL = 'http://localhost:8080/api';
 
-    // Tablica przechowująca wybrane pliki (Files)
+    // Zmienne
     let selectedFiles = [];
+
+    // Elementy DOM
+    const productImagesInput = document.getElementById('product-images');
+    const addProductForm = document.getElementById('add-product-form');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const productTypeSelect = document.getElementById('product-type');
+    const flowersField = document.getElementById('flowers-field');
+
+    // --- Funkcje walidacji ---
+    function showError(inputId, message) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        input.classList.add('input-error');
+
+        let errorSpan = input.parentNode.querySelector('.error-message');
+        if (!errorSpan) {
+            errorSpan = document.createElement('span');
+            errorSpan.className = 'error-message';
+            input.parentNode.appendChild(errorSpan);
+        }
+        errorSpan.textContent = message;
+    }
+
+    function clearErrors(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+
+        const inputs = form.querySelectorAll('.input-error');
+        inputs.forEach(input => input.classList.remove('input-error'));
+
+        const messages = form.querySelectorAll('.error-message');
+        messages.forEach(msg => msg.remove());
+    }
 
     // Load user profile
     async function loadUserProfile() {
-    try {
-    const response = await fetch(`${API_URL}/auth/user`, {
-    method: 'GET',
-    credentials: 'include'
-});
+        try {
+            const response = await fetch(`${API_URL}/auth/user`, {
+                method: 'GET',
+                credentials: 'include'
+            });
 
-    if (response.ok) {
-    const user = await response.json();
-    document.getElementById('user-name').textContent = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Użytkownik';
-    document.getElementById('welcome-name').textContent = user.firstname || 'Użytkowniku';
-    document.getElementById('user-email').textContent = user.email || 'nieznany@email.com';
-    document.getElementById('user-status').textContent = user.role === 'BEEKEEPER' ? 'Zweryfikowany Pszczelarz' : 'Użytkownik';
-} else if (response.status === 401) {
-    alert('Sesja wygasła. Zaloguj się ponownie.');
-    window.location.href = 'login.html';
-}
-} catch (error) {
-    console.error('Błąd podczas ładowania profilu:', error);
-}
-}
+            if (response.ok) {
+                const user = await response.json();
+                if(document.getElementById('user-name'))
+                    document.getElementById('user-name').textContent = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Użytkownik';
+                if(document.getElementById('welcome-name'))
+                    document.getElementById('welcome-name').textContent = user.firstname || 'Użytkowniku';
+                if(document.getElementById('user-email'))
+                    document.getElementById('user-email').textContent = user.email || 'nieznany@email.com';
+                if(document.getElementById('user-status'))
+                    document.getElementById('user-status').textContent = user.role === 'BEEKEEPER' ? 'Zweryfikowany Pszczelarz' : 'Użytkownik';
+            } else if (response.status === 401) {
+                alert('Sesja wygasła. Zaloguj się ponownie.');
+                window.location.href = 'login.html';
+            }
+        } catch (error) {
+            console.error('Błąd podczas ładowania profilu:', error);
+        }
+    }
 
-    // Obsługa wyboru plików
-    document.getElementById('product-images').addEventListener('change', function(e) {
-    const files = Array.from(e.target.files);
-
-    // Dodaj nowe pliki do istniejącej tablicy
-    files.forEach(file => {
-    // Sprawdź czy plik już nie istnieje (po nazwie i rozmiarze)
-    const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
-    if (!exists) {
-    selectedFiles.push(file);
-}
-});
-
-    updateImagePreview();
-
-    // Reset input value to allow selecting same files again if needed
-    this.value = '';
-});
+    // --- Obsługa zdjęć ---
+    if (productImagesInput) {
+        productImagesInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+                if (!exists) {
+                    selectedFiles.push(file);
+                }
+            });
+            updateImagePreview();
+            this.value = ''; // Reset inputa
+        });
+    }
 
     function updateImagePreview() {
-    const gallery = document.getElementById('preview-gallery');
-    const countLabel = document.getElementById('file-count');
+        const gallery = document.getElementById('preview-gallery');
+        const countLabel = document.getElementById('file-count');
+        if(!gallery) return;
 
-    gallery.innerHTML = '';
+        gallery.innerHTML = '';
 
-    if (selectedFiles.length === 0) {
-    gallery.innerHTML = `
+        if (selectedFiles.length === 0) {
+            gallery.innerHTML = `
                 <div class="empty-preview">
                     <i class="fas fa-images" style="font-size: 32px; margin-bottom: 10px;"></i>
                     <span>Brak wybranych zdjęć</span>
                 </div>
             `;
-    countLabel.textContent = 'Nie wybrano plików';
-    return;
-}
+            if(countLabel) countLabel.textContent = 'Nie wybrano plików';
+            return;
+        }
 
-    countLabel.textContent = `Wybrano plików: ${selectedFiles.length}`;
+        if(countLabel) countLabel.textContent = `Wybrano plików: ${selectedFiles.length}`;
 
-    selectedFiles.forEach((file, index) => {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-    const item = document.createElement('div');
-    item.className = 'preview-item';
-    item.innerHTML = `
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                item.innerHTML = `
                     <img src="${e.target.result}" alt="Preview">
                     <div class="remove-btn" onclick="removeFile(${index})" title="Usuń zdjęcie">
                         <i class="fas fa-times"></i>
                     </div>
                 `;
-    gallery.appendChild(item);
-};
-    reader.readAsDataURL(file);
-});
-}
+                gallery.appendChild(item);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
-    // Funkcja globalna, aby była dostępna z onclick w HTML
+    // Eksport funkcji do window, aby działała w onclick w HTML
     window.removeFile = function(index) {
-    selectedFiles.splice(index, 1);
-    updateImagePreview();
-};
+        selectedFiles.splice(index, 1);
+        updateImagePreview();
+    };
 
-    // Helper: Konwersja wielu plików na Base64
     function filesToBase64List(files) {
-    return Promise.all(files.map(file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-    // Usuwamy prefix "data:image/jpeg;base64," aby wysłać czysty string,
-    // tak jak backend tego oczekuje w CreateProductDTO -> List<String> images
-    const base64String = reader.result.split(',')[1];
-    resolve(base64String);
-};
-    reader.onerror = error => reject(error);
-    reader.readAsDataURL(file);
-})));
-}
+        return Promise.all(files.map(file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64String = reader.result.split(',')[1];
+                resolve(base64String);
+            };
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        })));
+    }
 
-    // Obsługa formularza
-    document.getElementById('add-product-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
+    // --- Obsługa formularza ---
+    if (addProductForm) {
+        addProductForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearErrors('add-product-form');
 
-    const submitBtn = document.getElementById('save-product-btn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Zapisywanie...';
+            // Pola formularza
+            const nameInput = document.getElementById('product-name');
+            const categoryInput = document.getElementById('product-type');
+            const stockInput = document.getElementById('product-quantity');
+            const priceInput = document.getElementById('product-price');
+            const descInput = document.getElementById('product-description');
 
-    try {
-    // Konwersja wszystkich wybranych zdjęć
-    let imagesBase64List = [];
-    if (selectedFiles.length > 0) {
-    imagesBase64List = await filesToBase64List(selectedFiles);
-}
+            // Wartości
+            const name = nameInput ? nameInput.value.trim() : '';
+            const description = descInput ? descInput.value.trim() : '';
+            const price = priceInput ? parseFloat(priceInput.value) : NaN;
+            const stock = stockInput ? parseInt(stockInput.value) : NaN;
+            const category = categoryInput ? categoryInput.value : '';
 
-    const productData = {
-    name: document.getElementById('product-name').value,
-    category: document.getElementById('product-type').value,
-    stock: parseInt(document.getElementById('product-quantity').value),
-    price: parseFloat(document.getElementById('product-price').value),
-    description: document.getElementById('product-description').value,
-    images: imagesBase64List // Wysyłamy listę
-};
+            let isValid = true;
 
-    // Dodaj flowerOrigin tylko dla miodu (opcjonalnie, jeśli backend to obsługuje w opisie)
-    if (productData.category === 'HONEY') {
-    const flowers = document.getElementById('product-flowers').value;
-    if (flowers) {
-    // Jeśli w DTO nie ma pola flowerOrigin, dodajemy do opisu
-    productData.description = `Pochodzenie kwiatowe: ${flowers}\n\n${productData.description}`;
-}
-}
+            // --- Walidacja DTO ---
 
-    console.log('Wysyłanie danych produktu:', productData);
+            // 1. Nazwa: @NotBlank, @Size(3-100)
+            if (!name) {
+                showError('product-name', 'Nazwa produktu jest wymagana');
+                isValid = false;
+            } else if (name.length < 3 || name.length > 100) {
+                showError('product-name', 'Nazwa produktu musi mieć od 3 do 100 znaków');
+                isValid = false;
+            }
 
-    const response = await fetch(`${API_URL}/products`, {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json'
-},
-    credentials: 'include',
-    body: JSON.stringify(productData)
+            // 2. Kategoria: @NotNull
+            if (!category) {
+                showError('product-type', 'Kategoria jest wymagana');
+                isValid = false;
+            }
+
+            // 3. Cena: @Positive, @Max(1000000)
+            if (isNaN(price) || priceInput.value === '') {
+                showError('product-price', 'Cena jest wymagana');
+                isValid = false;
+            } else if (price <= 0) {
+                showError('product-price', 'Cena musi być większa od 0');
+                isValid = false;
+            } else if (price > 1000000) {
+                showError('product-price', 'Cena przekracza limit (1 000 000)');
+                isValid = false;
+            }
+
+            // 4. Ilość (Stock): @Min(0), @Max(10000)
+            if (isNaN(stock) || stockInput.value === '') {
+                showError('product-quantity', 'Ilość magazynowa jest wymagana');
+                isValid = false;
+            } else if (stock < 0) {
+                showError('product-quantity', 'Ilość nie może być ujemna');
+                isValid = false;
+            } else if (stock > 10000) {
+                showError('product-quantity', 'Maksymalna ilość to 10 000');
+                isValid = false;
+            }
+
+            // 5. Opis: @Size(10-2000)
+            if (!description) {
+                showError('product-description', 'Opis produktu jest wymagany');
+                isValid = false;
+            } else if (description.length < 10) {
+                showError('product-description', 'Opis musi mieć co najmniej 10 znaków');
+                isValid = false;
+            } else if (description.length > 2000) {
+                showError('product-description', 'Opis nie może przekraczać 2000 znaków');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Przygotowanie wysyłki
+            const submitBtn = document.getElementById('save-product-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Zapisywanie...';
+
+            try {
+                let imagesBase64List = [];
+                if (selectedFiles.length > 0) {
+                    imagesBase64List = await filesToBase64List(selectedFiles);
+                }
+
+                const productData = {
+                    name: name,
+                    category: category,
+                    stock: stock,
+                    price: price,
+                    description: description,
+                    images: imagesBase64List
+                };
+
+                // Dodaj flowerOrigin dla miodu (dodajemy do opisu bo brak pola w DTO)
+                if (productData.category === 'HONEY') {
+                    const flowersVal = document.getElementById('product-flowers') ? document.getElementById('product-flowers').value.trim() : '';
+                    if (flowersVal) {
+                        productData.description = `Pochodzenie kwiatowe: ${flowersVal}\n\n${productData.description}`;
+                    }
+                }
+
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(productData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Błąd podczas dodawania produktu');
+                }
+
+                alert('✓ Produkt został pomyślnie dodany!');
+                window.location.href = 'profile.html?tab=products';
+
+            } catch (error) {
+                console.error('Błąd:', error);
+                alert(`Nie udało się dodać produktu:\n${error.message}`);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Przycisk Anuluj
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            if (confirm('Czy na pewno chcesz anulować dodawanie produktu? Wprowadzone dane zostaną utracone.')) {
+                window.location.href = 'profile.html?tab=products';
+            }
+        });
+    }
+
+    // Zmiana typu produktu (pokaż/ukryj kwiaty)
+    if (productTypeSelect && flowersField) {
+        // Ustawienie początkowe
+        flowersField.style.display = 'none';
+
+        productTypeSelect.addEventListener('change', function() {
+            if (this.value === 'HONEY') {
+                flowersField.style.display = 'block';
+            } else {
+                flowersField.style.display = 'none';
+            }
+        });
+    }
+
+    loadUserProfile();
 });
-
-    if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Błąd podczas dodawania produktu');
-}
-
-    const result = await response.json();
-    console.log('Produkt dodany:', result);
-
-    alert('✓ Produkt został pomyślnie dodany!');
-    window.location.href = 'profile.html?tab=products';
-
-} catch (error) {
-    console.error('Błąd podczas dodawania produktu:', error);
-    alert(`Nie udało się dodać produktu:\n${error.message}`);
-
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fas fa-save"></i> Zapisz produkt';
-}
-});
-
-    // Obsługa przycisku anuluj
-    document.getElementById('cancel-btn').addEventListener('click', function() {
-    if (confirm('Czy na pewno chcesz anulować dodawanie produktu? Wprowadzone dane zostaną utracone.')) {
-    window.location.href = 'profile.html?tab=products';
-}
-});
-
-    // Aktualizacja typu produktu w zależności od wyboru
-    document.getElementById('product-type').addEventListener('change', function() {
-    const flowersField = document.getElementById('flowers-field');
-
-    // Pokaż/ukryj pole z kwiatami w zależności od typu produktu
-    if (this.value === 'HONEY') {
-    flowersField.style.display = 'block';
-} else {
-    flowersField.style.display = 'none';
-}
-});
-
-    // Inicjalizacja - ukryj pole kwiatów na początku
-    document.getElementById('flowers-field').style.display = 'none';
-
-    // Load user profile on page load
-    window.addEventListener('DOMContentLoaded', loadUserProfile);

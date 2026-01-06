@@ -7,9 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/styles.css">
-    <link rel="stylesheet" href="styles/add_product.css">
-    <script src="scripts/add-product.js"></script>
-
+    <link rel="stylesheet" href="styles/error.css"> <link rel="stylesheet" href="styles/add_product.css">
 </head>
 <body>
 <div class="header">
@@ -75,7 +73,7 @@
 
         <div class="card">
             <div class="card-body">
-                <form id="add-product-form">
+                <form id="add-product-form" novalidate>
                     <div class="form-section">
                         <h3 class="form-section-title">Zdjęcia produktu</h3>
                         <div class="form-group image-upload-top">
@@ -166,6 +164,7 @@
     </div>
 </div>
 
+<script src="scripts/add-product.js"></script>
 
 </body>
 </html>

@@ -1,22 +1,25 @@
 // scripts/chat.js - Integracja czatu z API
 
 const API_BASE = 'http://localhost:8080/api';
+const MAX_MESSAGE_LENGTH = 500;
 
 let currentConversationId = null;
 let currentUser = null;
 let conversations = [];
 let messages = [];
 let messagePollingInterval = null;
-let isInitialLoad = true; // Flaga dla pierwszego ładowania
+let isInitialLoad = true;
 
-// ==================== INICJALIZACJA ====================
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Chat script loaded');
     await checkAuth();
     await loadConversations();
     setupEventListeners();
     setupMobileHandlers();
 
-    // Sprawdź czy jest parametr conversation w URL
+    // Inicjalizacja licznika znaków
+    updateCharCounter();
+
     const urlParams = new URLSearchParams(window.location.search);
     const conversationId = urlParams.get('conversation');
     if (conversationId) {
@@ -54,8 +57,10 @@ function updateWelcomeMessage() {
 // ==================== ŁADOWANIE KONWERSACJI ====================
 async function loadConversations() {
     try {
+        // Nie pokazujemy spinnera przy pollingu, tylko przy pierwszym ładowaniu
         if (isInitialLoad) {
-            showConversationsLoading(true);
+            const list = document.querySelector('.conversation-list');
+            if(list) list.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;"><i class="fas fa-spinner fa-spin"></i> Ładowanie...</div>';
         }
 
         const response = await fetch(`${API_BASE}/chat/conversations`, {
@@ -63,13 +68,12 @@ async function loadConversations() {
             credentials: 'include'
         });
 
-        if (!response.ok) {
-            throw new Error('Nie udało się pobrać konwersacji');
-        }
+        if (!response.ok) throw new Error('Nie udało się pobrać konwersacji');
 
         const newConversations = await response.json();
 
-        // Sprawdź czy są jakieś zmiany
+        // Proste sprawdzenie czy dane się zmieniły, żeby nie przerysowywać DOM bez potrzeby
+        // (W prawdziwej aplikacji użyłbyś React/Vue/Angular, tutaj robimy to ręcznie)
         if (isInitialLoad || JSON.stringify(conversations) !== JSON.stringify(newConversations)) {
             conversations = newConversations;
             displayConversations();
@@ -78,13 +82,11 @@ async function loadConversations() {
     } catch (error) {
         console.error('Błąd ładowania konwersacji:', error);
         if (isInitialLoad) {
-            showConversationsError('Nie udało się załadować konwersacji');
+            const list = document.querySelector('.conversation-list');
+            if(list) list.innerHTML = '<div style="text-align: center; padding: 20px; color: #e74c3c;">Błąd połączenia.</div>';
         }
     } finally {
-        if (isInitialLoad) {
-            showConversationsLoading(false);
-            isInitialLoad = false;
-        }
+        isInitialLoad = false;
     }
 }
 
@@ -95,9 +97,9 @@ function displayConversations() {
     if (conversations.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
-                <i class="fas fa-comments"></i>
+                <i class="fas fa-comments" style="font-size: 48px; color: #ddd; margin-bottom: 10px;"></i>
                 <p>Brak konwersacji</p>
-                <p style="font-size: 13px; color: #999;">Rozpocznij nową rozmowę z użytkownikiem</p>
+                <p style="font-size: 12px; color: #999;">Rozpocznij nową rozmowę z karty produktu</p>
             </div>
         `;
         return;
@@ -106,29 +108,35 @@ function displayConversations() {
     container.innerHTML = conversations.map(conv => createConversationItem(conv)).join('');
     attachConversationListeners();
 
-    // Jeśli jest aktywna konwersacja, zaznacz ją
+    // Przywróć aktywną klasę
     if (currentConversationId) {
         const activeItem = document.querySelector(`[data-conversation="${currentConversationId}"]`);
-        if (activeItem) {
-            activeItem.classList.add('active');
-        }
+        if (activeItem) activeItem.classList.add('active');
     }
 }
 
 function createConversationItem(conv) {
     const time = formatConversationTime(conv.lastMessageAt);
     const preview = conv.lastMessageContent || 'Brak wiadomości';
-    const unreadBadge = conv.unreadCount > 0 ?
-        `<div class="conversation-badge">${conv.unreadCount}</div>` : '';
+    const unreadBadge = conv.unreadCount > 0 ? `<div class="conversation-badge">${conv.unreadCount}</div>` : '';
+
+    // Ustalanie nazwy rozmówcy (backend zwraca otherUser...)
+    const name = `${conv.otherUserFirstname} ${conv.otherUserLastname}`;
+
+    // Zdjęcie produktu jako avatar (jeśli jest), w przeciwnym razie default avatar
+    const avatarSrc = conv.productImage
+        ? `data:image/jpeg;base64,${conv.productImage}`
+        : 'assets/default-avatar.png';
 
     return `
-        <div class="conversation-item" data-conversation="${conv.id}">
+        <div class="conversation-item ${conv.id === currentConversationId ? 'active' : ''}" data-conversation="${conv.id}">
             <div class="conversation-avatar">
-                <img src="assets/default-avatar.png" alt="${conv.otherUserFirstname} ${conv.otherUserLastname}">
+                <img src="${avatarSrc}" alt="${name}">
             </div>
             <div class="conversation-info">
-                <div class="conversation-name">${conv.otherUserFirstname} ${conv.otherUserLastname}</div>
-                <div class="conversation-preview">${truncateText(preview, 50)}</div>
+                <div class="conversation-name">${name}</div>
+                <div class="conversation-preview">${truncateText(preview, 40)}</div>
+                <div style="font-size: 10px; color: #aaa;">Produkt: ${conv.productName}</div>
             </div>
             <div class="conversation-meta">
                 <div class="conversation-time">${time}</div>
@@ -149,106 +157,92 @@ function attachConversationListeners() {
 
 // ==================== OTWIERANIE KONWERSACJI ====================
 async function openConversation(conversationId) {
+    if (currentConversationId === conversationId) return; // Już otwarta
     currentConversationId = conversationId;
 
-    // Aktualizuj UI - zaznacz aktywną konwersację
-    document.querySelectorAll('.conversation-item').forEach(item => {
-        item.classList.remove('active');
-    });
+    // UI Updates
+    document.querySelectorAll('.conversation-item').forEach(item => item.classList.remove('active'));
     const activeItem = document.querySelector(`[data-conversation="${conversationId}"]`);
     if (activeItem) {
         activeItem.classList.add('active');
-        // Usuń badge nieprzeczytanych
+        // Usuń badge po kliknięciu (frontend update, backend update leci w tle)
         const badge = activeItem.querySelector('.conversation-badge');
         if (badge) badge.remove();
     }
 
-    // Na mobile - ukryj listę, pokaż czat
+    // Mobile UI
     if (window.innerWidth < 768) {
         document.getElementById('conversations-list').classList.add('hidden');
         document.getElementById('chat-main').classList.remove('hidden');
+    } else {
+        document.getElementById('chat-main').classList.remove('hidden');
     }
 
-    // Resetuj flagę pierwszego ładowania dla wiadomości
+    // Header update
+    const conv = conversations.find(c => c.id === conversationId);
+    if (conv) {
+        const headerName = document.querySelector('.chat-header-name');
+        const headerStatus = document.querySelector('.chat-header-status');
+        const headerAvatar = document.querySelector('.chat-header .conversation-avatar img');
+
+        if (headerName) headerName.textContent = `${conv.otherUserFirstname} ${conv.otherUserLastname} (${conv.productName})`;
+        if (headerStatus) {
+            headerStatus.textContent = 'Online'; // Mock status
+            headerStatus.classList.add('online');
+        }
+        if(headerAvatar && conv.productImage) {
+            headerAvatar.src = `data:image/jpeg;base64,${conv.productImage}`;
+        } else if (headerAvatar) {
+            headerAvatar.src = 'assets/default-avatar.png';
+        }
+    }
+
+    // Reset messages and load
     messages = [];
+    document.getElementById('chat-messages').innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i></div>';
 
-    // Załaduj wiadomości
-    await loadMessages(conversationId, true);
+    // Clear input
+    const input = document.getElementById('chat-input');
+    if(input) {
+        input.value = '';
+        input.classList.remove('input-error');
+        updateCharCounter();
+    }
 
-    // Oznacz jako przeczytane
+    await loadMessages(conversationId);
     await markAsRead(conversationId);
-
-    // Zaktualizuj header czatu
-    updateChatHeader(conversationId);
-
-    // Start polling dla nowych wiadomości
     startMessagePolling();
 }
 
-function updateChatHeader(conversationId) {
-    const conv = conversations.find(c => c.id === conversationId);
-    if (!conv) return;
-
-    const headerName = document.querySelector('.chat-header-name');
-    const headerStatus = document.querySelector('.chat-header-status');
-
-    if (headerName) {
-        headerName.textContent = `${conv.otherUserFirstname} ${conv.otherUserLastname}`;
-    }
-
-    if (headerStatus) {
-        headerStatus.textContent = 'Online';
-        headerStatus.classList.add('online');
-    }
-}
-
 // ==================== ŁADOWANIE WIADOMOŚCI ====================
-async function loadMessages(conversationId, showLoading = false) {
+async function loadMessages(conversationId) {
     try {
-        // Tylko przy pierwszym załadowaniu pokazuj loading
-        if (showLoading) {
-            showMessagesLoading(true);
-        }
-
         const response = await fetch(`${API_BASE}/chat/conversations/${conversationId}/messages`, {
             method: 'GET',
             credentials: 'include'
         });
 
-        if (!response.ok) {
-            throw new Error('Nie udało się pobrać wiadomości');
-        }
+        if (!response.ok) throw new Error('Nie udało się pobrać wiadomości');
 
         const newMessages = await response.json();
 
-        // Sprawdź czy są nowe wiadomości
-        const oldMessagesLength = messages.length;
-        const hasNewMessages = newMessages.length !== oldMessagesLength;
+        const container = document.getElementById('chat-messages');
+        const wasAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 100);
 
-        if (hasNewMessages || showLoading) {
-            // Zachowaj pozycję scrolla jeśli to nie jest nowa wiadomość na końcu
-            const container = document.getElementById('chat-messages');
-            const wasAtBottom = container &&
-                (container.scrollHeight - container.scrollTop - container.clientHeight < 50);
-
+        // Renderujemy tylko jeśli są zmiany
+        if (newMessages.length !== messages.length || messages.length === 0) {
             messages = newMessages;
             displayMessages();
 
-            // Scroll do dołu tylko jeśli użytkownik był na dole lub to nowa wiadomość
-            if (wasAtBottom || newMessages.length > oldMessagesLength) {
+            // Scroll to bottom on first load or if user was at bottom
+            if (wasAtBottom || messages.length === newMessages.length) { // Logic simplified for polling
                 scrollToBottom();
             }
         }
 
     } catch (error) {
         console.error('Błąd ładowania wiadomości:', error);
-        if (showLoading) {
-            showMessagesError('Nie udało się załadować wiadomości');
-        }
-    } finally {
-        if (showLoading) {
-            showMessagesLoading(false);
-        }
+        document.getElementById('chat-messages').innerHTML = '<div style="text-align: center; color: #e74c3c;">Błąd ładowania wiadomości.</div>';
     }
 }
 
@@ -258,33 +252,20 @@ function displayMessages() {
 
     if (messages.length === 0) {
         container.innerHTML = `
-            <div class="message-date-divider">
-                <span>Brak wiadomości</span>
-            </div>
+            <div class="message-date-divider"><span>Rozpoczęcie czatu</span></div>
             <div style="text-align: center; padding: 40px 20px; color: #999;">
-                <i class="fas fa-comment-slash" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                <i class="fas fa-comment-dots" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
                 <p>Napisz pierwszą wiadomość!</p>
-            </div>
-        `;
+            </div>`;
         return;
     }
 
-    // Grupuj wiadomości według dat
     const groupedMessages = groupMessagesByDate(messages);
-
     let html = '';
     for (const [date, msgs] of Object.entries(groupedMessages)) {
-        html += `
-            <div class="message-date-divider">
-                <span>${date}</span>
-            </div>
-        `;
-
-        msgs.forEach(msg => {
-            html += createMessageElement(msg);
-        });
+        html += `<div class="message-date-divider"><span>${date}</span></div>`;
+        msgs.forEach(msg => { html += createMessageElement(msg); });
     }
-
     container.innerHTML = html;
 }
 
@@ -292,14 +273,11 @@ function createMessageElement(msg) {
     const messageClass = msg.isMine ? 'message-sent' : 'message-received';
     const time = formatMessageTime(msg.sentAt);
 
-    // Dodaj status przeczytania tylko dla wysłanych wiadomości
     let readStatus = '';
     if (msg.isMine) {
-        if (msg.isRead) {
-            readStatus = '<span class="message-status read" title="Przeczytane"><i class="fas fa-check-double"></i></span>';
-        } else {
-            readStatus = '<span class="message-status sent" title="Wysłane"><i class="fas fa-check"></i></span>';
-        }
+        readStatus = msg.isRead
+            ? '<span class="message-status read" title="Przeczytane"><i class="fas fa-check-double"></i></span>'
+            : '<span class="message-status sent" title="Wysłane"><i class="fas fa-check"></i></span>';
     }
 
     return `
@@ -314,15 +292,11 @@ function createMessageElement(msg) {
 
 function groupMessagesByDate(messages) {
     const grouped = {};
-
     messages.forEach(msg => {
         const date = formatDateDivider(msg.sentAt);
-        if (!grouped[date]) {
-            grouped[date] = [];
-        }
+        if (!grouped[date]) grouped[date] = [];
         grouped[date].push(msg);
     });
-
     return grouped;
 }
 
@@ -331,9 +305,30 @@ async function sendMessage() {
     const input = document.getElementById('chat-input');
     const content = input.value.trim();
 
-    if (!content || !currentConversationId) return;
+    if (!currentConversationId) {
+        alert('Wybierz konwersację, aby wysłać wiadomość');
+        return;
+    }
 
-    // Wyłącz przycisk i input podczas wysyłania
+    // --- WALIDACJA FRONT-END ---
+
+    // 1. Pusta wiadomość
+    if (!content) {
+        input.classList.add('input-error');
+        setTimeout(() => input.classList.remove('input-error'), 1000);
+        return;
+    }
+
+    // 2. Długość wiadomości
+    if (content.length > MAX_MESSAGE_LENGTH) {
+        input.classList.add('input-error');
+        alert(`Wiadomość jest zbyt długa (${content.length}/${MAX_MESSAGE_LENGTH})`);
+        return;
+    }
+
+    // Usuń błędy jeśli walidacja przeszła
+    input.classList.remove('input-error');
+
     const sendBtn = document.getElementById('send-message');
     input.disabled = true;
     sendBtn.disabled = true;
@@ -341,9 +336,7 @@ async function sendMessage() {
     try {
         const response = await fetch(`${API_BASE}/chat/messages`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({
                 conversationId: currentConversationId,
@@ -358,30 +351,42 @@ async function sendMessage() {
 
         const newMessage = await response.json();
 
-        // Dodaj wiadomość do listy
+        // Optymistyczna aktualizacja UI (dodaj wiadomość od razu)
         messages.push(newMessage);
-
-        // Dodaj wiadomość do UI z animacją
-        const container = document.getElementById('chat-messages');
-        const messageHtml = createMessageElement(newMessage);
-        container.insertAdjacentHTML('beforeend', messageHtml);
-
-        // Wyczyść input
-        input.value = '';
-
-        // Scroll do dołu
+        displayMessages(); // Przerysowanie
         scrollToBottom();
 
-        // Zaktualizuj konwersacje (ostatnia wiadomość) - ale bez pokazywania loadingu
-        await loadConversations();
+        input.value = '';
+        updateCharCounter();
+
+        // Odśwież listę konwersacji (żeby przenieść tę na górę)
+        loadConversations();
 
     } catch (error) {
         console.error('Błąd wysyłania wiadomości:', error);
-        showNotification(error.message, 'error');
+        alert('Nie udało się wysłać wiadomości: ' + error.message);
     } finally {
         input.disabled = false;
         sendBtn.disabled = false;
         input.focus();
+    }
+}
+
+// Funkcja aktualizująca licznik znaków
+function updateCharCounter() {
+    const input = document.getElementById('chat-input');
+    const counter = document.getElementById('char-counter');
+    if (!input || !counter) return;
+
+    const length = input.value.length;
+    counter.textContent = `${length} / ${MAX_MESSAGE_LENGTH}`;
+
+    if (length > MAX_MESSAGE_LENGTH) {
+        counter.style.color = '#e74c3c'; // Czerwony
+        input.classList.add('input-error');
+    } else {
+        counter.style.color = '#999'; // Szary
+        input.classList.remove('input-error');
     }
 }
 
@@ -392,29 +397,21 @@ async function markAsRead(conversationId) {
             method: 'PUT',
             credentials: 'include'
         });
-
-        // Po oznaczeniu jako przeczytane, odśwież wiadomości aby zaktualizować statusy
-        setTimeout(() => {
-            if (currentConversationId === conversationId) {
-                loadMessages(conversationId, false);
-            }
-        }, 500);
-    } catch (error) {
-        console.error('Błąd oznaczania jako przeczytane:', error);
-    }
+        // Nie musimy odświeżać wiadomości od razu, zrobi to polling
+    } catch (error) { console.error('Błąd oznaczania jako przeczytane:', error); }
 }
 
-// ==================== POLLING NOWYCH WIADOMOŚCI ====================
+// ==================== POLLING ====================
 function startMessagePolling() {
     stopMessagePolling();
-
+    // Odpytuj co 3 sekundy
     messagePollingInterval = setInterval(async () => {
         if (currentConversationId) {
-            // Ładuj bez pokazywania loadingu
-            await loadMessages(currentConversationId, false);
-            await loadConversations();
+            await loadMessages(currentConversationId);
         }
-    }, 3000); // Co 3 sekundy
+        // Również odświeżaj listę konwersacji (np. nowe wiadomości w innych wątkach)
+        await loadConversations();
+    }, 3000);
 }
 
 function stopMessagePolling() {
@@ -426,13 +423,10 @@ function stopMessagePolling() {
 
 // ==================== EVENT LISTENERS ====================
 function setupEventListeners() {
-    // Wysyłanie wiadomości
     const sendBtn = document.getElementById('send-message');
     const input = document.getElementById('chat-input');
 
-    if (sendBtn) {
-        sendBtn.addEventListener('click', sendMessage);
-    }
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
 
     if (input) {
         input.addEventListener('keypress', function(e) {
@@ -441,13 +435,13 @@ function setupEventListeners() {
                 sendMessage();
             }
         });
+
+        // Nasłuchiwanie wpisywania dla licznika znaków
+        input.addEventListener('input', updateCharCounter);
     }
 
-    // Wyszukiwanie konwersacji
     const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', filterConversations);
-    }
+    if (searchInput) searchInput.addEventListener('input', filterConversations);
 }
 
 function setupMobileHandlers() {
@@ -456,16 +450,20 @@ function setupMobileHandlers() {
         backBtn.addEventListener('click', function() {
             document.getElementById('conversations-list').classList.remove('hidden');
             document.getElementById('chat-main').classList.add('hidden');
+            currentConversationId = null;
             stopMessagePolling();
         });
     }
-
     window.addEventListener('resize', adjustLayout);
     adjustLayout();
 }
 
 function adjustLayout() {
-    if (window.innerWidth < 768) {
+    // Prosta obsługa responsywności JS-owej
+    if (window.innerWidth >= 768) {
+        document.getElementById('conversations-list').classList.remove('hidden');
+        document.getElementById('chat-main').classList.remove('hidden');
+    } else {
         if (currentConversationId) {
             document.getElementById('conversations-list').classList.add('hidden');
             document.getElementById('chat-main').classList.remove('hidden');
@@ -473,54 +471,33 @@ function adjustLayout() {
             document.getElementById('conversations-list').classList.remove('hidden');
             document.getElementById('chat-main').classList.add('hidden');
         }
-    } else {
-        document.getElementById('conversations-list').classList.remove('hidden');
-        document.getElementById('chat-main').classList.remove('hidden');
     }
 }
 
-// ==================== FILTROWANIE KONWERSACJI ====================
 function filterConversations() {
     const searchQuery = document.querySelector('.search-input').value.toLowerCase();
-
     document.querySelectorAll('.conversation-item').forEach(item => {
         const name = item.querySelector('.conversation-name').textContent.toLowerCase();
         const preview = item.querySelector('.conversation-preview').textContent.toLowerCase();
-
-        if (name.includes(searchQuery) || preview.includes(searchQuery)) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
+        item.style.display = (name.includes(searchQuery) || preview.includes(searchQuery)) ? 'flex' : 'none';
     });
 }
 
-// ==================== POMOCNICZE FUNKCJE ====================
+// ==================== POMOCNICZE ====================
 function scrollToBottom() {
     const container = document.getElementById('chat-messages');
-    if (container) {
-        setTimeout(() => {
-            container.scrollTop = container.scrollHeight;
-        }, 100);
-    }
+    if (container) setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
 }
 
 function formatConversationTime(dateString) {
     if (!dateString) return '';
-
     const date = new Date(dateString);
     const now = new Date();
     const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {
-        return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-    } else if (diffDays === 1) {
-        return 'Wczoraj';
-    } else if (diffDays < 7) {
-        return date.toLocaleDateString('pl-PL', { weekday: 'short' });
-    } else {
-        return date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'numeric' });
-    }
+    if (diffDays === 0) return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+    if (diffDays === 1) return 'Wczoraj';
+    if (diffDays < 7) return date.toLocaleDateString('pl-PL', { weekday: 'short' });
+    return date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'numeric' });
 }
 
 function formatMessageTime(dateString) {
@@ -532,18 +509,9 @@ function formatDateDivider(dateString) {
     const date = new Date(dateString);
     const now = new Date();
     const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {
-        return 'Dzisiaj';
-    } else if (diffDays === 1) {
-        return 'Wczoraj';
-    } else {
-        return date.toLocaleDateString('pl-PL', {
-            day: 'numeric',
-            month: 'long',
-            year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-        });
-    }
+    if (diffDays === 0) return 'Dzisiaj';
+    if (diffDays === 1) return 'Wczoraj';
+    return date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
 }
 
 function truncateText(text, maxLength) {
@@ -552,194 +520,8 @@ function truncateText(text, maxLength) {
 }
 
 function escapeHtml(text) {
+    if (!text) return "";
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
-
-function showConversationsLoading(show) {
-    const container = document.querySelector('.conversation-list');
-    if (show && container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px;">
-                <div class="spinner"></div>
-                <p style="color: #999; margin-top: 15px;">Ładowanie konwersacji...</p>
-            </div>
-        `;
-    }
-}
-
-function showConversationsError(message) {
-    const container = document.querySelector('.conversation-list');
-    if (container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px;">
-                <i class="fas fa-exclamation-circle" style="font-size: 48px; color: #ff6b6b; margin-bottom: 15px;"></i>
-                <p style="color: #666;">${message}</p>
-                <button class="btn btn-primary" onclick="loadConversations()" style="margin-top: 15px;">
-                    <i class="fas fa-redo"></i> Spróbuj ponownie
-                </button>
-            </div>
-        `;
-    }
-}
-
-function showMessagesLoading(show) {
-    const container = document.getElementById('chat-messages');
-    if (show && container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px;">
-                <div class="spinner"></div>
-                <p style="color: #999; margin-top: 15px;">Ładowanie wiadomości...</p>
-            </div>
-        `;
-    }
-}
-
-function showMessagesError(message) {
-    const container = document.getElementById('chat-messages');
-    if (container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px;">
-                <i class="fas fa-exclamation-circle" style="font-size: 48px; color: #ff6b6b; margin-bottom: 15px;"></i>
-                <p style="color: #666;">${message}</p>
-            </div>
-        `;
-    }
-}
-
-function showNotification(message, type = 'info') {
-    const existing = document.querySelector('.notification-toast');
-    if (existing) existing.remove();
-
-    const notification = document.createElement('div');
-    notification.className = `notification-toast notification-${type}`;
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-        <span>${message}</span>
-    `;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => notification.classList.add('show'), 100);
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// CSS dla spinner, notyfikacji i statusów przeczytania
-const style = document.createElement('style');
-style.textContent = `
-    .spinner {
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid var(--primary);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-        margin: 0 auto;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #999;
-    }
-
-    .empty-state i {
-        font-size: 64px;
-        color: #ddd;
-        margin-bottom: 20px;
-    }
-
-    .notification-toast {
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        background: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        z-index: 10000;
-        transform: translateX(400px);
-        transition: transform 0.3s ease;
-    }
-
-    .notification-toast.show {
-        transform: translateX(0);
-    }
-
-    .notification-toast.notification-success {
-        border-left: 4px solid #4caf50;
-    }
-
-    .notification-toast.notification-error {
-        border-left: 4px solid #f44336;
-    }
-
-    .notification-toast.notification-info {
-        border-left: 4px solid #2196f3;
-    }
-
-    .notification-toast i {
-        font-size: 20px;
-    }
-
-    .notification-success i {
-        color: #4caf50;
-    }
-
-    .notification-error i {
-        color: #f44336;
-    }
-
-    .notification-info i {
-        color: #2196f3;
-    }
-
-    /* Statusy przeczytania wiadomości */
-    .message-status {
-        display: inline-flex;
-        align-items: center;
-        margin-left: 5px;
-        font-size: 10px;
-    }
-
-    .message-status.sent {
-        color: #999;
-    }
-
-    .message-status.read {
-        color: #34B7F1;
-    }
-
-    .message-status i {
-        font-size: 12px;
-    }
-
-    /* Animacja pojawienia się */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .message:last-child {
-        animation: fadeInUp 0.3s ease;
-    }
-`;
-document.head.appendChild(style);
