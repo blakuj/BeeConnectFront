@@ -179,8 +179,8 @@ async function deleteNotification(notificationId, event) {
 }
 
 // ==================== OTWIERANIE POWIADOMIENIA ====================
-function openNotification(notificationId, url) {
-    markAsRead(notificationId);
+async function openNotification(notificationId, url) {
+    await markAsRead(notificationId);
 
     if (url && url !== '#') {
         window.location.href = url;
@@ -189,7 +189,6 @@ function openNotification(notificationId, url) {
 
 // ==================== EVENT LISTENERS ====================
 function setupNotificationListeners() {
-    // Toggle dropdown
     const bellIcon = document.getElementById('notification-bell');
     if (bellIcon) {
         bellIcon.addEventListener('click', (e) => {
@@ -242,14 +241,13 @@ function closeNotificationDropdown() {
     }
 }
 
-// ==================== POLLING ====================
 function startNotificationPolling() {
-    // Sprawdzaj co 30 sekund
+
     notificationPollingInterval = setInterval(() => {
         loadUnreadCount();
     }, 30000);
 
-    // Pierwsze wywołanie
+
     loadUnreadCount();
 }
 

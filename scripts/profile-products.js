@@ -1184,7 +1184,7 @@ async function refreshBadges() {
     const originalContent = container.innerHTML;
     container.innerHTML = `<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #F2A900;"></i><p style="color: #999; margin-top: 15px;">Sprawdzanie nowych odznak...</p></div>`;
     try {
-        const response = await fetch(`${API_URL}/badges/check`, { method: 'POST', credentials: 'include' });
+        const response = await fetch(`${API_URL}/badges/my`, { method: 'GET', credentials: 'include' });
         if (!response.ok) throw new Error('Błąd odświeżania');
         const badges = await response.json();
         container.innerHTML = `<div style="text-align: center; padding: 2rem;"><i class="fas fa-check-circle" style="font-size: 48px; color: #51CF66;"></i><p style="color: #51CF66; margin-top: 15px; font-weight: 600;">Odznaki zaktualizowane!</p></div>`;
