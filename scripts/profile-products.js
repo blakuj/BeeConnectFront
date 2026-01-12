@@ -356,7 +356,6 @@ async function fetchMyProducts() {
     }
 }
 
-// ==================== KUPIONE PRODUKTY ====================
 async function loadMyPurchases() {
     try {
         const response = await fetch(`${API_URL}/orders/my-purchases`, {
@@ -404,15 +403,42 @@ async function loadMyPurchases() {
                 ? `data:image/jpeg;base64,${order.productImage}`
                 : 'assets/default-product.jpg';
 
-            let statusLabel = 'W trakcie';
-            if (order.status === 'COMPLETED' || order.status === 'DELIVERED') statusLabel = 'Zakończone';
-            else if (order.status === 'SHIPPED') statusLabel = 'Wysłane';
+            let statusLabel = order.status;
+            let statusClass = 'card-status-active';
+
+            switch (order.status) {
+                case 'PENDING':
+                    statusLabel = 'Oczekujące';
+                    break;
+                case 'CONFIRMED':
+                    statusLabel = 'Opłacone (W przygotowaniu)';
+                    break;
+                case 'PROCESSING':
+                    statusLabel = 'W trakcie realizacji';
+                    break;
+                case 'SHIPPED':
+                    statusLabel = 'Wysłane (W drodze)';
+                    break;
+                case 'DELIVERED':
+                    statusLabel = 'Dostarczone';
+                    break;
+                case 'COMPLETED':
+                    statusLabel = 'Zakończone';
+                    statusClass = 'card-status-inactive';
+                    break;
+                case 'CANCELLED':
+                    statusLabel = 'Anulowane';
+                    statusClass = 'card-status-inactive';
+                    break;
+                default:
+                    statusLabel = order.status;
+            }
 
             const card = `
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-title">${order.productName}</div>
-                        <div class="card-header-status card-status-active">${statusLabel}</div>
+                        <div class="card-header-status ${statusClass}">${statusLabel}</div>
                     </div>
                     <div class="area-preview">
                         <img src="${thumbnail}" alt="${order.productName}">
@@ -910,15 +936,48 @@ async function submitAreaReview() {
 async function handleDelete() {
     const itemId = document.getElementById('delete-item-id').value;
     const itemType = document.getElementById('delete-item-type').value;
+
     try {
         if (itemType === 'area') {
-            await fetch(`${API_URL}/deleteArea/${itemId}`, { method: 'POST', credentials: 'include' });
-            alert('✅ Obszar usunięty!'); await fetchMyAreas();
+            const response = await fetch(`${API_URL}/deleteArea/${itemId}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                alert('✅ Obszar usunięty!');
+                await fetchMyAreas();
+            } else {
+                const errorText = await response.text();
+                alert('❌ ' + (errorText || 'Nie udało się usunąć obszaru.'));
+            }
+
         } else if (itemType === 'product') {
-            await fetch(`${API_URL}/products/${itemId}`, { method: 'DELETE', credentials: 'include' });
-            alert('✅ Produkt usunięty!'); await fetchMyProducts();
+            const response = await fetch(`${API_URL}/products/${itemId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                alert('✅ Produkt usunięty!');
+                await fetchMyProducts();
+            } else {
+                let errorMessage = 'Nie udało się usunąć produktu.';
+                try {
+                    const errorData = await response.json();
+                    if (errorData && errorData.error) {
+                        errorMessage = errorData.error;
+                    }
+                } catch (e) {
+                    console.error('Błąd parsowania odpowiedzi błędu:', e);
+                }
+                alert('❌ ' + errorMessage);
+            }
         }
-    } catch (e) { alert('❌ Błąd usuwania.'); }
+    } catch (e) {
+        console.error('Delete error:', e);
+        alert('❌ Wystąpił błąd połączenia z serwerem.');
+    }
     closeAllModals();
 }
 

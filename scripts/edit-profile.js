@@ -300,6 +300,22 @@ window.addEventListener('DOMContentLoaded', function() {
                 isValid = false;
             }
 
+            if (!address) {
+                showError('apiary-address', 'Adres pasieki jest wymagany');
+                isValid = false;
+            } else if (address.length > 255) {
+                showError('apiary-address', 'Adres może mieć maksymalnie 255 znaków');
+                isValid = false;
+            }
+
+            if (!honeyType) {
+                showError('honey-types', 'Rodzaje produkowanego miodu są wymagane.');
+                isValid = false;
+            } else if (honeyType.length > 50) {
+                showError('honey-types', 'Rodzaje miodu mogą mieć maksymalnie 50 znaków');
+                isValid = false;
+            }
+
             const fileInput = document.getElementById('document-upload');
             if (!fileInput.files || fileInput.files.length === 0) {
                 const uploadContainer = document.querySelector('.file-upload-label');
