@@ -181,35 +181,36 @@ async function fetchMyAreas() {
 
 async function fetchRentedAreas() {
     try {
-        const response = await fetch(`${API_URL}/rentedAreas`, {
+        const response = await fetch(`${API_URL}/reservations/my`, {
             method: "GET",
             credentials: "include"
         });
-        const areas = await response.json();
+        const reservations = await response.json();
         const container = document.getElementById('rented-areas-container');
         container.innerHTML = '';
 
-        if (areas.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych wynajętych obszarów.</p>';
+        if (reservations.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych wynajętych obszarów (rezerwacji).</p>';
             return;
         }
 
-        for (const area of areas) {
-            const status = area.status === 'AVAILABLE' ? 'Aktywny' : 'Zakończony';
-            const statusClass = area.status === 'AVAILABLE' ? 'card-status-active' : 'card-status-inactive';
+        for (const res of reservations) {
+            let statusText = res.status;
+            let statusClass = 'card-status-inactive';
 
-            const location = area.coordinates && area.coordinates.length > 0
-                ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
-                : 'Brak lokalizacji';
-
-            const thumbnail = (area.images && area.images.length > 0)
-                ? `data:image/jpeg;base64,${area.images[0]}`
-                : 'assets/default-area.jpg';
+            if (res.status === 'CONFIRMED' || res.status === 'ACTIVE') {
+                statusText = (res.status === 'ACTIVE') ? 'Aktywna' : 'Potwierdzona';
+                statusClass = 'card-status-active';
+            } else if (res.status === 'COMPLETED') {
+                statusText = 'Zakończona';
+            } else if (res.status === 'CANCELLED') {
+                statusText = 'Anulowana';
+            }
 
             let canReview = false;
-            if (area.reservationId) {
+            if (res.id) {
                 try {
-                    const reviewCheckResponse = await fetch(`${API_URL}/reviews/areas/can-review/${area.reservationId}`, {
+                    const reviewCheckResponse = await fetch(`${API_URL}/reviews/areas/can-review/${res.id}`, {
                         method: "GET",
                         credentials: "include"
                     });
@@ -223,38 +224,45 @@ async function fetchRentedAreas() {
             }
 
             const reviewButtonHtml = canReview
-                ? `<button class="btn btn-accent card-btn review-area-btn" data-reservation-id="${area.reservationId}">
-                       <i class="fas fa-star"></i> Wystaw opinię
-                   </button>`
-                : `<div class="status-badge reviewed" style="color: #27ae60; font-weight: 600; display: flex; align-items: center; gap: 5px; font-size: 0.9rem;">
-                       <i class="fas fa-check-circle"></i> Oceniono
-                   </div>`;
-
-            const footerContent = area.reservationId
-                ? reviewButtonHtml
-                : `<span style="color: #999; font-size: 0.9rem;">Brak rezerwacji</span>`;
+                ? `<button class="btn btn-accent card-btn review-area-btn" data-reservation-id="${res.id}">
+           <i class="fas fa-star"></i> Wystaw opinię
+       </button>`
+                : (['COMPLETED', 'ACTIVE', 'CONFIRMED'].includes(res.status) ? `<div class="status-badge reviewed" style="color: #27ae60; font-weight: 600; display: flex; align-items: center; gap: 5px; font-size: 0.9rem;">
+           <i class="fas fa-check-circle"></i> Oceniono
+       </div>` : '');
 
             const card = `
-                <div class="card" data-area-id="${area.id || ''}">
+                <div class="card">
                     <div class="card-header">
-                        <div class="card-header-title">${area.name || 'Brak nazwy'}</div>
-                        <div class="card-header-status ${statusClass}">${status}</div>
-                    </div>
-                    <div class="area-preview">
-                        <img src="${thumbnail}" alt="Podgląd obszaru">
+                        <div class="card-header-title">${res.areaName || 'Brak nazwy'}</div>
+                        <div class="card-header-status ${statusClass}">${statusText}</div>
                     </div>
                     <div class="card-body">
                         <div class="card-property">
-                            <div class="card-property-label">Powierzchnia:</div>
-                            <div class="card-property-value">${area.area.toFixed(2)} ha</div>
+                            <div class="card-property-label">Właściciel:</div>
+                            <div class="card-property-value">${res.ownerFirstname} ${res.ownerLastname}</div>
                         </div>
                         <div class="card-property">
-                            <div class="card-property-label">Lokalizacja: </div>
-                            <div class="card-property-value">${location}</div>
+                            <div class="card-property-label">Kontakt:</div>
+                            <div class="card-property-value" style="font-size:13px;">${res.ownerEmail} <br> ${res.ownerPhone || ''}</div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Okres:</div>
+                            <div class="card-property-value">
+                                ${formatDate(res.startDate)} - ${formatDate(res.endDate)}
+                            </div>
+                        </div>
+                        <div class="card-property">
+                            <div class="card-property-label">Liczba uli:</div>
+                            <div class="card-property-value">${res.numberOfHives}</div>
+                        </div>
+                         <div class="card-property">
+                            <div class="card-property-label">Koszt całkowity:</div>
+                            <div class="card-property-value"><strong>${res.totalPrice.toFixed(2)} PLN</strong></div>
                         </div>
                     </div>
                     <div class="card-footer">
-                        ${footerContent}
+                        ${reviewButtonHtml}
                     </div>
                 </div>
             `;
@@ -265,7 +273,7 @@ async function fetchRentedAreas() {
     } catch (error) {
         console.error('Error fetching rented areas:', error);
         document.getElementById('rented-areas-container').innerHTML =
-            '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania wynajętych obszarów.</p>';
+            '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania rezerwacji.</p>';
     }
 }
 
@@ -929,8 +937,8 @@ async function submitAreaReview() {
         const response = await fetch(`${API_URL}/reviews/areas`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ reservationId, rating, comment })
         });
-        if (response.ok) { alert('✅ Opinia dodana!'); closeAllModals(); await fetchRentedAreas(); } else { alert('❌ Błąd.'); }
-    } catch (e) { alert('❌ Błąd.'); }
+        if (response.ok) { alert('✅ Opinia dodana!'); closeAllModals(); await fetchRentedAreas(); } else { alert('❌ Błąd: Obszar ktoremu chcesz wystawić opinie nie istnieje..'); }
+    } catch (e) { alert('❌ Obszar ktoremu chcesz wystawić opinie nie istnieje.'); }
 }
 
 async function handleDelete() {
