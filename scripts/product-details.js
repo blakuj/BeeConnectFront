@@ -68,7 +68,6 @@ function displayProductDetails() {
         ? currentProduct.images
         : null;
 
-    // Główne zdjęcie (pierwsze z listy lub default)
     const mainImageUrl = images
         ? `data:image/jpeg;base64,${images[0]}`
         : 'assets/default-product.jpg';
@@ -235,7 +234,6 @@ function displayProductDetails() {
         ` : ''}
     `;
 
-    // Aktualizuj ilość przy zmianie
     const quantityInput = document.getElementById('quantity');
     if (quantityInput) {
         quantityInput.addEventListener('input', updateTotalPrice);
@@ -299,7 +297,6 @@ async function buyProduct() {
     const deliveryAddress = document.getElementById('delivery-address').value.trim();
     const buyerNotes = document.getElementById('buyer-notes').value.trim();
 
-    // Walidacja
     if (!deliveryAddress) {
         showNotification('Podaj adres dostawy', 'error');
         return;
@@ -316,7 +313,6 @@ async function buyProduct() {
         return;
     }
 
-    // Potwierdzenie
     if (!confirm(`Czy na pewno chcesz kupić ${quantity} szt. za ${totalPrice.toFixed(2)} PLN?`)) {
         return;
     }
@@ -625,7 +621,6 @@ function displayProductReviews() {
 }
 
 function showNotification(message, type = 'info') {
-    // Usuń poprzednie powiadomienie jeśli istnieje
     const existing = document.querySelector('.notification-toast');
     if (existing) existing.remove();
 

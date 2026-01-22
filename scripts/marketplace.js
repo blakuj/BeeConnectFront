@@ -20,7 +20,7 @@ let sortBy = 'newest'; // newest, price-asc, price-desc, popular
 document.addEventListener('DOMContentLoaded', async function() {
     await loadProducts();
     setupEventListeners();
-    await checkAuth(); // Sprawdź czy użytkownik jest zalogowany
+    await checkAuth();
     updateUnreadBadge();
 });
 
@@ -67,7 +67,6 @@ function displayProducts() {
         return;
     }
 
-    // Sortowanie
     sortProducts();
 
     // Paginacja
@@ -75,18 +74,14 @@ function displayProducts() {
     const endIndex = startIndex + productsPerPage;
     const productsToDisplay = filteredProducts.slice(startIndex, endIndex);
 
-    // Renderowanie produktów
     productGrid.innerHTML = productsToDisplay.map(product => createProductCard(product)).join('');
 
-    // Renderowanie paginacji
     renderPagination();
 
-    // Dodaj event listeners do kart
     attachCardListeners();
 }
 
 function createProductCard(product) {
-    // ZMIANA: Obsługa listy zdjęć zamiast pojedynczego pola
     const imageUrl = (product.images && product.images.length > 0)
         ? `data:image/jpeg;base64,${product.images[0]}`
         : 'assets/default-product.jpg';
@@ -136,7 +131,6 @@ function createProductCard(product) {
 }
 
 function attachCardListeners() {
-    // Kliknięcie w kartę produktu
     document.querySelectorAll('.product-card').forEach(card => {
         card.addEventListener('click', function(e) {
             if (!e.target.closest('button')) {
@@ -146,7 +140,6 @@ function attachCardListeners() {
         });
     });
 
-    // Przyciski "Zobacz szczegóły"
     document.querySelectorAll('.view-product-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -161,11 +154,6 @@ function applyFilters() {
     filteredProducts = allProducts.filter(product => {
         // Filtr kategorii
         if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
-            return false;
-        }
-
-        // Filtr lokalizacji
-        if (selectedLocations.length > 0 && !selectedLocations.includes(product.location)) {
             return false;
         }
 
@@ -184,7 +172,7 @@ function applyFilters() {
         return true;
     });
 
-    currentPage = 1; // Reset do pierwszej strony
+    currentPage = 1;
     updateProductCount();
 }
 
@@ -210,21 +198,6 @@ function filterByCategory(category) {
             if (allCheckbox) allCheckbox.checked = false;
         } else {
             if (allCheckbox) allCheckbox.checked = true;
-        }
-    }
-    applyFilters();
-    displayProducts();
-}
-
-function filterByLocation(location) {
-    if (location === 'ALL') {
-        selectedLocations = [];
-    } else {
-        const index = selectedLocations.indexOf(location);
-        if (index > -1) {
-            selectedLocations.splice(index, 1);
-        } else {
-            selectedLocations.push(location);
         }
     }
     applyFilters();
@@ -290,7 +263,6 @@ function renderPagination() {
         </button>
     `;
 
-    // Zawsze pokazuj pierwszą stronę
     paginationHTML += `
         <button class="pagination-btn ${currentPage === 1 ? 'active' : ''}" onclick="changePage(1)">1</button>
     `;
@@ -299,7 +271,6 @@ function renderPagination() {
         paginationHTML += `<button class="pagination-btn pagination-ellipsis" disabled>...</button>`;
     }
 
-    // Strony wokół aktualnej
     for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
         paginationHTML += `
             <button class="pagination-btn ${currentPage === i ? 'active' : ''}" onclick="changePage(${i})">${i}</button>
@@ -310,7 +281,6 @@ function renderPagination() {
         paginationHTML += `<button class="pagination-btn pagination-ellipsis" disabled>...</button>`;
     }
 
-    // Zawsze pokazuj ostatnią stronę
     if (totalPages > 1) {
         paginationHTML += `
             <button class="pagination-btn ${currentPage === totalPages ? 'active' : ''}" onclick="changePage(${totalPages})">${totalPages}</button>
@@ -337,13 +307,11 @@ function changePage(page) {
 
 // ==================== EVENT LISTENERS ====================
 function setupEventListeners() {
-    // Wyszukiwanie
     const searchInput = document.querySelector('.search-input');
     if (searchInput) {
         searchInput.addEventListener('input', debounce(searchProducts, 300));
     }
 
-    // Sortowanie
     const sortSelect = document.querySelector('.sort-select');
     if (sortSelect) {
         sortSelect.addEventListener('change', function() {
@@ -351,13 +319,11 @@ function setupEventListeners() {
         });
     }
 
-    // Filtr ceny
     const priceInputs = document.querySelectorAll('.price-input');
     priceInputs.forEach(input => {
         input.addEventListener('change', filterByPrice);
     });
 
-    // Przyciski filtrów kategorii
     document.querySelectorAll('.filter-checkbox[id^="category-"]').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const category = this.id.replace('category-', '').toUpperCase();
@@ -491,9 +457,8 @@ async function updateUnreadBadge() {
     }
 }
 
-// Aktualizuj badge co 30 sekund
 setInterval(updateUnreadBadge, 30000);
-updateUnreadBadge(); // Początkowe wywołanie
+updateUnreadBadge();
 
 function updateUserInfo(user) {
     const welcomeMessage = document.querySelector('.welcome-message');

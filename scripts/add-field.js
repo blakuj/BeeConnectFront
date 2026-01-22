@@ -39,12 +39,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         input.classList.add('input-error');
 
-        // Sprawdź czy kontener błędu już istnieje
         let errorSpan = input.parentNode.querySelector('.error-message');
         if (!errorSpan) {
             errorSpan = document.createElement('span');
             errorSpan.className = 'error-message';
-            // Wstawiamy pod inputem
             input.parentNode.appendChild(errorSpan);
         }
         errorSpan.textContent = message;
@@ -77,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Inicjalizacja mapy ---
-    // Upewniamy się, że kontener mapy istnieje
     let map = null;
     if (document.getElementById('map')) {
         map = L.map('map', {
@@ -200,7 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Funkcja globalna do usuwania plików (przypisana do window, by działała z onclick w HTML)
     window.removeFile = function(index) {
         selectedFiles.splice(index, 1);
         updateImagePreview();
@@ -241,8 +237,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Weryfikacja nazwy:', name, 'Długość:', name.length);
 
             let isValid = true;
-
-            // --- WALIDACJA ---
 
             // 1. Nazwa: @NotBlank, @Size(min=3, max=100)
             if (!name) {
@@ -320,7 +314,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     imagesBase64List = await filesToBase64List(selectedFiles);
                 }
 
-                // Pobranie powierzchni z inputa (kalkulowana automatycznie)
                 const areaValue = areaInput ? parseFloat(areaInput.value) : 0;
 
                 var newArea = {

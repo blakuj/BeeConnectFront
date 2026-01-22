@@ -1,4 +1,4 @@
-// scripts/chat.js - Integracja czatu z API
+// scripts/chat.js
 
 const API_BASE = 'http://localhost:8080/api';
 const MAX_MESSAGE_LENGTH = 500;
@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupEventListeners();
     setupMobileHandlers();
 
-    // Inicjalizacja licznika znaków
     updateCharCounter();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -57,7 +56,6 @@ function updateWelcomeMessage() {
 // ==================== ŁADOWANIE KONWERSACJI ====================
 async function loadConversations() {
     try {
-        // Nie pokazujemy spinnera przy pollingu, tylko przy pierwszym ładowaniu
         if (isInitialLoad) {
             const list = document.querySelector('.conversation-list');
             if(list) list.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;"><i class="fas fa-spinner fa-spin"></i> Ładowanie...</div>';
@@ -72,8 +70,6 @@ async function loadConversations() {
 
         const newConversations = await response.json();
 
-        // Proste sprawdzenie czy dane się zmieniły, żeby nie przerysowywać DOM bez potrzeby
-        // (W prawdziwej aplikacji użyłbyś React/Vue/Angular, tutaj robimy to ręcznie)
         if (isInitialLoad || JSON.stringify(conversations) !== JSON.stringify(newConversations)) {
             conversations = newConversations;
             displayConversations();
@@ -120,7 +116,6 @@ function createConversationItem(conv) {
     const preview = conv.lastMessageContent || 'Brak wiadomości';
     const unreadBadge = conv.unreadCount > 0 ? `<div class="conversation-badge">${conv.unreadCount}</div>` : '';
 
-    // Ustalanie nazwy rozmówcy (backend zwraca otherUser...)
     const name = `${conv.otherUserFirstname} ${conv.otherUserLastname}`;
 
     // Zdjęcie produktu jako avatar (jeśli jest), w przeciwnym razie default avatar
@@ -165,7 +160,6 @@ async function openConversation(conversationId) {
     const activeItem = document.querySelector(`[data-conversation="${conversationId}"]`);
     if (activeItem) {
         activeItem.classList.add('active');
-        // Usuń badge po kliknięciu (frontend update, backend update leci w tle)
         const badge = activeItem.querySelector('.conversation-badge');
         if (badge) badge.remove();
     }
@@ -229,13 +223,12 @@ async function loadMessages(conversationId) {
         const container = document.getElementById('chat-messages');
         const wasAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 100);
 
-        // Renderujemy tylko jeśli są zmiany
         if (newMessages.length !== messages.length || messages.length === 0) {
             messages = newMessages;
             displayMessages();
 
-            // Scroll to bottom on first load or if user was at bottom
-            if (wasAtBottom || messages.length === newMessages.length) { // Logic simplified for polling
+
+            if (wasAtBottom || messages.length === newMessages.length) {
                 scrollToBottom();
             }
         }
@@ -351,15 +344,14 @@ async function sendMessage() {
 
         const newMessage = await response.json();
 
-        // Optymistyczna aktualizacja UI (dodaj wiadomość od razu)
+
         messages.push(newMessage);
-        displayMessages(); // Przerysowanie
+        displayMessages();
         scrollToBottom();
 
         input.value = '';
         updateCharCounter();
 
-        // Odśwież listę konwersacji (żeby przenieść tę na górę)
         loadConversations();
 
     } catch (error) {
@@ -397,19 +389,16 @@ async function markAsRead(conversationId) {
             method: 'PUT',
             credentials: 'include'
         });
-        // Nie musimy odświeżać wiadomości od razu, zrobi to polling
     } catch (error) { console.error('Błąd oznaczania jako przeczytane:', error); }
 }
 
 // ==================== POLLING ====================
 function startMessagePolling() {
     stopMessagePolling();
-    // Odpytuj co 3 sekundy
     messagePollingInterval = setInterval(async () => {
         if (currentConversationId) {
             await loadMessages(currentConversationId);
         }
-        // Również odświeżaj listę konwersacji (np. nowe wiadomości w innych wątkach)
         await loadConversations();
     }, 3000);
 }
@@ -436,7 +425,6 @@ function setupEventListeners() {
             }
         });
 
-        // Nasłuchiwanie wpisywania dla licznika znaków
         input.addEventListener('input', updateCharCounter);
     }
 
@@ -459,7 +447,6 @@ function setupMobileHandlers() {
 }
 
 function adjustLayout() {
-    // Prosta obsługa responsywności JS-owej
     if (window.innerWidth >= 768) {
         document.getElementById('conversations-list').classList.remove('hidden');
         document.getElementById('chat-main').classList.remove('hidden');

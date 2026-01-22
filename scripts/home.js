@@ -152,13 +152,11 @@
     function getLayerKey(name) {
     if (!name) return 'unknown';
     const lower = name.toLowerCase();
-    // Mapowanie specjalnych przypadków (polskie znaki)
+    // Mapowanie specjalnych przypadków
     if (lower === 'spadź') return 'spadz';
-    // Domyślnie zwracamy małe litery
     return lower;
 }
 
-    // Pobieranie obszarów
     fetch(`${apiUrl.replace('/auth', '')}/areas`, {
     method: "GET",
     credentials: "include"
@@ -168,13 +166,10 @@
     areas.forEach(area => {
         const coords = area.coordinates;
 
-        // Pobierz listę kwiatów z obiektu area (nowa struktura backendu)
-        // Jeśli lista jest pusta, użyj domyślnego
         const flowersList = (area.flowers && area.flowers.length > 0)
             ? area.flowers
             : [{name: "unknown", color: "#999999"}];
 
-        // Dla każdego kwiata na obszarze dodaj wielokąt do odpowiedniej warstwy
         flowersList.forEach(flower => {
             const color = flower.color || "#999999";
             const layerKey = getLayerKey(flower.name);
@@ -208,10 +203,8 @@
                 map.fitBounds(this.getBounds(), { padding: [50, 50], maxZoom: 12 });
             });
 
-            // Dodaj do odpowiedniej grupy warstw, jeśli istnieje
             if (layers[layerKey]) {
                 layers[layerKey].addLayer(polygon);
-                // Domyślnie wszystkie warstwy są włączone, więc dodajemy do mapy
                 layers[layerKey].addTo(map);
             }
         });
@@ -222,7 +215,7 @@
     document.querySelectorAll('.toggle input[type="checkbox"]').forEach(function(toggle) {
     toggle.addEventListener('change', function() {
         const layerName = this.getAttribute('data-layer');
-        const layerKey = getLayerKey(layerName); // Używamy tej samej funkcji normalizującej
+        const layerKey = getLayerKey(layerName);
         const layer = layers[layerKey];
 
         if (!layer) return;

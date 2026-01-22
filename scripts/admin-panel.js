@@ -492,12 +492,12 @@ function createAreaCard(area) {
         ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
         : 'Brak lokalizacji';
 
-    // ZMIANA: Obsługa listy kwiatów
+    //Obsługa listy kwiatów
     const flowerType = (area.flowers && area.flowers.length > 0)
         ? area.flowers.map(f => f.name).join(', ')
         : 'Nie określono';
 
-    // ZMIANA: Obsługa zdjęcia głównego
+    //Obsługa zdjęcia głównego
     const imageUrl = (area.images && area.images.length > 0)
         ? `data:image/jpeg;base64,${area.images[0]}`
         : 'assets/default-area.jpg';
@@ -537,7 +537,6 @@ function createAreaCard(area) {
     return card;
 }
 
-// Pomocnicza funkcja do konwersji HEX na RGBA
 function hexToRgba(hex, alpha) {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -577,17 +576,16 @@ function showAreaDetailsModal(area) {
     const statusText = area.status === 'AVAILABLE' ? 'Dostępny' : 'Niedostępny';
     const statusClass = area.status === 'AVAILABLE' ? 'status-approved' : 'status-rejected';
 
-    // ZMIANA: Obsługa listy kwiatów
+    //Obsługa listy kwiatów
     const flowerType = (area.flowers && area.flowers.length > 0)
         ? area.flowers.map(f => f.name).join(', ')
         : 'Nie określono';
 
-    // ZMIANA: Obsługa galerii zdjęć
+    //Obsługa galerii zdjęć
     let galleryHtml = '';
     const images = (area.images && area.images.length > 0) ? area.images : null;
 
     if (images) {
-        // Główne zdjęcie
         galleryHtml += `
             <div class="area-gallery-container">
                 <div class="area-image-main">
@@ -595,7 +593,6 @@ function showAreaDetailsModal(area) {
                 </div>
         `;
 
-        // Miniatury (jeśli więcej niż jedno)
         if (images.length > 1) {
             galleryHtml += `
                 <div class="area-thumbnails">
@@ -608,7 +605,7 @@ function showAreaDetailsModal(area) {
                 </div>
             `;
         }
-        galleryHtml += `</div>`; // Zamknięcie area-gallery-container
+        galleryHtml += `</div>`;
     } else {
         galleryHtml = `
             <div class="area-gallery-container">

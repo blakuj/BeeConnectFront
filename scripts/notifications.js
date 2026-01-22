@@ -127,7 +127,6 @@ async function markAsRead(notificationId) {
             credentials: 'include'
         });
 
-        // Znajdź powiadomienie i oznacz jako przeczytane
         const notif = notifications.find(n => n.id === notificationId);
         if (notif) {
             notif.isRead = true;
@@ -165,7 +164,6 @@ async function deleteNotification(notificationId, event) {
             credentials: 'include'
         });
 
-        // Usuń z listy
         const notif = notifications.find(n => n.id === notificationId);
         if (notif && !notif.isRead) {
             unreadCount = Math.max(0, unreadCount - 1);
@@ -197,7 +195,6 @@ function setupNotificationListeners() {
         });
     }
 
-    // Oznacz wszystkie jako przeczytane
     const markAllBtn = document.getElementById('mark-all-read');
     if (markAllBtn) {
         markAllBtn.addEventListener('click', (e) => {
@@ -206,7 +203,6 @@ function setupNotificationListeners() {
         });
     }
 
-    // Kliknięcie w powiadomienie
     document.addEventListener('click', (e) => {
         const notifItem = e.target.closest('.notification-item');
         if (notifItem) {
@@ -216,7 +212,6 @@ function setupNotificationListeners() {
         }
     });
 
-    // Zamknij dropdown po kliknięciu poza nim
     document.addEventListener('click', (e) => {
         const dropdown = document.getElementById('notification-dropdown');
         const bellIcon = document.getElementById('notification-bell');

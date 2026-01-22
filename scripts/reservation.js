@@ -4,7 +4,7 @@
     let userBalance = 0;
     let areaId = null;
     let areaReviews = [];
-    let occupiedDates = []; // Zmienna na zajęte daty
+    let occupiedDates = [];
 
     const urlParams = new URLSearchParams(window.location.search);
     areaId = urlParams.get('areaId');
@@ -27,7 +27,6 @@
     document.getElementById('loading').style.display = 'block';
 
     try {
-    // 1. Sprawdź użytkownika
     const userResponse = await fetch(`${API_BASE_URL}/auth/user`, {
     credentials: 'include'
 });
@@ -56,12 +55,10 @@
     throw new Error('Nie znaleziono obszaru');
 }
 
-    // UWAGA: Logika backendu się zmieniła - obszar dostępny jeśli nie wyłączony przez właściciela
     if (currentArea.status !== 'AVAILABLE') {
     throw new Error('Ten obszar został wyłączony przez właściciela');
 }
 
-    // 3. Pobierz zajęte daty dla kalendarza
     const occupiedResponse = await fetch(`${API_BASE_URL}/reservations/area/${areaId}/occupied`, {
     credentials: 'include'
 });
@@ -72,7 +69,6 @@
     displayAreaDetails(currentArea);
     await loadAreaReviews();
 
-    // Inicjalizacja kalendarza po pobraniu zajętych dat
     initializeCalendars();
 
     document.getElementById('loading').style.display = 'none';
@@ -95,16 +91,14 @@
     locale: "pl",
     dateFormat: "Y-m-d",
     minDate: tomorrow,
-    disable: occupiedDates, // Blokuje zajęte daty
+    disable: occupiedDates,
     onChange: function(selectedDates, dateStr, instance) {
     updateSummary();
 
-    // Jeśli zmieniono datę początkową, zaktualizuj minimalną datę końcową
     if (instance.element.id === 'start-date') {
     const endDatePicker = document.getElementById('end-date')._flatpickr;
     endDatePicker.set('minDate', dateStr);
 
-    // Jeśli data końcowa jest teraz wcześniejsza niż początkowa, wyczyść ją
     if (endDatePicker.selectedDates[0] && endDatePicker.selectedDates[0] < selectedDates[0]) {
     endDatePicker.clear();
 }

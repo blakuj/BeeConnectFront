@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
         messages.forEach(msg => msg.remove());
     }
 
-    // Load user profile
+
     async function loadUserProfile() {
         try {
             const response = await fetch(`${API_URL}/auth/user`, {
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Eksport funkcji do window, aby działała w onclick w HTML
+
     window.removeFile = function(index) {
         selectedFiles.splice(index, 1);
         updateImagePreview();
@@ -145,14 +145,12 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             clearErrors('add-product-form');
 
-            // Pola formularza
             const nameInput = document.getElementById('product-name');
             const categoryInput = document.getElementById('product-type');
             const stockInput = document.getElementById('product-quantity');
             const priceInput = document.getElementById('product-price');
             const descInput = document.getElementById('product-description');
 
-            // Wartości
             const name = nameInput ? nameInput.value.trim() : '';
             const description = descInput ? descInput.value.trim() : '';
             const price = priceInput ? parseFloat(priceInput.value) : NaN;
@@ -160,8 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const category = categoryInput ? categoryInput.value : '';
 
             let isValid = true;
-
-            // --- Walidacja DTO ---
 
             // 1. Nazwa: @NotBlank, @Size(3-100)
             if (!name) {
@@ -216,7 +212,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (!isValid) return;
 
-            // Przygotowanie wysyłki
             const submitBtn = document.getElementById('save-product-btn');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
@@ -237,7 +232,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     images: imagesBase64List
                 };
 
-                // Dodaj flowerOrigin dla miodu (dodajemy do opisu bo brak pola w DTO)
                 if (productData.category === 'HONEY') {
                     const flowersVal = document.getElementById('product-flowers') ? document.getElementById('product-flowers').value.trim() : '';
                     if (flowersVal) {
@@ -269,7 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Przycisk Anuluj
     if (cancelBtn) {
         cancelBtn.addEventListener('click', function() {
             if (confirm('Czy na pewno chcesz anulować dodawanie produktu? Wprowadzone dane zostaną utracone.')) {
@@ -278,9 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Zmiana typu produktu (pokaż/ukryj kwiaty)
     if (productTypeSelect && flowersField) {
-        // Ustawienie początkowe
         flowersField.style.display = 'none';
 
         productTypeSelect.addEventListener('change', function() {
