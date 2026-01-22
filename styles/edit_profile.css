@@ -1,0 +1,75 @@
+
+body {
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.profile-container {
+    height: calc(100vh - 60px);
+    padding: 1rem;
+    background-color: #f8f9fa;
+    overflow-y: auto;
+}
+
+.profile-card {
+    display: flex;
+    width: 100%;
+    max-width: 1000px;
+    min-height: 600px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    height: auto;
+}
+
+.profile-sidebar {
+    flex-direction: column;
+    width: 280px;
+    background-color: #ffd875;
+    color: var(--secondary);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    min-height:900px;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-bottom: 2rem;
+}
+
+.profile-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: 600px;
+}
+
+.tab-content {
+    height: auto;
+    padding-bottom: 2rem;
+}
+
+.file-upload-input {
+    position: fixed;
+    top: -1000px;
+}
+
+@media (max-width: 768px) {
+    .profile-card {
+        flex-direction: column;
+    }
+
+    .profile-sidebar {
+        width: 100%;
+        min-height: auto;
+    }
+
+    .profile-content {
+        max-height: none;
+    }
+}

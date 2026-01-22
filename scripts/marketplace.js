@@ -20,7 +20,7 @@ let sortBy = 'newest'; // newest, price-asc, price-desc, popular
 document.addEventListener('DOMContentLoaded', async function() {
     await loadProducts();
     setupEventListeners();
-    await checkAuth(); // Sprawdź czy użytkownik jest zalogowany
+    await checkAuth();
     updateUnreadBadge();
 });
 
@@ -67,7 +67,6 @@ function displayProducts() {
         return;
     }
 
-    // Sortowanie
     sortProducts();
 
     // Paginacja
@@ -75,23 +74,17 @@ function displayProducts() {
     const endIndex = startIndex + productsPerPage;
     const productsToDisplay = filteredProducts.slice(startIndex, endIndex);
 
-    // Renderowanie produktów
     productGrid.innerHTML = productsToDisplay.map(product => createProductCard(product)).join('');
 
-    // Renderowanie paginacji
     renderPagination();
 
-    // Dodaj event listeners do kart
     attachCardListeners();
 }
 
 function createProductCard(product) {
-    const imageUrl = product.imageBase64
-        ? `data:image/jpeg;base64,${product.imageBase64}`
+    const imageUrl = (product.images && product.images.length > 0)
+        ? `data:image/jpeg;base64,${product.images[0]}`
         : 'assets/default-product.jpg';
-
-
-console.log(imageUrl);
 
     const rating = product.rating || 0;
     const reviewCount = product.reviewCount || 0;
@@ -138,7 +131,6 @@ console.log(imageUrl);
 }
 
 function attachCardListeners() {
-    // Kliknięcie w kartę produktu
     document.querySelectorAll('.product-card').forEach(card => {
         card.addEventListener('click', function(e) {
             if (!e.target.closest('button')) {
@@ -148,7 +140,6 @@ function attachCardListeners() {
         });
     });
 
-    // Przyciski "Zobacz szczegóły"
     document.querySelectorAll('.view-product-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -163,11 +154,6 @@ function applyFilters() {
     filteredProducts = allProducts.filter(product => {
         // Filtr kategorii
         if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
-            return false;
-        }
-
-        // Filtr lokalizacji
-        if (selectedLocations.length > 0 && !selectedLocations.includes(product.location)) {
             return false;
         }
 
@@ -186,13 +172,20 @@ function applyFilters() {
         return true;
     });
 
-    currentPage = 1; // Reset do pierwszej strony
+    currentPage = 1;
     updateProductCount();
 }
 
+
 function filterByCategory(category) {
+    const allCheckbox = document.getElementById('category-all');
+
     if (category === 'ALL') {
         selectedCategories = [];
+        document.querySelectorAll('.filter-checkbox[id^="category-"]').forEach(cb => {
+            if (cb.id !== 'category-all') cb.checked = false;
+        });
+        if (allCheckbox) allCheckbox.checked = true;
     } else {
         const index = selectedCategories.indexOf(category);
         if (index > -1) {
@@ -200,20 +193,11 @@ function filterByCategory(category) {
         } else {
             selectedCategories.push(category);
         }
-    }
-    applyFilters();
-    displayProducts();
-}
 
-function filterByLocation(location) {
-    if (location === 'ALL') {
-        selectedLocations = [];
-    } else {
-        const index = selectedLocations.indexOf(location);
-        if (index > -1) {
-            selectedLocations.splice(index, 1);
+        if (selectedCategories.length > 0) {
+            if (allCheckbox) allCheckbox.checked = false;
         } else {
-            selectedLocations.push(location);
+            if (allCheckbox) allCheckbox.checked = true;
         }
     }
     applyFilters();
@@ -279,7 +263,6 @@ function renderPagination() {
         </button>
     `;
 
-    // Zawsze pokazuj pierwszą stronę
     paginationHTML += `
         <button class="pagination-btn ${currentPage === 1 ? 'active' : ''}" onclick="changePage(1)">1</button>
     `;
@@ -288,7 +271,6 @@ function renderPagination() {
         paginationHTML += `<button class="pagination-btn pagination-ellipsis" disabled>...</button>`;
     }
 
-    // Strony wokół aktualnej
     for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
         paginationHTML += `
             <button class="pagination-btn ${currentPage === i ? 'active' : ''}" onclick="changePage(${i})">${i}</button>
@@ -299,7 +281,6 @@ function renderPagination() {
         paginationHTML += `<button class="pagination-btn pagination-ellipsis" disabled>...</button>`;
     }
 
-    // Zawsze pokazuj ostatnią stronę
     if (totalPages > 1) {
         paginationHTML += `
             <button class="pagination-btn ${currentPage === totalPages ? 'active' : ''}" onclick="changePage(${totalPages})">${totalPages}</button>
@@ -326,13 +307,11 @@ function changePage(page) {
 
 // ==================== EVENT LISTENERS ====================
 function setupEventListeners() {
-    // Wyszukiwanie
     const searchInput = document.querySelector('.search-input');
     if (searchInput) {
         searchInput.addEventListener('input', debounce(searchProducts, 300));
     }
 
-    // Sortowanie
     const sortSelect = document.querySelector('.sort-select');
     if (sortSelect) {
         sortSelect.addEventListener('change', function() {
@@ -340,13 +319,11 @@ function setupEventListeners() {
         });
     }
 
-    // Filtr ceny
     const priceInputs = document.querySelectorAll('.price-input');
     priceInputs.forEach(input => {
         input.addEventListener('change', filterByPrice);
     });
 
-    // Przyciski filtrów kategorii
     document.querySelectorAll('.filter-checkbox[id^="category-"]').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const category = this.id.replace('category-', '').toUpperCase();
@@ -381,7 +358,7 @@ function getCategoryName(category) {
         'POLLEN': 'Pyłek',
         'PROPOLIS': 'Propolis',
         'ROYAL_JELLY': 'Mleczko pszczele',
-        'HONEYCOMB': 'Plaster miodu',
+        'BEE_BREAD': 'Pierzga',
         'EQUIPMENT': 'Sprzęt',
         'OTHER': 'Inne'
     };
@@ -480,9 +457,8 @@ async function updateUnreadBadge() {
     }
 }
 
-// Aktualizuj badge co 30 sekund
 setInterval(updateUnreadBadge, 30000);
-updateUnreadBadge(); // Początkowe wywołanie
+updateUnreadBadge();
 
 function updateUserInfo(user) {
     const welcomeMessage = document.querySelector('.welcome-message');
@@ -490,79 +466,3 @@ function updateUserInfo(user) {
         welcomeMessage.textContent = `Witaj, ${user.firstname}!`;
     }
 }
-
-// CSS dla spinnera
-const style = document.createElement('style');
-style.textContent = `
-    .spinner {
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid var(--primary);
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-        margin: 0 auto;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
-    .unavailable-badge {
-        background-color: #ff6b6b !important;
-    }
-    
-    .out-of-stock-badge {
-        background-color: #999 !important;
-    }
-    
-    .low-stock-badge {
-        background-color: #ffa500 !important;
-    }
-    
-    .product-card.unavailable {
-        opacity: 0.6;
-    }
-    
-    .product-description {
-        font-size: 13px;
-        color: #666;
-        margin: 8px 0;
-        line-height: 1.4;
-    }
-    
-    .product-meta {
-        display: flex;
-        gap: 12px;
-        font-size: 12px;
-        color: #888;
-        margin: 8px 0;
-    }
-    
-    .product-meta span {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-    
-    .product-seller {
-        font-size: 12px;
-        color: #666;
-        margin: 8px 0;
-        padding: 6px 10px;
-        background-color: #f8f9fa;
-        border-radius: 4px;
-    }
-    
-    .product-seller i {
-        color: var(--primary);
-        margin-right: 4px;
-    }
-    
-    .btn-block {
-        width: 100%;
-        margin-top: 10px;
-    }
-`;
-document.head.appendChild(style);

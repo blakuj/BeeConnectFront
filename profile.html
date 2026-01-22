@@ -7,13 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/profile.css">
+    <link rel="stylesheet" href="styles/error.css">
     <script src="scripts/auth.js"></script>
     <script src="scripts/profile-products.js"></script>
 
-
 </head>
 <body>
-<!-- Header -->
 <div class="header">
     <div class="logo-container">
         <div class="logo">
@@ -28,7 +28,6 @@
     </div>
 </div>
 
-<!-- Main Content -->
 <div class="dashboard-container">
     <div class="dashboard-sidebar">
         <div class="user-info">
@@ -48,6 +47,11 @@
                 <i class="fas fa-hand-holding-heart"></i>
                 Wynajęte Obszary
             </a>
+            <a href="#" class="sidebar-nav-item" data-tab="sold-areas">
+                <i class="fas fa-calendar-check"></i>
+                Rezerwacje u Ciebie
+            </a>
+
             <a href="#" class="sidebar-nav-item" data-tab="products">
                 <i class="fas fa-box"></i>
                 Twoje Produkty
@@ -55,6 +59,15 @@
             <a href="#" class="sidebar-nav-item" data-tab="bought-products">
                 <i class="fas fa-shopping-basket"></i>
                 Kupione Produkty
+            </a>
+            <a href="#" class="sidebar-nav-item" data-tab="sold-products">
+                <i class="fas fa-cash-register"></i>
+                Sprzedane Produkty
+            </a>
+
+            <a href="#" class="sidebar-nav-item" data-tab="badges">
+                <i class="fas fa-award"></i>
+                Twoje Odznaki
             </a>
             <a href="edit-profile.html" class="sidebar-nav-item">
                 <i class="fas fa-user-edit"></i>
@@ -68,7 +81,6 @@
     </div>
 
     <div class="dashboard-content">
-        <!-- Twoje Obszary -->
         <div class="tab-content active" id="areas">
             <div class="dashboard-heading">
                 <h1 class="dashboard-title">Twoje Obszary</h1>
@@ -78,21 +90,17 @@
                 </a>
             </div>
             <div class="card-container" id="my-areas-container">
-                <!-- Obszary będą dynamicznie wstawiane tutaj -->
             </div>
         </div>
 
-        <!-- Wynajęte Obszary -->
         <div class="tab-content" id="rented-areas">
             <div class="dashboard-heading">
                 <h1 class="dashboard-title">Wynajęte przez Ciebie Obszary</h1>
             </div>
             <div class="card-container" id="rented-areas-container">
-                <!-- Wynajęte obszary będą dynamicznie wstawiane tutaj -->
             </div>
         </div>
 
-        <!-- Twoje Produkty -->
         <div class="tab-content" id="products">
             <div class="dashboard-heading">
                 <h1 class="dashboard-title">Twoje Produkty</h1>
@@ -102,88 +110,102 @@
                 </a>
             </div>
             <div class="card-container" id="my-products-container">
-                <!-- Produkty będą dynamicznie wstawiane tutaj -->
             </div>
         </div>
 
-        <!-- Kupione Produkty -->
         <div class="tab-content" id="bought-products">
             <div class="dashboard-heading">
                 <h1 class="dashboard-title">Kupione Produkty</h1>
             </div>
             <div class="card-container" id="bought-products-container">
-                <!-- Kupione produkty będą dynamicznie wstawiane tutaj -->
+            </div>
+        </div>
+        <div class="tab-content" id="sold-areas">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Rezerwacje na Twoich obszarach</h1>
+            </div>
+            <div class="card-container" id="sold-areas-container">
+                <div style="text-align: center; padding: 2rem; color: #666;">
+                    <i class="fas fa-spinner fa-spin"></i> Ładowanie...
+                </div>
             </div>
         </div>
 
-        <!-- Edytuj Profil -->
-        <div class="tab-content" id="profile">
+        <div class="tab-content" id="sold-products">
             <div class="dashboard-heading">
-                <h1 class="dashboard-title">Edytuj Profil</h1>
+                <h1 class="dashboard-title">Historia sprzedaży produktów</h1>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    <form id="profile-form">
-                        <div class="form-section">
-                            <h3 class="form-section-title">Dane osobowe</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="firstname">Imię</label>
-                                    <input type="text" id="firstname" name="firstname" value="" readonly>
-                                    <small class="field-info">Pole tylko do odczytu</small>
-                                </div>
-                                <div class="form-group">
-                                    <label for="lastname">Nazwisko</label>
-                                    <input type="text" id="lastname" name="lastname" value="" readonly>
-                                    <small class="field-info">Pole tylko do odczytu</small>
-                                </div>
-                            </div>
+
+            <div class="sales-filters" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <button class="btn btn-outline active-filter" id="filter-active" onclick="setSalesFilter('ACTIVE')">
+                    <i class="fas fa-truck-loading"></i> W trakcie
+                </button>
+                <button class="btn btn-outline" id="filter-history" onclick="setSalesFilter('HISTORY')">
+                    <i class="fas fa-history"></i> Zakończone
+                </button>
+            </div>
+
+            <div class="card-container" id="sold-products-container">
+                <div style="text-align: center; padding: 2rem; color: #666;">
+                    <i class="fas fa-spinner fa-spin"></i> Ładowanie...
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="badges">
+            <div class="dashboard-heading">
+                <h1 class="dashboard-title">Twoje Odznaki</h1>
+                <button class="btn btn-accent" onclick="refreshBadges()">
+                    <i class="fas fa-sync-alt"></i>
+                    Odśwież Odznaki
+                </button>
+            </div>
+            <div class="badges-info-section">
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Zdobywaj odznaki za aktywność na platformie! Odznaki są widoczne dla innych użytkowników i budują Twoja wiarygodność.</p>
+                </div>
+            </div>
+            <div class="badges-grid" id="my-badges-container">
+            </div>
+            <div class="badges-how-to-earn">
+                <h2>Jak zdobyć odznaki?</h2>
+                <div class="badge-earn-list">
+                    <div class="badge-earn-item">
+                        <div class="badge-earn-icon" style="background-color: #51CF6615; border-color: #51CF66;">
+                            <i class="fas fa-seedling" style="color: #51CF66;"></i>
                         </div>
-                        <div class="form-section">
-                            <h3 class="form-section-title">Dane kontaktowe</h3>
-                            <div class="form-group">
-                                <label for="phone">Numer telefonu</label>
-                                <input type="tel" id="phone" name="phone" value="">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Adres e-mail</label>
-                                <input type="email" id="email" name="email" value="" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="address">Adres</label>
-                                <input type="text" id="address" name="address" value="">
-                            </div>
+                        <div class="badge-earn-details">
+                            <h3>Nowicjusz</h3>
+                            <p>Dodaj swój pierwszy produkt na rynek lub pierwszy obszar pasieki.</p>
                         </div>
-                        <div class="form-section">
-                            <h3 class="form-section-title">Zmiana hasła</h3>
-                            <div class="form-group">
-                                <label for="current-password">Aktualne hasło</label>
-                                <input type="password" id="current-password" name="current-password" placeholder="Wprowadź aktualne hasło">
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="new-password">Nowe hasło</label>
-                                    <input type="password" id="new-password" name="new-password" placeholder="Wprowadź nowe hasło">
-                                </div>
-                                <div class="form-group">
-                                    <label for="confirm-new-password">Potwierdź nowe hasło</label>
-                                    <input type="password" id="confirm-new-password" name="confirm-new-password" placeholder="Potwierdź nowe hasło">
-                                </div>
-                            </div>
+                    </div>
+
+                    <div class="badge-earn-item">
+                        <div class="badge-earn-icon" style="background-color: #FFD70015; border-color: #FFD700;">
+                            <i class="fas fa-crown" style="color: #FFD700;"></i>
                         </div>
-                        <button type="submit" class="btn btn-primary save-btn">
-                            <i class="fas fa-save"></i>
-                            Zapisz zmiany
-                        </button>
-                    </form>
+                        <div class="badge-earn-details">
+                            <h3>Potentat</h3>
+                            <p>Zostań właścicielem co najmniej 5 obszarów.</p>
+                        </div>
+                    </div>
+
+                    <div class="badge-earn-item">
+                        <div class="badge-earn-icon" style="background-color: #339AF015; border-color: #339AF0;">
+                            <i class="fas fa-check-circle" style="color: #339AF0;"></i>
+                        </div>
+                        <div class="badge-earn-details">
+                            <h3>Zaufany Sprzedawca</h3>
+                            <p>Uzyskaj średnią ocen produktów powyżej 4.5 (przy minimum 5 wystawionych opiniach).</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modals -->
-<!-- Modal opinii dla obszaru -->
 <div class="modal-overlay" id="area-review-modal">
     <div class="modal">
         <div class="modal-header">
@@ -198,20 +220,16 @@
                         <div class="star active" data-value="1"><i class="fas fa-star"></i></div>
                         <div class="star active" data-value="2"><i class="fas fa-star"></i></div>
                         <div class="star active" data-value="3"><i class="fas fa-star"></i></div>
-                        <div class="star" data-value="4"><i class="fas fa-star"></i></div>
-                        <div class="star" data-value="5"><i class="fas fa-star"></i></div>
+                        <div class="star active" data-value="4"><i class="fas fa-star"></i></div>
+                        <div class="star active" data-value="5"><i class="fas fa-star"></i></div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="area-review-title">Tytuł opinii:</label>
-                    <input type="text" id="area-review-title" name="title" placeholder="Np. Doskonała lokalizacja dla pszczół">
-                </div>
-                <div class="form-group">
                     <label for="area-review-content">Twoja opinia:</label>
-                    <textarea id="area-review-content" name="content" rows="5" placeholder="Opisz swoje doświadczenia z tym obszarem..."></textarea>
+                    <textarea id="area-review-content" name="content" rows="5" placeholder="Opisz swoje doświadczenia z tym obszarem..." required></textarea>
                 </div>
-                <input type="hidden" id="area-review-id" name="areaId" value="">
-                <input type="hidden" id="area-review-rating" name="rating" value="3">
+                <input type="hidden" id="area-review-reservation-id" name="reservationId" value="">
+                <input type="hidden" id="area-review-rating" name="rating" value="5">
             </form>
         </div>
         <div class="modal-footer">
@@ -221,7 +239,6 @@
     </div>
 </div>
 
-<!-- Modal opinii dla produktu -->
 <div class="modal-overlay" id="product-review-modal">
     <div class="modal">
         <div class="modal-header">
@@ -237,19 +254,16 @@
                         <div class="star active" data-value="2"><i class="fas fa-star"></i></div>
                         <div class="star active" data-value="3"><i class="fas fa-star"></i></div>
                         <div class="star active" data-value="4"><i class="fas fa-star"></i></div>
-                        <div class="star" data-value="5"><i class="fas fa-star"></i></div>
+                        <div class="star active" data-value="5"><i class="fas fa-star"></i></div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="product-review-title">Tytuł opinii:</label>
-                    <input type="text" id="product-review-title" name="title" placeholder="Np. Najlepszy miód jaki jadłem">
-                </div>
-                <div class="form-group">
                     <label for="product-review-content">Twoja opinia:</label>
-                    <textarea id="product-review-content" name="content" rows="5" placeholder="Opisz swoje wrażenia z tego produktu..."></textarea>
+                    <textarea id="product-review-content" name="content" rows="5" placeholder="Opisz swoje wrażenia z tego produktu..." required></textarea>
                 </div>
+                <input type="hidden" id="product-review-order-id" name="orderId" value="">
                 <input type="hidden" id="product-review-id" name="productId" value="">
-                <input type="hidden" id="product-review-rating" name="rating" value="4">
+                <input type="hidden" id="product-review-rating" name="rating" value="5">
             </form>
         </div>
         <div class="modal-footer">
@@ -259,7 +273,6 @@
     </div>
 </div>
 
-<!-- Modal potwierdzenia usunięcia -->
 <div class="modal-overlay" id="delete-confirm-modal">
     <div class="modal">
         <div class="modal-header">
@@ -278,7 +291,6 @@
     </div>
 </div>
 
-<!-- NOWY MODAL: Edycja obszaru -->
 <div class="modal-overlay" id="edit-area-modal">
     <div class="modal">
         <div class="modal-header">
@@ -287,21 +299,24 @@
         </div>
         <div class="modal-body">
             <form id="edit-area-form">
-                <!-- Zdjęcie obszaru na górze -->
                 <div class="form-group image-upload-top">
-                    <label>Zdjęcie obszaru:</label>
+                    <label>Zdjęcia obszaru:</label>
                     <div class="image-preview-container">
-                        <div class="image-preview">
-                            <img id="edit-area-current-image" src="/api/placeholder/800/500" alt="Zdjęcie obszaru">
+                        <div class="preview-gallery" id="edit-area-gallery">
+                            <div class="empty-preview">
+                                <i class="fas fa-images" style="font-size: 24px; margin-bottom: 5px;"></i>
+                                <span>Brak zdjęć</span>
+                            </div>
                         </div>
+
                         <div class="image-upload-controls">
                             <label for="edit-area-image" class="btn btn-outline image-upload-btn">
-                                <i class="fas fa-upload"></i> Wybierz zdjęcie
+                                <i class="fas fa-upload"></i> Wybierz zdjęcia
                             </label>
-                            <input type="file" id="edit-area-image" name="image" accept="image/*" style="display: none;">
-                            <span class="selected-file-name">Nie wybrano pliku</span>
+                            <input type="file" id="edit-area-image" name="image" accept="image/*" multiple style="display: none;">
                         </div>
                     </div>
+                    <small style="display: block; margin-top: 5px; color: #777; font-size: 11px;">Możesz dodać nowe zdjęcia lub usunąć istniejące.</small>
                 </div>
                 <div class="form-group">
                     <label for="edit-area-title">Nazwa obszaru:</label>
@@ -328,10 +343,13 @@
                         <div class="read-only-value" id="edit-area-location-display"></div>
                     </div>
                 </div>
+
                 <div class="form-group">
-                    <label for="edit-area-flowers">Kwiaty (oddzielone przecinkami):</label>
-                    <input type="text" id="edit-area-flowers" name="flowers" placeholder="Np. Lipa, Wielokwiat">
+                    <label>Dostępne pożytki (kwiaty):</label>
+                    <div id="edit-area-flowers-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; background: #f9f9f9; border-radius: 4px; max-height: 150px; overflow-y: auto;">
+                    </div>
                 </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="edit-area-max-hives">Maksymalna liczba uli:</label>
@@ -348,7 +366,7 @@
                 </div>
                 <div class="form-group">
                     <label for="edit-area-description">Opis obszaru:</label>
-                    <textarea id="edit-area-description" name="description" rows="4" placeholder="Opisz swoją pasiękę i warunki dla pszczół..."></textarea>
+                    <textarea id="edit-area-description" name="description" rows="4" placeholder="Opisz swoją pasiekę i warunki dla pszczół..."></textarea>
                 </div>
                 <input type="hidden" id="edit-area-id" name="areaId" value="">
                 <input type="hidden" id="edit-area-size" name="size" value="">
@@ -362,7 +380,6 @@
     </div>
 </div>
 
-<!-- NOWY MODAL: Edycja produktu -->
 <div class="modal-overlay" id="edit-product-modal">
     <div class="modal">
         <div class="modal-header">
@@ -371,21 +388,24 @@
         </div>
         <div class="modal-body">
             <form id="edit-product-form">
-                <!-- Zdjęcie produktu na górze -->
                 <div class="form-group image-upload-top">
-                    <label>Zdjęcie produktu:</label>
+                    <label>Zdjęcia produktu:</label>
                     <div class="image-preview-container">
-                        <div class="image-preview">
-                            <img id="edit-product-current-image" src="/api/placeholder/600/400" alt="Zdjęcie produktu">
+                        <div class="preview-gallery" id="edit-product-gallery">
+                            <div class="empty-preview">
+                                <i class="fas fa-images" style="font-size: 24px; margin-bottom: 5px;"></i>
+                                <span>Brak zdjęć</span>
+                            </div>
                         </div>
+
                         <div class="image-upload-controls">
                             <label for="edit-product-image" class="btn btn-outline image-upload-btn">
-                                <i class="fas fa-upload"></i> Wybierz zdjęcie
+                                <i class="fas fa-upload"></i> Wybierz zdjęcia
                             </label>
-                            <input type="file" id="edit-product-image" name="image" accept="image/*" style="display: none;">
-                            <span class="selected-file-name">Nie wybrano pliku</span>
+                            <input type="file" id="edit-product-image" name="image" accept="image/*" multiple style="display: none;">
                         </div>
                     </div>
+                    <small style="display: block; margin-top: 5px; color: #777; font-size: 11px;">Możesz dodać nowe zdjęcia lub usunąć istniejące.</small>
                 </div>
                 <div class="form-group">
                     <label for="edit-product-title">Nazwa produktu:</label>
@@ -407,7 +427,7 @@
                     <select id="edit-product-type" name="type">
                         <option value="HONEY">Miód</option>
                         <option value="POLLEN">Pyłek pszczeli</option>
-                        <option value="WAX">Wosk</option>
+                        <option value="WAX">Wosk pszczeli</option>
                         <option value="PROPOLIS">Propolis</option>
                         <option value="BEE_BREAD">Pierzga</option>
                         <option value="ROYAL_JELLY">Mleczko pszczele</option>
@@ -435,680 +455,5 @@
         </div>
     </div>
 </div>
-
-<script>
-    const API_URL = 'http://localhost:8080/api';
-
-    // Function to load user profile
-    async function loadUserProfile() {
-        try {
-            const response = await fetch(`${API_URL}/auth/user`, {
-                method: 'GET',
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                const user = await response.json();
-
-                document.getElementById('firstname').value = user.firstname || '';
-                document.getElementById('lastname').value = user.lastname || '';
-                document.getElementById('email').value = user.email || '';
-                document.getElementById('phone').value = user.phone || '';
-
-                const userName = document.querySelector('.user-name');
-                if (userName) {
-                    userName.textContent = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Użytkownik';
-                }
-
-                document.getElementById('welcome-name').textContent = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Gość';
-                document.getElementById('user-email').textContent = user.email || 'nieznany@fizyka.com';
-                document.getElementById('user-status').textContent = user.role === 'BEEKEEPER' ? 'Zweryfikowany Pszczelarz' : 'Użytkownik';
-            } else if (response.status === 401) {
-                alert('Sesja wygasła. Zaloguj się ponownie.');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-            }
-        } catch (error) {
-            console.error('Błąd:', error);
-        }
-    }
-
-    async function fetchMyAreas() {
-        try {
-            const response = await fetch(`${API_URL}/ownedAreas`, {
-                method: "GET",
-                credentials: "include"
-            });
-            const areas = await response.json();
-            const container = document.getElementById('my-areas-container');
-            container.innerHTML = '';
-
-            if (areas.length === 0) {
-                container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych obszarów. Dodaj pierwszy obszar!</p>';
-                return;
-            }
-
-            areas.forEach(area => {
-                const status = area.status === 'AVAILABLE' ? 'Aktywny' : 'Nieaktywny';
-                const statusClass = area.status === 'AVAILABLE' ? 'card-status-active' : 'card-status-inactive';
-                const availability = area.status === 'AVAILABLE'
-                    ? `Dostępny od ${formatDate(area.availableFrom)}`
-                    : `Nieaktywny od ${formatDate(area.availableFrom)}`;
-
-                const location = area.coordinates && area.coordinates.length > 0
-                    ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
-                    : 'Brak lokalizacji';
-
-                const card = `
-                <div class="card" data-area-id="${area.id || ''}">
-                    <div class="card-header">
-                        <div class="card-header-title">${area.name || 'Brak nazwy'}</div>
-                        <div class="card-header-status ${statusClass}">${status}</div>
-                    </div>
-                    <div class="area-preview">
-                        <img src="${area.imgBase64 ? `data:image/jpeg;base64,${area.imgBase64}` : 'assets/default-area.jpg'}"
-                             alt="Podgląd obszaru"
-                             onerror="this.src='assets/default-area.jpg'">
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Powierzchnia:</div>
-                            <div class="card-property-value">${area.area.toFixed(2)} ha</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Lokalizacja: </div>
-                            <div class="card-property-value">${location}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Kwiaty: </div>
-                            <div class="card-property-value">${area.type || 'Brak danych'}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Status: </div>
-                            <div class="card-property-value">${availability}</div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <button class="btn btn-outline card-btn edit-area-btn" data-area='${JSON.stringify(area).replace(/'/g, "&apos;")}'>
-                            <i class="fas fa-edit"></i> Edytuj
-                        </button>
-                        ${area.status === 'AVAILABLE' ? `
-                            <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
-                                <i class="fas fa-trash-alt"></i> Usuń
-                            </button>
-                        ` : `
-                            <button class="btn btn-primary card-btn activate-area-btn" data-id="${area.id || ''}">
-                                <i class="fas fa-check"></i> Aktywuj ponownie
-                            </button>
-                            <button class="btn btn-danger card-btn delete-area-btn" data-id="${area.id || ''}">
-                                <i class="fas fa-trash-alt"></i> Usuń
-                            </button>
-                        `}
-                    </div>
-                </div>
-            `;
-                container.insertAdjacentHTML('beforeend', card);
-            });
-
-            document.querySelectorAll('.edit-area-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const areaData = this.getAttribute('data-area');
-                    const area = JSON.parse(areaData);
-
-                    console.log('Area data:', area);
-
-                    document.getElementById('edit-area-id').value = area.id || '';
-                    document.getElementById('edit-area-title').value = area.name || '';
-                    document.getElementById('edit-area-status-switch').checked = area.status === 'AVAILABLE';
-                    document.getElementById('edit-area-size-display').textContent = `${area.area.toFixed(2)} ha`;
-
-                    const location = area.coordinates && area.coordinates.length > 0
-                        ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
-                        : 'Brak lokalizacji';
-                    document.getElementById('edit-area-location-display').textContent = location;
-
-                    document.getElementById('edit-area-size').value = area.area || '';
-                    document.getElementById('edit-area-location').value = location;
-                    document.getElementById('edit-area-flowers').value = area.type || '';
-                    document.getElementById('edit-area-date-to').value = area.availableFrom || '';
-                    document.getElementById('edit-area-max-hives').value = area.maxHives || '';
-                    document.getElementById('edit-area-price').value = area.pricePerDay || '';
-                    document.getElementById('edit-area-description').value = area.description || '';
-                    document.getElementById('edit-area-current-image').src = area.imgBase64
-                        ? `data:image/jpeg;base64,${area.imgBase64}`
-                        : 'assets/default-area.jpg';
-
-                    openModal('edit-area-modal');
-                });
-            });
-
-            document.querySelectorAll('.delete-area-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const itemId = this.getAttribute('data-id');
-                    document.getElementById('delete-item-id').value = itemId;
-                    document.getElementById('delete-item-type').value = 'area';
-                    openModal('delete-confirm-modal');
-                });
-            });
-
-        } catch (error) {
-            console.error('Error fetching my areas:', error);
-            document.getElementById('my-areas-container').innerHTML =
-                '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania obszarów. Sprawdź połączenie z serwerem.</p>';
-        }
-    }
-
-    function formatDate(date) {
-        return date ? new Date(date).toLocaleDateString('pl-PL') : 'Brak daty';
-    }
-
-    async function fetchRentedAreas() {
-        try {
-            const response = await fetch(`${API_URL}/rentedAreas`, {
-                method: "GET",
-                credentials: "include"
-            });
-            const areas = await response.json();
-            const container = document.getElementById('rented-areas-container');
-            container.innerHTML = '';
-
-            if (areas.length === 0) {
-                container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych wynajętych obszarów.</p>';
-                return;
-            }
-
-            areas.forEach(area => {
-                const status = area.status === 'AVAILABLE' ? 'Aktywny' : 'Zakończony';
-                const statusClass = area.status === 'AVAILABLE' ? 'card-status-active' : 'card-status-inactive';
-                const availability = area.status === 'AVAILABLE'
-                    ? `Dostępny od ${formatDate(area.availableFrom)}`
-                    : `Nieaktywny od ${formatDate(area.availableFrom)}`;
-
-                const location = area.coordinates && area.coordinates.length > 0
-                    ? `${area.coordinates[0][0].toFixed(4)}, ${area.coordinates[0][1].toFixed(4)}`
-                    : 'Brak lokalizacji';
-                const ownerName = `${area.ownerFirstName || ''} ${area.ownerLastName || ''}`.trim() || 'Nieznany właściciel';
-
-                const card = `
-                    <div class="card" data-area-id="${area.id || ''}">
-                        <div class="card-header">
-                            <div class="card-header-title">${area.name || 'Brak nazwy'}</div>
-                            <div class="card-header-status ${statusClass}">${status}</div>
-                        </div>
-                        <div class="area-preview">
-                            <img src="${area.imgBase64 ? `data:image/jpeg;base64,${area.imgBase64}` : 'assets/default-area.jpg'}"
-                                 alt="Podgląd obszaru"
-                                 onerror="this.src='assets/default-area.jpg'">
-                        </div>
-                        <div class="card-body">
-                            <div class="card-property">
-                                <div class="card-property-label">Powierzchnia:</div>
-                                <div class="card-property-value">${area.area.toFixed(2)} ha</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Lokalizacja: </div>
-                                <div class="card-property-value">${location}</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Kwiaty: </div>
-                                <div class="card-property-value">${area.type || 'Brak danych'}</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Status: </div>
-                                <div class="card-property-value">${availability}</div>
-                            </div>
-                            <div class="card-property">
-                                <div class="card-property-label">Właściciel: </div>
-                                <div class="card-property-value">${ownerName}</div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-accent card-btn review-area-btn" data-id="${area.id}">
-                                <i class="fas fa-star"></i>
-                                Wystaw opinię
-                            </button>
-                            <button class="btn btn-primary card-btn view-area-btn" data-id="${area.id}">
-                                <i class="fas fa-eye"></i>
-                                Szczegóły
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', card);
-            });
-
-            document.querySelectorAll('.review-area-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const areaId = this.getAttribute('data-id');
-                    document.getElementById('area-review-id').value = areaId;
-                    openModal('area-review-modal');
-                });
-            });
-
-            document.querySelectorAll('.view-area-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const areaId = this.getAttribute('data-id');
-                    alert(`Wyświetlam szczegóły obszaru ${areaId}`);
-                });
-            });
-        } catch (error) {
-            console.error('Error fetching rented areas:', error);
-            document.getElementById('rented-areas-container').innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania wynajętych obszarów. Sprawdź połączenie z serwerem.</p>';
-        }
-    }
-
-    // Funkcja do tłumaczenia kategorii produktu
-    function translateProductCategory(category) {
-        const translations = {
-            'HONEY': 'Miód',
-            'POLLEN': 'Pyłek pszczeli',
-            'WAX': 'Wosk pszczeli',
-            'PROPOLIS': 'Propolis',
-            'BEE_BREAD': 'Pierzga',
-            'ROYAL_JELLY': 'Mleczko pszczele',
-            'OTHER': 'Inny'
-        };
-        return translations[category] || category;
-    }
-
-    // Funkcja do pobierania produktów użytkownika
-    async function fetchMyProducts() {
-        try {
-            const response = await fetch(`${API_URL}/products/my`, {
-                method: "GET",
-                credentials: "include"
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const products = await response.json();
-            const container = document.getElementById('my-products-container');
-            container.innerHTML = '';
-
-            if (products.length === 0) {
-                container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Nie masz jeszcze żadnych produktów. Dodaj pierwszy produkt!</p>';
-                return;
-            }
-
-            products.forEach(product => {
-                const status = product.available ? 'Dostępny' : 'Wyprzedany';
-                const statusClass = product.available ? 'card-status-active' : 'card-status-inactive';
-                const categoryName = translateProductCategory(product.category);
-
-                const card = `
-                <div class="card" data-product-id="${product.id || ''}">
-                    <div class="card-header">
-                        <div class="card-header-title">${product.name || 'Brak nazwy'}</div>
-                        <div class="card-header-status ${statusClass}">${status}</div>
-                    </div>
-                    <div class="area-preview">
-                        <img src="${product.imageBase64 ? `data:image/jpeg;base64,${product.imageBase64}` : 'assets/default-product.jpg'}"
-                             alt="Zdjęcie produktu"
-                             onerror="this.src='assets/default-product.jpg'">
-                    </div>
-                    <div class="card-body">
-                        <div class="card-property">
-                            <div class="card-property-label">Typ:</div>
-                            <div class="card-property-value">${categoryName}</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Ilość:</div>
-                            <div class="card-property-value">${product.stock || 0} szt.</div>
-                        </div>
-                        <div class="card-property">
-                            <div class="card-property-label">Cena:</div>
-                            <div class="card-property-value">${(product.price || 0).toFixed(2)} PLN</div>
-                        </div>
-                        ${product.flowerOrigin ? `
-                        <div class="card-property">
-                            <div class="card-property-label">Pochodzenie:</div>
-                            <div class="card-property-value">${product.flowerOrigin}</div>
-                        </div>
-                        ` : ''}
-                    </div>
-                    <div class="card-footer">
-                        <button class="btn btn-outline card-btn edit-product-btn" data-product='${JSON.stringify(product).replace(/'/g, "&apos;")}'>
-                            <i class="fas fa-edit"></i> Edytuj
-                        </button>
-                        <button class="btn btn-danger card-btn delete-product-btn" data-id="${product.id || ''}">
-                            <i class="fas fa-trash-alt"></i> Usuń
-                        </button>
-                    </div>
-                </div>
-                `;
-                container.insertAdjacentHTML('beforeend', card);
-            });
-
-            // Event listenery dla przycisków edycji produktu
-            document.querySelectorAll('.edit-product-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const productData = this.getAttribute('data-product');
-                    const product = JSON.parse(productData);
-
-                    console.log('Product data:', product);
-
-                    document.getElementById('edit-product-id').value = product.id || '';
-                    document.getElementById('edit-product-title').value = product.name || '';
-                    document.getElementById('edit-product-status-switch').checked = product.available;
-                    document.getElementById('edit-product-type').value = product.category || 'OTHER';
-                    document.getElementById('edit-product-quantity').value = product.stock || 0;
-                    document.getElementById('edit-product-price').value = product.price || 0;
-                    document.getElementById('edit-product-description').value = product.description || '';
-                    document.getElementById('edit-product-current-image').src = product.imageBase64
-                        ? `data:image/jpeg;base64,${product.imageBase64}`
-                        : 'assets/default-product.jpg';
-
-                    openModal('edit-product-modal');
-                });
-            });
-
-            // Event listenery dla przycisków usuwania produktu
-            document.querySelectorAll('.delete-product-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const itemId = this.getAttribute('data-id');
-                    document.getElementById('delete-item-id').value = itemId;
-                    document.getElementById('delete-item-type').value = 'product';
-                    openModal('delete-confirm-modal');
-                });
-            });
-
-        } catch (error) {
-            console.error('Error fetching my products:', error);
-            document.getElementById('my-products-container').innerHTML =
-                '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Błąd podczas ładowania produktów. Sprawdź połączenie z serwerem.</p>';
-        }
-    }
-
-    document.querySelectorAll('.sidebar-nav-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelectorAll('.sidebar-nav-item').forEach(i => {
-                i.classList.remove('active');
-            });
-            this.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            const tabId = this.getAttribute('data-tab');
-            if (tabId === 'profile') {
-                window.location.href = 'edit-profile.html';
-            } else {
-                document.getElementById(tabId).classList.add('active');
-
-                // Załaduj dane dla odpowiedniej zakładki
-                if (tabId === 'products') {
-                    fetchMyProducts();
-                }
-                if (tabId === 'bought-products') {
-                    loadMyPurchases();
-                }
-            }
-        });
-    });
-
-    document.querySelectorAll('.star').forEach(star => {
-        star.addEventListener('click', function() {
-            const value = this.getAttribute('data-value');
-            const stars = this.parentElement.querySelectorAll('.star');
-            const ratingInput = this.closest('form').querySelector('input[name="rating"]');
-            ratingInput.value = value;
-            stars.forEach(s => {
-                if (s.getAttribute('data-value') <= value) {
-                    s.classList.add('active');
-                } else {
-                    s.classList.remove('active');
-                }
-            });
-        });
-    });
-
-    function openModal(modalId) {
-        document.getElementById(modalId).style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    function closeAllModals() {
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.style.display = 'none';
-        });
-        document.body.style.overflow = 'auto';
-    }
-
-    document.querySelectorAll('.modal-close, .close-modal-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            closeAllModals();
-        });
-    });
-
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeAllModals();
-            }
-        });
-    });
-
-    document.getElementById('profile-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        alert('Profil został zaktualizowany!');
-    });
-
-    document.querySelector('.submit-area-review-btn').addEventListener('click', function() {
-        alert('Dziękujemy za opinię o obszarze!');
-        closeAllModals();
-    });
-
-    document.querySelector('.submit-product-review-btn').addEventListener('click', function() {
-        alert('Dziękujemy za opinię o produkcie!');
-        closeAllModals();
-    });
-
-    // Handle delete confirmation
-    document.querySelector('.confirm-delete-btn').addEventListener('click', async function() {
-        const itemId = document.getElementById('delete-item-id').value;
-        const itemType = document.getElementById('delete-item-type').value;
-
-        if (itemType === 'area') {
-            try {
-                const response = await fetch(`${API_URL}/deleteArea/${itemId}`, {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    alert(`Obszar #${itemId} został usunięty!`);
-                    fetchMyAreas();
-                } else {
-                    alert('Błąd podczas usuwania obszaru. Sprawdź konsolę.');
-                    console.error('Delete area error:', response.status);
-                }
-            } catch (error) {
-                console.error('Error deleting area:', error);
-                alert('Nie udało się usunąć obszaru. Sprawdź połączenie z serwerem.');
-            }
-        } else if (itemType === 'product') {
-            try {
-                const response = await fetch(`${API_URL}/products/${itemId}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    alert(`Produkt #${itemId} został usunięty!`);
-                    fetchMyProducts();
-                } else {
-                    const errorData = await response.json();
-                    alert(`Błąd podczas usuwania produktu: ${errorData.error || 'Nieznany błąd'}`);
-                    console.error('Delete product error:', response.status);
-                }
-            } catch (error) {
-                console.error('Error deleting product:', error);
-                alert('Nie udało się usunąć produktu. Sprawdź połączenie z serwerem.');
-            }
-        }
-
-        closeAllModals();
-    });
-
-    document.getElementById('edit-area-image').addEventListener('change', function() {
-        const fileName = this.files[0] ? this.files[0].name : 'Nie wybrano pliku';
-        this.closest('.image-upload-controls').querySelector('.selected-file-name').textContent = fileName;
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('edit-area-current-image').src = e.target.result;
-            };
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-
-    document.getElementById('edit-product-image').addEventListener('change', function() {
-        const fileName = this.files[0] ? this.files[0].name : 'Nie wybrano pliku';
-        this.closest('.image-upload-controls').querySelector('.selected-file-name').textContent = fileName;
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('edit-product-current-image').src = e.target.result;
-            };
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-
-    // Function to convert file to Base64
-    function toBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(',')[1]); // Get Base64 string without prefix
-            reader.onerror = error => reject(error);
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // Handle edit area submission
-    document.querySelector('.submit-edit-area-btn').addEventListener('click', async function(e) {
-        e.preventDefault();
-
-        const form = document.getElementById('edit-area-form');
-        const formData = new FormData(form);
-        const areaId = document.getElementById('edit-area-id').value;
-        let imgBase64 = document.getElementById('edit-area-current-image').src.includes('base64')
-            ? document.getElementById('edit-area-current-image').src.split(',')[1] // Existing Base64
-            : null;
-
-        const imageFile = document.getElementById('edit-area-image').files[0];
-        if (imageFile) {
-            try {
-                imgBase64 = await toBase64(imageFile);
-            } catch (error) {
-                console.error('Error converting image to Base64:', error);
-                alert('Błąd podczas przetwarzania zdjęcia. Spróbuj ponownie.');
-                return;
-            }
-        }
-
-        const editAreaDTO = {
-            id: parseInt(areaId),
-            name: document.getElementById('edit-area-title').value,
-            imgBase64: imgBase64,
-            type: formData.get('flowers'),
-            maxHives: parseInt(formData.get('maxHives')) || 0,
-            pricePerDay: parseFloat(formData.get('price')) || 0,
-            description: formData.get('description'),
-            endDate: formData.get('dateTo'),
-            availabilityStatus: formData.get('status') === 'on' ? 'AVAILABLE' : 'UNAVAILABLE'
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/editArea`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(editAreaDTO)
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            alert('Obszar został zaktualizowany!');
-            closeAllModals();
-            fetchMyAreas();
-        } catch (error) {
-            console.error('Error updating area:', error);
-            alert('Nie udało się zaktualizować obszaru. Sprawdź konsolę dla szczegółów.');
-        }
-    });
-
-    // Handle edit product submission
-    document.querySelector('.submit-edit-product-btn').addEventListener('click', async function(e) {
-        e.preventDefault();
-
-        const productId = document.getElementById('edit-product-id').value;
-        let imgBase64 = document.getElementById('edit-product-current-image').src.includes('base64')
-            ? document.getElementById('edit-product-current-image').src.split(',')[1]
-            : null;
-
-        const imageFile = document.getElementById('edit-product-image').files[0];
-        if (imageFile) {
-            try {
-                imgBase64 = await toBase64(imageFile);
-            } catch (error) {
-                console.error('Error converting image to Base64:', error);
-                alert('Błąd podczas przetwarzania zdjęcia. Spróbuj ponownie.');
-                return;
-            }
-        }
-
-        const updateProductDTO = {
-            id: parseInt(productId),
-            name: document.getElementById('edit-product-title').value,
-            category: document.getElementById('edit-product-type').value,
-            stock: parseInt(document.getElementById('edit-product-quantity').value) || 0,
-            price: parseFloat(document.getElementById('edit-product-price').value) || 0,
-            description: document.getElementById('edit-product-description').value,
-            imgBase64: imgBase64,
-            available: document.getElementById('edit-product-status-switch').checked
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/products`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(updateProductDTO)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Błąd podczas aktualizacji produktu');
-            }
-
-            alert('Produkt został zaktualizowany!');
-            closeAllModals();
-            fetchMyProducts();
-        } catch (error) {
-            console.error('Error updating product:', error);
-            alert(`Nie udało się zaktualizować produktu: ${error.message}`);
-        }
-    });
-
-    // Load data on page load
-    window.addEventListener('DOMContentLoaded', async () => {
-        await loadUserProfile();
-        fetchMyAreas();
-        fetchRentedAreas();
-        fetchMyProducts();
-    });
-</script>
 </body>
 </html>

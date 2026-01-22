@@ -15,7 +15,6 @@
 
 <body>
 
-<!-- Nagłówek -->
 <div class="header">
     <div class="logo-container">
         <div class="logo">
@@ -26,7 +25,6 @@
         <div class="welcome-message" id="welcome-message">Witaj, Gościu</div>
     </div>
     <div class="header-controls">
-        <!-- W header-controls -->
         <div class="notification-wrapper">
             <button class="notification-bell" id="notification-bell">
                 <i class="fas fa-bell"></i>
@@ -44,11 +42,9 @@
                 </div>
             </div>
         </div>
-        <!-- Przycisk Marketplace -->
         <button class="btn btn-marketplace" onclick="window.location.href='marketplace.html'">
             <i class="fas fa-store"></i> Marketplace
         </button>
-        <!-- Przycisk ustawień -->
         <div class="settings-dropdown">
             <button class="settings-btn" onclick="toggleDropdown()">
                 <i class="fas fa-cog"></i> Ustawienia
@@ -56,7 +52,7 @@
             <div id="settingsDropdown" class="dropdown-content">
                 <a href="edit-profile.html"><i class="fas fa-user-edit"></i> Edytuj profil</a>
                 <a href="addFunds.html"><i class="fas fa-wallet"></i> Doładuj konto</a>
-                <a href="#"><i class="fas fa-bell"></i> Powiadomienia</a>
+                <a href="profile.html"><i class="fas fa-bell"></i> Mój profil</a>
                 <a href="https://policja.pl/"><i class="fas fa-question-circle"></i> Pomoc</a>
             </div>
         </div>
@@ -67,9 +63,7 @@
     </div>
 </div>
 
-<!-- Główny kontener -->
 <div class="main-container">
-    <!-- Sidebar z filtrami -->
     <div class="sidebar">
         <h3><i class="fas fa-filter"></i> Filtry obszarów</h3>
         <div class="flower-filter">
@@ -80,7 +74,7 @@
                 </div>
                 <div class="toggle-container">
                     <label class="toggle">
-                        <input type="checkbox" checked data-layer="Lipa">
+                        <input type="checkbox" checked data-layer="lipa">
                         <span class="toggle-switch toggle-lipa"></span>
                     </label>
                 </div>
@@ -92,7 +86,7 @@
                 </div>
                 <div class="toggle-container">
                     <label class="toggle">
-                        <input type="checkbox" checked data-layer="Wielokwiat">
+                        <input type="checkbox" checked data-layer="wielokwiat">
                         <span class="toggle-switch toggle-wielokwiat"></span>
                     </label>
                 </div>
@@ -104,7 +98,7 @@
                 </div>
                 <div class="toggle-container">
                     <label class="toggle">
-                        <input type="checkbox" checked data-layer="Gryka">
+                        <input type="checkbox" checked data-layer="gryka">
                         <span class="toggle-switch toggle-gryka"></span>
                     </label>
                 </div>
@@ -116,7 +110,7 @@
                 </div>
                 <div class="toggle-container">
                     <label class="toggle">
-                        <input type="checkbox" checked data-layer="Rzepak">
+                        <input type="checkbox" checked data-layer="rzepak">
                         <span class="toggle-switch toggle-rzepak"></span>
                     </label>
                 </div>
@@ -128,7 +122,7 @@
                 </div>
                 <div class="toggle-container">
                     <label class="toggle">
-                        <input type="checkbox" checked data-layer="Spadź">
+                        <input type="checkbox" checked data-layer="spadz">
                         <span class="toggle-switch toggle-spadz"></span>
                     </label>
                 </div>
@@ -140,7 +134,7 @@
                 </div>
                 <div class="toggle-container">
                     <label class="toggle">
-                        <input type="checkbox" checked data-layer="Akacja">
+                        <input type="checkbox" checked data-layer="akacja">
                         <span class="toggle-switch toggle-akacja"></span>
                     </label>
                 </div>
@@ -152,7 +146,7 @@
                 </div>
                 <div class="toggle-container">
                     <label class="toggle">
-                        <input type="checkbox" checked data-layer="Wrzos">
+                        <input type="checkbox" checked data-layer="wrzos">
                         <span class="toggle-switch toggle-wrzos"></span>
                     </label>
                 </div>
@@ -164,7 +158,7 @@
                 </div>
                 <div class="toggle-container">
                     <label class="toggle">
-                        <input type="checkbox" checked data-layer="Malina">
+                        <input type="checkbox" checked data-layer="malina">
                         <span class="toggle-switch toggle-malina"></span>
                     </label>
                 </div>
@@ -172,18 +166,15 @@
         </div>
     </div>
 
-    <!-- Kontener mapy -->
     <div class="map-container">
         <div id="map"></div>
 
-        <!-- Przycisk dodawania obszaru -->
         <div class="add-area-btn-container">
             <button class="add-area-btn" onclick="window.location.href='add-field.html'">
                 <i class="fas fa-plus"></i> Dodaj obszar
             </button>
         </div>
 
-        <!-- Legenda -->
         <div class="legend">
             <div class="legend-title">Typy roślinności</div>
             <div class="legend-item">
@@ -223,248 +214,7 @@
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-    const apiUrl = "http://localhost:8080/api/auth";
-
-    function toggleDropdown() {
-        document.getElementById("settingsDropdown").classList.toggle("show");
-    }
-
-    window.onclick = function(event) {
-        if (!event.target.matches('.settings-btn') && !event.target.matches('.fa-cog')) {
-            var dropdowns = document.getElementsByClassName("dropdown-content");
-            for (var i = 0; i < dropdowns.length; i++) {
-                var openDropdown = dropdowns[i];
-                if (openDropdown.classList.contains('show')) {
-                    openDropdown.classList.remove('show');
-                }
-            }
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        function checkScreenSize() {
-            const notificationContainer = document.querySelector('.notifications-container');
-            if (window.innerWidth <= 768 && notificationContainer) {
-                notificationContainer.remove();
-            }
-        }
-
-        checkScreenSize();
-        window.addEventListener('resize', checkScreenSize);
-
-        // Obsługa sesji i przywitania
-        const userJson = localStorage.getItem("currentUser");
-        const loginBtn = document.getElementById("login-btn");
-        const logoutBtn = document.getElementById("logout-btn");
-        const welcomeEl = document.getElementById("welcome-message");
-
-        if (userJson) {
-            const user = JSON.parse(userJson);
-            if (welcomeEl) welcomeEl.textContent = `Witaj, ${user.firstname} ${user.lastname}`;
-            if (loginBtn) loginBtn.style.display = "none";
-            if (logoutBtn) logoutBtn.style.display = "inline-block";
-
-            logoutBtn.addEventListener("click", async () => {
-                try {
-                    await fetch(`${apiUrl}/logout`, {
-                        method: "POST",
-                        credentials: "include"
-                    });
-                    localStorage.removeItem("currentUser");
-                    window.location.href = "login.html";
-                } catch (err) {
-                    console.error("Błąd wylogowania:", err);
-                    alert("Błąd podczas wylogowywania");
-                }
-            });
-        } else {
-            if (welcomeEl) welcomeEl.textContent = "Witaj, Gościu";
-            if (logoutBtn) logoutBtn.style.display = "none";
-            if (loginBtn) loginBtn.style.display = "inline-block";
-        }
-    });
-
-    // Mapa i style
-    var map = L.map('map', {
-        zoomControl: false,
-        attributionControl: false
-    }).setView([52.237049, 21.017532], 7);
-
-    L.control.zoom({ position: 'topright' }).addTo(map);
-    L.control.attribution({
-        position: 'bottomright',
-        prefix: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    const flowerColors = {
-        "lipa": "#FF0000",
-        "wielokwiat": "#FFA500",
-        "gryka": "#FFFF00",
-        "rzepak": "#FFFF99",
-        "spadź": "#800000",
-        "akacja": "#7878FF",
-        "wrzos": "#800080",
-        "malina": "#FF69B4",
-        "unknown": "#999999"
-    };
-
-    function getColorForType(type) {
-        return flowerColors[type.toLowerCase()] || flowerColors["unknown"];
-    }
-
-    // ✨ NOWA FUNKCJA: Przekierowanie do strony rezerwacji
-    function redirectToReservation(areaId) {
-        // Sprawdź czy użytkownik jest zalogowany
-        const userJson = localStorage.getItem("currentUser");
-
-        if (!userJson) {
-            // Jeśli nie zalogowany, przekieruj do logowania
-            alert('Musisz być zalogowany, aby zarezerwować obszar.');
-            window.location.href = 'login.html';
-            return;
-        }
-
-        // Przekieruj do strony rezerwacji z parametrem areaId
-        window.location.href = `reservation.html?areaId=${areaId}`;
-    }
-
-    // ✨ ZAKTUALIZOWANA FUNKCJA formatPopup z obsługą kliknięcia
-    function formatPopup(area) {
-        const isAvailable = area.status && area.status.toLowerCase() === "available";
-        const availability = isAvailable
-            ? '<span class="status available">Dostępny</span>'
-            : '<span class="status reserved">Zarezerwowany</span>';
-        const buttonText = isAvailable ? 'Zarezerwuj obszar' : 'Zarezerwowany';
-        const flowerType = area.type || "Nieznany";
-        const areaSize = area.area ? `${area.area.toFixed(2)} ha` : "?";
-        const price = area.pricePerDay ? `${area.pricePerDay} zł/dzień` : "?";
-        const ownerName = `${area.ownerFirstName || ""} ${area.ownerLastName || ""}`.trim() || "?";
-
-        //  DODANO data-area-id do przycisku
-        return `
-                <div class="custom-popup">
-                    <h3>${area.name || "Obszar bez nazwy"}</h3>
-                    <div class="property">
-                        <span class="prop-label">Typ:</span>
-                        <span>${flowerType}</span>
-                    </div>
-                    <div class="property">
-                        <span class="prop-label">Powierzchnia:</span>
-                        <span>${areaSize}</span>
-                    </div>
-                    <div class="property">
-                        <span class="prop-label">Status:</span>
-                        ${availability}
-                    </div>
-                    <div class="property">
-                        <span class="prop-label">Właściciel:</span>
-                        <span>${ownerName}</span>
-                    </div>
-                    <div class="property">
-                        <span class="prop-label">Cena:</span>
-                        <span>${price}</span>
-                    </div>
-                    <button class="reserve-btn${isAvailable ? '' : ' disabled-btn'}"
-                            ${isAvailable ? '' : 'disabled'}
-                            data-area-id="${area.id}"
-                            onclick="redirectToReservation(${area.id})">
-                        <i class="fas ${isAvailable ? 'fa-calendar-check' : 'fa-lock'}"></i>
-                        ${buttonText}
-                    </button>
-                </div>
-            `;
-    }
-
-    const layers = {
-        lipa: L.layerGroup(),
-        wielokwiat: L.layerGroup(),
-        gryka: L.layerGroup(),
-        rzepak: L.layerGroup(),
-        spadz: L.layerGroup(),
-        akacja: L.layerGroup(),
-        wrzos: L.layerGroup(),
-        malina: L.layerGroup()
-    };
-
-    // Pobieranie obszarów
-    fetch(`${apiUrl.replace('/auth', '')}/areas`, {
-        method: "GET",
-        credentials: "include"
-    })
-        .then(res => res.json())
-        .then(areas => {
-            areas.forEach(area => {
-                const coords = area.coordinates;
-                const flowerType = area.type || "unknown";
-                const color = getColorForType(flowerType);
-
-                const polygon = L.polygon(coords, {
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: area.available ? 0.6 : 0.3,
-                    weight: 2
-                });
-
-                polygon.bindTooltip(flowerType, {
-                    className: 'area-tooltip',
-                    direction: 'top',
-                    sticky: false,
-                    opacity: 0.9
-                });
-
-                polygon.bindPopup(formatPopup(area));
-
-                polygon.on('mouseover', function() {
-                    this.setStyle({ weight: 3, opacity: 1, fillOpacity: 0.7 });
-                    this.bringToFront();
-                });
-
-                polygon.on('mouseout', function() {
-                    this.setStyle({ weight: 2, opacity: 0.8, fillOpacity: 0.6 });
-                });
-
-                polygon.on('click', function() {
-                    map.fitBounds(this.getBounds(), { padding: [50, 50], maxZoom: 12 });
-                });
-
-                const layerKey = flowerType.toLowerCase();
-                if (layers[layerKey]) {
-                    layers[layerKey].addLayer(polygon);
-                    layers[layerKey].addTo(map);
-                }
-            });
-        })
-        .catch(err => console.error("Błąd ładowania obszarów:", err));
-
-    document.querySelectorAll('.toggle input[type="checkbox"]').forEach(function(toggle) {
-        toggle.addEventListener('change', function() {
-            const layerName = this.getAttribute('data-layer').toLowerCase();
-            const layer = layers[layerName];
-            if (!layer) return;
-
-            if (this.checked) {
-                map.addLayer(layer);
-                layer.eachLayer(function(l) {
-                    l.setStyle({ opacity: 0, fillOpacity: 0 });
-                    setTimeout(() => l.setStyle({ opacity: 0.8, fillOpacity: 0.6 }), 10);
-                });
-            } else {
-                layer.eachLayer(l => l.setStyle({ opacity: 0, fillOpacity: 0 }));
-                setTimeout(() => map.removeLayer(layer), 300);
-            }
-        });
-    });
-
-    document.querySelector('.add-area-btn')?.addEventListener('click', function() {
-        window.location.href = 'add-field.html';
-    });
-</script>
+<script src="scripts/home.js"></script>
 <script src="scripts/notifications.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
