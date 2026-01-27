@@ -14,13 +14,33 @@
 }
 
     function showError(message) {
-    const container = document.getElementById('error-container');
-    container.innerHTML = `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-circle"></i> ${message}
-                </div>
-            `;
-}
+        const container = document.getElementById('error-container');
+
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+
+        errorDiv.innerHTML = `
+        <div style="display: flex; align-items: center;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>${message}</span>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" 
+                style="background: none; border: none; color: inherit; font-size: 1.2em; cursor: pointer; margin-left: 15px; opacity: 0.7;">
+            &times;
+        </button>
+    `;
+
+        container.appendChild(errorDiv);
+
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.style.opacity = '0';
+                errorDiv.style.transition = 'opacity 0.3s';
+
+                setTimeout(() => errorDiv.remove(), 300);
+            }
+        }, 5000);
+    }
 
     // ==================== ŁADOWANIE DANYCH ====================
     async function loadData() {
@@ -39,7 +59,6 @@
     userBalance = userData.balance || 0;
     document.getElementById('user-balance').textContent = userBalance.toFixed(2) + ' PLN';
 
-    // 2. Pobierz obszar
     const areaResponse = await fetch(`${API_BASE_URL}/areas`, {
     credentials: 'include'
 });
