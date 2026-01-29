@@ -2,9 +2,9 @@
 
 .chat-container {
     display: flex;
-    height: calc(100vh - 80px); /* Adjust based on header height */
+    height: calc(100vh - 70px);
     background-color: #f0f2f5;
-    margin-top: 80px; /* Header height */
+    margin-top: 0;
 }
 
 /* --- Conversations List --- */
@@ -70,7 +70,7 @@
 }
 
 .conversation-item.active {
-    background-color: #e6f4ea; /* Light accent color */
+    background-color: #e6f4ea;
     border-left: 4px solid var(--accent-color);
 }
 
@@ -91,7 +91,7 @@
 
 .conversation-info {
     flex: 1;
-    min-width: 0; /* Important for text truncation */
+    min-width: 0;
 }
 
 .conversation-name {
@@ -184,7 +184,7 @@
     flex: 1;
     padding: 20px;
     overflow-y: auto;
-    background-color: #f0f2f5; /* Tło czatu */
+    background-color: #f0f2f5;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -193,7 +193,7 @@
 .message {
     display: flex;
     flex-direction: column;
-    max-width: 70%; /* Ograniczenie szerokości dymka */
+    max-width: 70%;
     margin-bottom: 5px;
 }
 
@@ -215,15 +215,15 @@
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-/* --- FIX DLA DŁUGICH TEKSTÓW --- */
+
 .message-content {
-    /* To naprawia problem "asdddd..." */
+
     overflow-wrap: break-word;
     word-wrap: break-word;
     -ms-word-break: break-all;
     word-break: break-word;
 
-    /* Zabezpieczenie szerokości */
+
     max-width: 100%;
 }
 
@@ -278,7 +278,7 @@
     transition: border 0.3s;
 }
 
-/* Klasa błędu dodawana przez JS */
+
 .input-error {
     border: 1px solid #e74c3c !important;
     background-color: #fff5f5 !important;
@@ -331,7 +331,7 @@
         z-index: 20;
     }
 
-    .chat-main.active { /* Or handle via JS classes */
+    .chat-main.active {
         display: flex;
     }
 
