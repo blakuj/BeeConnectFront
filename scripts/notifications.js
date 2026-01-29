@@ -1,21 +1,72 @@
-
-const API_BASE = 'http://localhost:8080/api';
+const NOTIF_API_BASE = 'http://localhost:8080/api';
 
 let notifications = [];
 let unreadCount = 0;
 let notificationPollingInterval = null;
 
-// ==================== INICJALIZACJA ====================
 function initNotifications() {
     loadNotifications();
-    setupNotificationListeners();
+    loadUnreadCount();
     startNotificationPolling();
 }
 
-// ==================== ŁADOWANIE POWIADOMIEŃ ====================
+// ==================== GLOBALNE LISTENERY  ====================
+document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('click', handleGlobalClicks);
+});
+
+function handleGlobalClicks(e) {
+    const bellBtn = e.target.closest('#notification-bell');
+    if (bellBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleNotificationDropdown();
+        return;
+    }
+
+    const markAllBtn = e.target.closest('#mark-all-read');
+    if (markAllBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        markAllAsRead();
+        return;
+    }
+
+    const deleteBtn = e.target.closest('.notification-delete');
+    if (deleteBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const notifItem = deleteBtn.closest('.notification-item');
+        if (notifItem) {
+            deleteNotification(parseInt(notifItem.dataset.id));
+        }
+        return;
+    }
+
+
+    const notifItem = e.target.closest('.notification-item');
+    if (notifItem) {
+        const id = parseInt(notifItem.dataset.id);
+        const url = notifItem.dataset.url;
+        openNotification(id, url);
+        return;
+    }
+
+    const dropdown = document.getElementById('notification-dropdown');
+    const bellIcon = document.getElementById('notification-bell');
+
+    if (dropdown && dropdown.classList.contains('show')) {
+        if (!dropdown.contains(e.target) && (!bellIcon || !bellIcon.contains(e.target))) {
+            closeNotificationDropdown();
+        }
+    }
+}
+
+// ==================== API  ====================
+
 async function loadNotifications() {
     try {
-        const response = await fetch(`${API_BASE}/notifications`, {
+        const response = await fetch(`${NOTIF_API_BASE}/notifications`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -31,7 +82,7 @@ async function loadNotifications() {
 
 async function loadUnreadCount() {
     try {
-        const response = await fetch(`${API_BASE}/notifications/unread/count`, {
+        const response = await fetch(`${NOTIF_API_BASE}/notifications/unread/count`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -42,11 +93,70 @@ async function loadUnreadCount() {
             updateBadge();
         }
     } catch (error) {
-        console.error('Błąd ładowania liczby nieprzeczytanych:', error);
     }
 }
 
-// ==================== AKTUALIZACJA UI ====================
+async function markAsRead(notificationId) {
+    try {
+        await fetch(`${NOTIF_API_BASE}/notifications/${notificationId}/read`, {
+            method: 'PUT',
+            credentials: 'include'
+        });
+
+        const notif = notifications.find(n => n.id === notificationId);
+        if (notif && !notif.isRead) {
+            notif.isRead = true;
+            unreadCount = Math.max(0, unreadCount - 1);
+            updateNotificationUI();
+        }
+    } catch (error) {
+        console.error('Błąd oznaczania jako przeczytane:', error);
+    }
+}
+
+async function markAllAsRead() {
+    try {
+        await fetch(`${NOTIF_API_BASE}/notifications/read-all`, {
+            method: 'PUT',
+            credentials: 'include'
+        });
+
+        notifications.forEach(n => n.isRead = true);
+        unreadCount = 0;
+        updateNotificationUI();
+    } catch (error) {
+        console.error('Błąd oznaczania wszystkich:', error);
+    }
+}
+
+async function deleteNotification(notificationId) {
+    try {
+        await fetch(`${NOTIF_API_BASE}/notifications/${notificationId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+
+        const notif = notifications.find(n => n.id === notificationId);
+        if (notif && !notif.isRead) {
+            unreadCount = Math.max(0, unreadCount - 1);
+        }
+
+        notifications = notifications.filter(n => n.id !== notificationId);
+        updateNotificationUI();
+    } catch (error) {
+        console.error('Błąd usuwania:', error);
+    }
+}
+
+async function openNotification(notificationId, url) {
+    await markAsRead(notificationId);
+    if (url && url !== '#' && url !== 'null') {
+        window.location.href = url;
+    }
+}
+
+// ==================== UI HELPERS ====================
+
 function updateNotificationUI() {
     updateBadge();
     displayNotifications();
@@ -88,7 +198,7 @@ function createNotificationItem(notif) {
 
     return `
         <div class="notification-item ${unreadClass}" data-id="${notif.id}" data-url="${notif.actionUrl || '#'}">
-            <div class="notification-icon ${notif.type.toLowerCase()}">
+            <div class="notification-icon ${notif.type ? notif.type.toLowerCase() : 'system'}">
                 <i class="${icon}"></i>
             </div>
             <div class="notification-content">
@@ -96,7 +206,7 @@ function createNotificationItem(notif) {
                 <div class="notification-message">${notif.message}</div>
                 <div class="notification-time">${time}</div>
             </div>
-            <button class="notification-delete" onclick="deleteNotification(${notif.id}, event)">
+            <button class="notification-delete" title="Usuń">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -119,141 +229,8 @@ function getNotificationIcon(type) {
     return icons[type] || 'fas fa-bell';
 }
 
-// ==================== OBSŁUGA POWIADOMIEŃ ====================
-async function markAsRead(notificationId) {
-    try {
-        await fetch(`${API_BASE}/notifications/${notificationId}/read`, {
-            method: 'PUT',
-            credentials: 'include'
-        });
-
-        const notif = notifications.find(n => n.id === notificationId);
-        if (notif) {
-            notif.isRead = true;
-            unreadCount = Math.max(0, unreadCount - 1);
-            updateNotificationUI();
-        }
-    } catch (error) {
-        console.error('Błąd oznaczania jako przeczytane:', error);
-    }
-}
-
-async function markAllAsRead() {
-    try {
-        await fetch(`${API_BASE}/notifications/read-all`, {
-            method: 'PUT',
-            credentials: 'include'
-        });
-
-        notifications.forEach(n => n.isRead = true);
-        unreadCount = 0;
-        updateNotificationUI();
-    } catch (error) {
-        console.error('Błąd oznaczania wszystkich jako przeczytane:', error);
-    }
-}
-
-async function deleteNotification(notificationId, event) {
-    if (event) {
-        event.stopPropagation();
-    }
-
-    try {
-        await fetch(`${API_BASE}/notifications/${notificationId}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-
-        const notif = notifications.find(n => n.id === notificationId);
-        if (notif && !notif.isRead) {
-            unreadCount = Math.max(0, unreadCount - 1);
-        }
-
-        notifications = notifications.filter(n => n.id !== notificationId);
-        updateNotificationUI();
-    } catch (error) {
-        console.error('Błąd usuwania powiadomienia:', error);
-    }
-}
-
-// ==================== OTWIERANIE POWIADOMIENIA ====================
-async function openNotification(notificationId, url) {
-    await markAsRead(notificationId);
-
-    if (url && url !== '#') {
-        window.location.href = url;
-    }
-}
-
-// ==================== EVENT LISTENERS ====================
-function setupNotificationListeners() {
-    const bellIcon = document.getElementById('notification-bell');
-    if (bellIcon) {
-        bellIcon.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleNotificationDropdown();
-        });
-    }
-
-    const markAllBtn = document.getElementById('mark-all-read');
-    if (markAllBtn) {
-        markAllBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            markAllAsRead();
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        const notifItem = e.target.closest('.notification-item');
-        if (notifItem) {
-            const id = parseInt(notifItem.dataset.id);
-            const url = notifItem.dataset.url;
-            openNotification(id, url);
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        const dropdown = document.getElementById('notification-dropdown');
-        const bellIcon = document.getElementById('notification-bell');
-
-        if (dropdown && !dropdown.contains(e.target) && !bellIcon.contains(e.target)) {
-            closeNotificationDropdown();
-        }
-    });
-}
-
-function toggleNotificationDropdown() {
-    const dropdown = document.getElementById('notification-dropdown');
-    if (dropdown) {
-        dropdown.classList.toggle('show');
-    }
-}
-
-function closeNotificationDropdown() {
-    const dropdown = document.getElementById('notification-dropdown');
-    if (dropdown) {
-        dropdown.classList.remove('show');
-    }
-}
-
-function startNotificationPolling() {
-
-    notificationPollingInterval = setInterval(() => {
-        loadUnreadCount();
-    }, 30000);
-
-
-    loadUnreadCount();
-}
-
-function stopNotificationPolling() {
-    if (notificationPollingInterval) {
-        clearInterval(notificationPollingInterval);
-    }
-}
-
-// ==================== FORMATOWANIE CZASU ====================
 function formatNotificationTime(dateString) {
+    if (!dateString) return '';
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now - date;
@@ -270,6 +247,21 @@ function formatNotificationTime(dateString) {
     return date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
 }
 
-// Eksportuj funkcje
+function toggleNotificationDropdown() {
+    const dropdown = document.getElementById('notification-dropdown');
+    if (dropdown) dropdown.classList.toggle('show');
+}
+
+function closeNotificationDropdown() {
+    const dropdown = document.getElementById('notification-dropdown');
+    if (dropdown) dropdown.classList.remove('show');
+}
+
+function startNotificationPolling() {
+    if (notificationPollingInterval) clearInterval(notificationPollingInterval);
+    notificationPollingInterval = setInterval(() => {
+        loadUnreadCount();
+    }, 30000);
+}
+
 window.initNotifications = initNotifications;
-window.deleteNotification = deleteNotification;
