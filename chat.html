@@ -9,25 +9,11 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/chat.css">
     <link rel="stylesheet" href="styles/error.css">
+    <link rel="stylesheet" href="styles/notification_styles.css">
 </head>
 <body>
-<div class="header">
-    <div class="logo-container">
-        <div class="logo">
-            <a href="home.html">
-                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
-            </a>
-        </div>
-        <div class="page-title">BeeConnect Chat</div>
-    </div>
-    <div class="header-controls">
-        <div class="welcome-message">Witaj!</div>
-        <a href="profile.html" class="btn btn-outline">
-            <i class="fas fa-user"></i>
-            Mój Profil
-        </a>
-    </div>
-</div>
+
+<div id="global-header"></div>
 
 <div class="chat-container">
     <div class="conversations" id="conversations-list">
@@ -80,5 +66,8 @@
 </div>
 
 <script src="scripts/chat.js"></script>
+<script src="scripts/header.js"></script>
+<script src="scripts/notifications.js"></script>
+
 </body>
 </html>

@@ -11,30 +11,19 @@
     <script src="scripts/auth.js"></script>
     <script src="scripts/edit-profile.js"></script>
     <link rel="stylesheet" href="styles/error.css">
+    <link rel="stylesheet" href="styles/notification_styles.css">
 </head>
 <body>
-<div class="header">
-    <div class="logo-container">
-        <div class="logo">
-            <a href="home.html">
-                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
-            </a>
-        </div>
-        <div class="page-title">BeeConnect</div>
-    </div>
-    <div class="user-menu">
-        <a href="home.html" class="user-menu-item"><i class="fas fa-home"></i> Strona główna</a>
-        <a href="profile.html" class="user-menu-item active"><i class="fas fa-user-edit"></i> Mój profil</a>
-        <a href="login.html" class="user-menu-item"><i class="fas fa-sign-out-alt"></i> Wyloguj</a>
-    </div>
-</div>
+
+<div id="global-header"></div>
+
 
 <div class="profile-container">
     <div class="profile-card">
         <div class="profile-sidebar">
             <div class="user-profile">
                 <div class="profile-image">
-                    <img src="assets/default-avatar.png" >
+                    <img src="assets/default-avatar.jpg" >
                 </div>
                 <h3 class="user-name">Ładowanie...</h3>
                 <p class="user-role">Pszczelarz</p>
@@ -234,6 +223,8 @@
         </div>
     </div>
 </div>
+<script src="scripts/header.js"></script>
+<script src="scripts/notifications.js"></script>
 
 
 </body>

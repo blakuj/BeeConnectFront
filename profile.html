@@ -9,30 +9,22 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/profile.css">
     <link rel="stylesheet" href="styles/error.css">
+    <link rel="stylesheet" href="styles/notification_styles.css">
+
     <script src="scripts/auth.js"></script>
     <script src="scripts/profile-products.js"></script>
 
 </head>
 <body>
-<div class="header">
-    <div class="logo-container">
-        <div class="logo">
-            <a href="home.html">
-                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
-            </a>
-        </div>
-        <div class="page-title">BeeConnect</div>
-    </div>
-    <div class="header-controls">
-        <div class="welcome-message">Witaj, <span id="welcome-name"></span>!</div>
-    </div>
-</div>
+
+<div id="global-header"></div>
+
 
 <div class="dashboard-container">
     <div class="dashboard-sidebar">
         <div class="user-info">
             <div class="user-avatar">
-                <img src="assets/default-avatar.png" alt="Avatar użytkownika">
+                <img src="assets/default-avatar.jpg" alt="Avatar użytkownika">
             </div>
             <div class="user-name" id="user-name"></div>
             <div class="user-email" id="user-email"></div>
@@ -74,10 +66,7 @@
                 Edytuj Profil
             </a>
         </div>
-        <a href="login.html" class="btn btn-outline logout-btn">
-            <i class="fas fa-sign-out-alt"></i>
-            Wyloguj się
-        </a>
+
     </div>
 
     <div class="dashboard-content">
@@ -455,5 +444,10 @@
         </div>
     </div>
 </div>
+
+<script src="scripts/header.js"></script>
+<script src="scripts/notifications.js"></script>
+
+
 </body>
 </html>

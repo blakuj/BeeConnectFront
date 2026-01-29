@@ -7,28 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/marketplace.css">
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/notification_styles.css">
 
 </head>
 <body>
-<div class="header">
-    <div class="logo-container">
-        <div class="logo">
-            <a href="home.html">
-                <img src="assets/BeeConnect.png" alt="BeeConnect Logo">
-            </a>
-        </div>
-        <div class="page-title">BeeConnect Marketplace</div>
-    </div>
-    <div class="header-controls">
-        <a href="chat.html" class="btn btn-outline" style="position: relative;">
-            <i class="fas fa-comments"></i>
-            <span id="unread-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: #F2A900; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 600;"></span>
-        </a>
-        <a href="profile.html" class="btn btn-secondary">
-            <i class="fas fa-user"></i> Mój profil
-        </a>
-    </div>
-</div>
+<div id="global-header"></div>
 
 
 <div class="marketplace-container">
@@ -124,7 +108,10 @@
 <button class="filter-toggle-btn" id="filter-toggle">
     <i class="fas fa-filter"></i>
 </button>
-
 <script src="scripts/marketplace.js"></script>
+<script src="scripts/header.js"></script>
+<script src="scripts/notifications.js"></script>
+
+
 </body>
 </html>
