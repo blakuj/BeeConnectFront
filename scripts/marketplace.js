@@ -6,7 +6,7 @@ const API_BASE = 'http://localhost:8080/api';
 let allProducts = [];
 let filteredProducts = [];
 let currentPage = 1;
-const productsPerPage = 12;
+const productsPerPage = 6;
 
 // Filtry
 let selectedCategories = [];
@@ -302,7 +302,13 @@ function changePage(page) {
 
     currentPage = page;
     displayProducts();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const contentContainer = document.querySelector('.marketplace-content');
+    if (contentContainer) {
+        contentContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 // ==================== EVENT LISTENERS ====================
