@@ -1928,6 +1928,107 @@ select option {
     margin-top: 1rem;
 }
 
+/* --- NOWE STYLE NAGŁÓWKA --- */
+
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+    margin-right: 16px;
+}
+
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--secondary);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.nav-btn:hover {
+    background-color: var(--light);
+    color: var(--primary-dark);
+}
+
+.nav-btn.active {
+    background-color: var(--primary-light);
+    color: var(--secondary);
+    border-color: var(--primary);
+}
+
+.nav-btn i {
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .nav-label {
+        display: none;
+    }
+
+    .nav-btn {
+        padding: 10px;
+        border-radius: 50%;
+    }
+
+    .welcome-message.hidden-mobile {
+        display: none;
+    }
+
+    .logo-container {
+        flex: 0;
+    }
+
+    .nav-links {
+        margin-right: 8px;
+        gap: 4px;
+    }
+}
+
+.settings-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    background: transparent;
+}
+
+.settings-btn:hover, .settings-btn.active-profile {
+    background-color: var(--light);
+    border-color: var(--primary);
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.text-danger:hover {
+    background-color: #fff5f5 !important;
+}
+
+.mobile-only {
+    display: none;
+    padding: 10px 16px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    color: var(--secondary);
+}
+
+@media (max-width: 480px) {
+    .mobile-only {
+        display: block;
+    }
+}
+
 @media (max-width: 480px) {
     .topup-card {
         padding: 1.5rem;
